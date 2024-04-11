@@ -15,6 +15,9 @@ SOURCES += \
     InGame/styles.cpp \
     StageSelection/MyPushButton.cpp \
     StageSelection/Stagechoice1.cpp \
+    Title/login1.cpp \
+    Title/setting.cpp \
+    Title/widget.cpp \
     main.cpp \
     mainwindow.cpp
 
@@ -26,11 +29,17 @@ HEADERS += \
     InGame/styles.h \
     StageSelection/MyPushButton.h \
     StageSelection/Stagechoice1.h \
+    Title/login1.h \
+    Title/setting.h \
+    Title/widget.h \
     mainwindow.h
 
 FORMS += \
     InGame/CardView.ui \
     StageSelection/Stagechoice1.ui \
+    Title/login1.ui \
+    Title/setting.ui \
+    Title/widget.ui \
     mainwindow.ui
 
 # Default rules for deployment.
@@ -39,7 +48,9 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
-    Stagechoice1.qrc
+    Stagechoice1.qrc \
+    Title/src.qrc
 
 DISTFILES += \
-    InGame/cards.json
+    InGame/cards.json \
+    InGame/interface.md

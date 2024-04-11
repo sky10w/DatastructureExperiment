@@ -3,7 +3,7 @@
 InGame::InGame(const QVector<Entity*>& enemy)
 {
 	this->_player = new Player();
-	this->_enemies.append(enemy);
+    this->_enemies = enemy;
 }
 
 void InGame::run()

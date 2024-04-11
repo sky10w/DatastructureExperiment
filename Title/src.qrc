@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/img">
+        <file>Image/MSI_MPG.png</file>
+        <file>Image/start.png</file>
+        <file>Image/MSI_MPG.jpg</file>
+        <file>Image/start1.png</file>
+        <file>Image/map.png</file>
+        <file>Image/sett.png</file>
+        <file>Image/exit.png</file>
+        <file>Image/back.png</file>
+        <file>Image/bg.jpg</file>
+        <file>Image/bg1.jpg</file>
+        <file>Image/map1.png</file>
+    </qresource>
+</RCC>

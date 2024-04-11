@@ -12,7 +12,6 @@
 #include <qevent.h>
 #include <qeventpoint.h>
 
-#include "InGame/styles.h"
 #include "InGame/globalOptions.h"
 
 class CardInfo{
@@ -28,7 +27,8 @@ public:
 	CardInfo(const QString id, const QString name, const QString description, const QString path, int targetType, int energy);
 	bool operator==(const CardInfo& rhs) const {return this->id == rhs.id;}
 	friend size_t qHash(CardInfo k, size_t seed);
-	friend size_t qHash(const CardInfo& k, size_t seed);
+    friend size_t qHash(const CardInfo& k, size_t seed);
+    void setPath(const QString &newPath);
 };
 size_t qHash(CardInfo k, size_t seed);
 size_t qHash(const CardInfo& k, size_t seed);
@@ -70,8 +70,8 @@ public:
 private:
 	QString _id;
 	bool _pressed;
-	QPoint lastPoint;
-	QPoint initPoint;
+    QPointF lastPoint;
+    QPointF initPoint;
 protected:
 	void paintEvent(QPaintEvent*) override;
 	void mousePressEvent(QMouseEvent* event) override;

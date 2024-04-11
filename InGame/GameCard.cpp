@@ -115,7 +115,7 @@ CardSystem::CardSystem()
 		const QString path = obj["path"].toString();
 		const int target_type = obj["target_type"].toInt();
 		const int energy = obj["energy"].toInt();
-		// this->cards[id] = {id, name, description, path, target_type, energy};
+        this->cards[id] = {id, name, description, path, target_type, energy};
 	}
 }
 
@@ -187,7 +187,7 @@ QVector<int> CardStack::utilGetRandomNum(int n)
 	return resList;
 }
 
-CardInfo::CardInfo(const QString id, const QString name, const QString description, 
+CardInfo::CardInfo(const QString id, const QString name, const QString description,
 	const QString path, int targetType, int energy)
 {
 	this->id = id;
@@ -200,8 +200,8 @@ CardInfo::CardInfo(const QString id, const QString name, const QString descripti
 
 CardView::CardView(const QString id, QWidget* parent)
 	: QWidget(parent)
-	, _pressed(false)
-	, _id(id)
+    , _id(id)
+    , _pressed(false)
 {
 	this->resize({180, 240});
 	const QString path = CardSystem::cards[this->_id].path;
@@ -220,14 +220,14 @@ void CardView::paintEvent(QPaintEvent*)
 void CardView::mousePressEvent(QMouseEvent* event)
 {
 	_pressed = true;
-	lastPoint = event->globalPos();
+    lastPoint = event->globalPosition();
 	initPoint = this->pos();
 }
 
 void CardView::mouseMoveEvent(QMouseEvent* event)
 {
-	const auto pt = event->globalPos();
-	this->move(pt - lastPoint + initPoint);
+    const QPointF pt = event->globalPosition();
+    this->move((pt - lastPoint + initPoint).toPoint());
 }
 
 void CardView::mouseReleaseEvent(QMouseEvent* event)
