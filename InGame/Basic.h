@@ -1,35 +1,73 @@
 #pragma once
-#include <qwidget.h>
-#include <qvector.h>
+#include <QWidget>
+#include <QVector>
+
+#include "GameCard.h"
 
 struct Context;
-class BasicEffect;
+// using Context = QMap<QString, QVariant>;
+class BasicBuff;
 class Entity;
-class EffectDistributor;
+class BuffDistributor;
+
+namespace EntityAct
+{
+    using Act_t = int;
+    enum Act : int
+    {
+        ATTACK = (1 << 0),
+        DEFEND = (1 << 1),
+        BUFF = (1 << 2),
+    };
+}
+
+/// Context(from, to(vector), damageDone, armorGained, effectGiven)
+struct Context
+{
+    Entity* from;
+    QVector<Entity*> to;
+    int damageDone;
+    int armorGained;
+    BasicBuff* buffGiven;
+};
 
 class Entity : public QObject
 {
 	Q_OBJECT
 public:
-	virtual void Hurt(int damage, Context ctx);
-	virtual void Attack(int damage, Context ctx);
+    explicit Entity(bool isPlayer);
 	virtual void RoundBegin();
 	virtual void RoundMid() = 0;
 	virtual void RoundEnd();
+
+    virtual bool isPlayer() const;
+    virtual int getHp() const;
+    virtual int getArmor() const;
+
+    // Actions
+
+    virtual void attack(Context* ctx, bool triggerBuff);
+    virtual void gainArmor(Context* ctx, bool triggerBuff);
+    virtual void hurt(Context* ctx, bool triggerBuff);
+    virtual void giveBuff(Context* ctx, bool triggerBuff);
+    virtual void getBuffed(Context* ctx, bool triggerBuff);
+
 protected:
 	int _hp;
 	int _armor;
+    bool _isPlayer;
+    QString _id;
 
-	static const int _EventNumber;
-	std::list<BasicEffect*> _effectList[5];
+    std::list<BasicBuff*> _buffList[7];
 
-	friend class EffectDistributor;
+    friend class BuffDistributor;
 };
 
 class Enemy : public Entity
 {
 	Q_OBJECT
 public:
+    Enemy();
 	virtual void RoundMid() override;
 };
 
@@ -37,83 +75,54 @@ class Player : public Entity
 {
 	Q_OBJECT
 public:
+    Player();
 	virtual void RoundBegin() override;
 	virtual void RoundMid() override;
+private:
+    QList<QString> _cards;
 };
 
 
-struct Context
-{
-	Context(Entity* const from, QVector<Entity*> const to);
-	Context(const Context& r) = default;
-	Entity* from;
-	QVector<Entity*> to;
-};
 
-struct ProcessState
-{
-	int damage;
-	int armor;
-	int hp;
-	ProcessState();
-};
-
-class BasicEffect : public QObject
+class BasicBuff : public QObject
 {
 	Q_OBJECT
 public:
-	enum EffectType : int
+    enum BuffType : int
 	{
 		ON_ROUNDBEGIN = 0,
 		ON_ROUNDEND,
+        ON_GIVEBUFF,
+        ON_GETBUFFED,
 		ON_ATTACK,
-		ON_HURT,
-		IMMEDIATE
+        ON_GAINARMOR,
+        ON_HURT
 	};
 public:
-	BasicEffect(Context ctx, EffectType type);
-	virtual void affect(ProcessState& state) = 0;
+    BasicBuff(BuffType type);
+    virtual void affect(Context *ctx) = 0;
+    virtual BuffType getType() const;
 protected:
-	Context _ctx;
-	EffectType _type;
-	friend class EffectDistributor;
+    BuffType _type;
 };
 
-class DoDamageBasicEffect : public BasicEffect
+class ModifyDamageBasicBuff : public BasicBuff
 {
 	Q_OBJECT
 public:
-	DoDamageBasicEffect(Context ctx, EffectType type, int damage);
-	virtual void affect(ProcessState& state) override;
-protected:
-	int _damage;
+    ModifyDamageBasicBuff(BuffType type);
+    virtual void affect(Context *ctx) override = 0;
 };
 
-class ModifyDamageBasicEffect : public BasicEffect
+class ModifyDamageByNumberBuff : public ModifyDamageBasicBuff
 {
 	Q_OBJECT
 public:
-	ModifyDamageBasicEffect(Context ctx, EffectType type);
-	virtual void affect(ProcessState& state) override = 0;
+    ModifyDamageByNumberBuff(BuffType type, int incDamage);
+    virtual void affect(Context *ctx) override;
 protected:
-	int* _damagePtr;
+    int _incDamage;
 };
 
-class ModifyDamageByNumberBasicEffect : public ModifyDamageBasicEffect
-{
-	Q_OBJECT
-public:
-	ModifyDamageByNumberBasicEffect(Context ctx, EffectType type, int reducedDamage);
-	virtual void affect(ProcessState& state) override;
-protected:
-	int _incDamage;
-};
-
-class EffectDistributor : public QObject
-{
-	Q_OBJECT
-public:
-	virtual void distributeBasicEffect(BasicEffect* eff);
-};
 
 

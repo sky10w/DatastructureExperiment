@@ -21,12 +21,3 @@ private:
 	QVector<Entity*> _enemies;
 	CardStack _draw, _drop;
 };
-
-class InGameView : public QWidget
-{
-	Q_OBJECT
-public:
-
-private:
-	QVector<CardView> cards;
-};

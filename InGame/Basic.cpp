@@ -1,61 +1,117 @@
 #include "Basic.h"
 
 // Entity ---
-const int Entity::_EventNumber = 5;
+Entity::Entity(bool isPlayer)
+    : _isPlayer(isPlayer)
+{}
 
-void Entity::Hurt(int damage, Context ctx)
-{
-	ProcessState tempState;
-	tempState.damage = damage;
-	for (auto eff : this->_effectList[BasicEffect::ON_HURT])
-	{
-		eff->affect(tempState);
-	}
-	// 进行实际的伤害计算
-	if (this->_armor > tempState.damage)
-	{
-		this->_armor -= tempState.damage;
-	}
-	else
-	{
-		tempState.damage -= this->_armor;
-		this->_armor = 0;
-		this->_hp -= tempState.damage;
-	}
-}
-void Entity::Attack(int damage, Context ctx)
-{
-	ProcessState tempState;
-	tempState.damage = damage;
-
-	for (auto eff : this->_effectList[BasicEffect::ON_ATTACK])
-	{
-		eff->affect(tempState);
-	}
-	for (auto tar : ctx.to)
-	{
-		tar->Hurt(tempState.damage, Context(tar, { this }));
-	}
-}
 void Entity::RoundBegin()
 {
-	ProcessState tempState;
-	for (auto eff : this->_effectList[BasicEffect::ON_ROUNDBEGIN])
+    for (auto eff : this->_buffList[BasicBuff::ON_ROUNDBEGIN])
 	{
-		eff->affect(tempState);
+        eff->affect(nullptr);
 	}
 }
 void Entity::RoundEnd()
 {
-	ProcessState tempState;
-	for (auto eff : this->_effectList[BasicEffect::ON_ROUNDEND])
+    for (auto eff : this->_buffList[BasicBuff::ON_ROUNDEND])
 	{
-		eff->affect(tempState);
-	}
+        eff->affect(nullptr);
+    }
+}
+
+bool Entity::isPlayer() const
+{
+    return this->_isPlayer;
+}
+
+int Entity::getHp() const
+{
+    return this->_hp;
+}
+
+int Entity::getArmor() const
+{
+    return this->_armor;
+}
+
+void Entity::attack(Context *ctx, bool triggerBuff)
+{
+    if(triggerBuff)
+    {
+        for(auto &item :this->_buffList[BasicBuff::ON_ATTACK])
+        {
+            item->affect(ctx);
+        }
+    }
+
+    for(auto &tar: ctx->to)
+    {
+        tar->hurt(ctx, triggerBuff);
+    }
+}
+
+void Entity::gainArmor(Context *ctx, bool triggerBuff)
+{
+    if(triggerBuff)
+    {
+        for(auto &item :this->_buffList[BasicBuff::ON_GAINARMOR])
+        {
+            item->affect(ctx);
+        }
+    }
+
+    this->_armor += ctx->armorGained;
+}
+
+void Entity::hurt(Context *ctx, bool triggerBuff)
+{
+    if(triggerBuff)
+    {
+        for(auto &item :this->_buffList[BasicBuff::ON_HURT])
+        {
+            item->affect(ctx);
+        }
+    }
+
+    int dealDamage = std::min(ctx->damageDone, this->_armor);
+    ctx->damageDone -= dealDamage;
+}
+
+void Entity::giveBuff(Context *ctx, bool triggerBuff)
+{
+    if(triggerBuff)
+    {
+        for(auto &item :this->_buffList[BasicBuff::ON_GIVEBUFF])
+        {
+            item->affect(ctx);
+        }
+    }
+    for(auto &tar: ctx->to)
+    {
+        tar->getBuffed(ctx, triggerBuff);
+    }
+}
+
+void Entity::getBuffed(Context *ctx, bool triggerBuff)
+{
+    if(triggerBuff)
+    {
+        for(auto &item :this->_buffList[BasicBuff::ON_GETBUFFED])
+        {
+            item->affect(ctx);
+        }
+    }
+    const auto buff = ctx->buffGiven;
+    this->_buffList[buff->getType()].push_back(buff);
 }
 // --- Entity
 
 // Enemy ---
+Enemy::Enemy()
+    : Entity(false)
+{}
+
 void Enemy::RoundMid()
 {
 
@@ -64,6 +120,11 @@ void Enemy::RoundMid()
 
 
 // Player ---
+
+Player::Player()
+    : Entity(true)
+{}
+
 void Player::RoundBegin()
 {
 	/// TODO Write something...
@@ -76,80 +137,31 @@ void Player::RoundMid()
 }
 // --- Player
 
-ProcessState::ProcessState()
-	: damage(0)
-	, armor(0)
-	, hp(0)
+// BasicBuff ---
+BasicBuff::BasicBuff(BuffType type)
+    : _type(type)
 {}
 
-// BasicEffect ---
-BasicEffect::BasicEffect(Context ctx, EffectType type)
-	: _ctx(ctx)
-	, _type(type)
-{}
+BasicBuff::BuffType BasicBuff::getType() const
+{
+    return this->_type;
+}
 // --- BasicEffect
 
-
-// DoDamageBasicEffect ---
-DoDamageBasicEffect::DoDamageBasicEffect(Context ctx, EffectType type, int damage)
-	: BasicEffect(ctx, type)
-	, _damage(damage)
-{}
-void DoDamageBasicEffect::affect(ProcessState& state)
-{
-	_ctx.from->Attack(state.damage, _ctx);
-}
-// --- DoDamageBasicEffect
-
-
-// ModifyDamageBasicEffect ---
-ModifyDamageBasicEffect::ModifyDamageBasicEffect(Context ctx, EffectType type)
-	: BasicEffect(ctx, type)
+// ModifyDamageBasicBuff ---
+ModifyDamageBasicBuff::ModifyDamageBasicBuff(BuffType type)
+    : BasicBuff(type)
 {}
 // --- ModifyDamageBasicEffect
 
 
-// ModifyDamageByNumberBasicEffect ---
-ModifyDamageByNumberBasicEffect::ModifyDamageByNumberBasicEffect(Context ctx, EffectType type, int reducedDamage)
-	: ModifyDamageBasicEffect(ctx, type)
-	, _incDamage(reducedDamage)
-{}
-void ModifyDamageByNumberBasicEffect::affect(ProcessState& state)
+// ModifyDamageByNumberBuff ---
+
+void ModifyDamageByNumberBuff::affect(Context *ctx)
 {
-	state.damage += this->_incDamage;
+    ctx->damageDone += this->_incDamage;
 }
 // --- ModifyDamageByNumberBasicEffect
 
 
-
-// Context ---
-Context::Context(Entity* const from, QVector<Entity*> const to)
-	: from(from)
-	, to(to)
-{}
-// --- Context
-
-
-// EffectDistributor ---
-void EffectDistributor::distributeBasicEffect(BasicEffect* eff)
-{
-	ProcessState tempState;
-	switch (eff->_type)
-	{
-	case BasicEffect::IMMEDIATE:
-		// Execute immediately
-		eff->affect(tempState);
-		break;
-
-	default:
-		// Insert into _onAttack
-		auto& ctx = eff->_ctx;
-		for (auto& tar : ctx.to)
-		{
-			tar->_effectList[eff->_type].push_back(eff);
-		}
-		break;
-	}
-}
-// --- EffectDistributor
 
