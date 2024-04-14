@@ -15,8 +15,5 @@ setting::~setting()
 
 void setting::on_pushButton_clicked()
 {
-    widget *father =new widget();
-    this->close();
-    father->show();
 }
 

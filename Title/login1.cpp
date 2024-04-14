@@ -15,8 +15,5 @@ login1::~login1()
 
 void login1::on_pushButton_clicked()
 {
-    widget *father =new widget();
-    this->close();
-    father->show();
 }
 

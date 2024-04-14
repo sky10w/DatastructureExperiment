@@ -10,9 +10,12 @@ CONFIG += c++17
 
 SOURCES += \
     InGame/Basic.cpp \
+    InGame/Buff.cpp \
     InGame/GameCard.cpp \
     InGame/InGame.cpp \
+    InGame/Stageconfig.cpp \
     InGame/styles.cpp \
+    InGame/System.cpp \
     StageSelection/MyPushButton.cpp \
     StageSelection/Stagechoice1.cpp \
     Title/login1.cpp \
@@ -23,10 +26,13 @@ SOURCES += \
 
 HEADERS += \
     InGame/Basic.h \
+    InGame/Buff.h \
     InGame/GameCard.h \
     InGame/InGame.h \
+    InGame/Stageconfig.h \
     InGame/globalOptions.h \
     InGame/styles.h \
+    InGame/System.h \
     StageSelection/MyPushButton.h \
     StageSelection/Stagechoice1.h \
     Title/login1.h \
@@ -48,9 +54,10 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
-    Stagechoice1.qrc \
+    StageSelection/Stagechoice1.qrc \
     Title/src.qrc
 
 DISTFILES += \
+    InGame/buff.json \
     InGame/cards.json \
     InGame/interface.md

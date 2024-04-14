@@ -1,7 +1,4 @@
 #include "widget.h"
-#include "ui_widget.h"
-#include <QPushButton>
-#include <QToolButton>
 
 widget::widget(QWidget *parent)
     : QWidget(parent)

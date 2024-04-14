@@ -1,66 +1,45 @@
 #include "Basic.h"
 
 // Entity ---
-const int Entity::_EventNumber = 5;
-
-// void Entity::Hurt(int damage, Context ctx)
-// {
-// 	ProcessState tempState;
-// 	tempState.damage = damage;
-// 	for (auto eff : this->_effectList[BasicEffect::ON_HURT])
-// 	{
-// 		eff->affect(tempState);
-// 	}
-// 	// ����ʵ�ʵ��˺�����
-// 	if (this->_armor > tempState.damage)
-// 	{
-// 		this->_armor -= tempState.damage;
-// 	}
-// 	else
-// 	{
-// 		tempState.damage -= this->_armor;
-// 		this->_armor = 0;
-// 		this->_hp -= tempState.damage;
-// 	}
-// }
-// void Entity::Attack(int damage, Context ctx)
-// {
-// 	ProcessState tempState;
-// 	tempState.damage = damage;
-
-// 	for (auto eff : this->_effectList[BasicEffect::ON_ATTACK])
-// 	{
-// 		eff->affect(tempState);
-// 	}
-// 	for (auto tar : ctx.to)
-// 	{
-// 		tar->Hurt(tempState.damage, Context(tar, { this }));
-// 	}
-// }
 Entity::Entity(bool isPlayer)
     : _isPlayer(isPlayer)
 {}
 
 void Entity::RoundBegin()
 {
-	for (auto eff : this->_effectList[BasicEffect::ON_ROUNDBEGIN])
+    for (auto eff : this->_buffList[BasicBuff::ON_ROUNDBEGIN])
 	{
         eff->affect(nullptr);
 	}
 }
 void Entity::RoundEnd()
 {
-	for (auto eff : this->_effectList[BasicEffect::ON_ROUNDEND])
+    for (auto eff : this->_buffList[BasicBuff::ON_ROUNDEND])
 	{
         eff->affect(nullptr);
     }
 }
 
-void Entity::attack(Context *ctx, bool triggerEffect)
+bool Entity::isPlayer() const
 {
-    if(triggerEffect)
+    return this->_isPlayer;
+}
+
+int Entity::getHp() const
+{
+    return this->_hp;
+}
+
+int Entity::getArmor() const
+{
+    return this->_armor;
+}
+
+void Entity::attack(Context *ctx, bool triggerBuff)
+{
+    if(triggerBuff)
     {
-        for(auto &item :this->_effectList[BasicEffect::ON_ATTACK])
+        for(auto &item :this->_buffList[BasicBuff::ON_ATTACK])
         {
             item->affect(ctx);
         }
@@ -68,15 +47,15 @@ void Entity::attack(Context *ctx, bool triggerEffect)
 
     for(auto &tar: ctx->to)
     {
-        tar->hurt(ctx, triggerEffect);
+        tar->hurt(ctx, triggerBuff);
     }
 }
 
-void Entity::gainArmor(Context *ctx, bool triggerEffect)
+void Entity::gainArmor(Context *ctx, bool triggerBuff)
 {
-    if(triggerEffect)
+    if(triggerBuff)
     {
-        for(auto &item :this->_effectList[BasicEffect::ON_GAINARMOR])
+        for(auto &item :this->_buffList[BasicBuff::ON_GAINARMOR])
         {
             item->affect(ctx);
         }
@@ -85,11 +64,11 @@ void Entity::gainArmor(Context *ctx, bool triggerEffect)
     this->_armor += ctx->armorGained;
 }
 
-void Entity::hurt(Context *ctx, bool triggerEffect)
+void Entity::hurt(Context *ctx, bool triggerBuff)
 {
-    if(triggerEffect)
+    if(triggerBuff)
     {
-        for(auto &item :this->_effectList[BasicEffect::ON_HURT])
+        for(auto &item :this->_buffList[BasicBuff::ON_HURT])
         {
             item->affect(ctx);
         }
@@ -97,6 +76,34 @@ void Entity::hurt(Context *ctx, bool triggerEffect)
 
     int dealDamage = std::min(ctx->damageDone, this->_armor);
     ctx->damageDone -= dealDamage;
+}
+
+void Entity::giveBuff(Context *ctx, bool triggerBuff)
+{
+    if(triggerBuff)
+    {
+        for(auto &item :this->_buffList[BasicBuff::ON_GIVEBUFF])
+        {
+            item->affect(ctx);
+        }
+    }
+    for(auto &tar: ctx->to)
+    {
+        tar->getBuffed(ctx, triggerBuff);
+    }
+}
+
+void Entity::getBuffed(Context *ctx, bool triggerBuff)
+{
+    if(triggerBuff)
+    {
+        for(auto &item :this->_buffList[BasicBuff::ON_GETBUFFED])
+        {
+            item->affect(ctx);
+        }
+    }
+    const auto buff = ctx->buffGiven;
+    this->_buffList[buff->getType()].push_back(buff);
 }
 // --- Entity
 
@@ -130,76 +137,31 @@ void Player::RoundMid()
 }
 // --- Player
 
-// BasicEffect ---
-BasicEffect::BasicEffect(EffectType type)
+// BasicBuff ---
+BasicBuff::BasicBuff(BuffType type)
     : _type(type)
 {}
+
+BasicBuff::BuffType BasicBuff::getType() const
+{
+    return this->_type;
+}
 // --- BasicEffect
 
-
-// DoDamageBasicEffect ---
-DoDamageBasicEffect::DoDamageBasicEffect(EffectType type, int damage)
-    : BasicEffect(type)
-	, _damage(damage)
-{}
-void DoDamageBasicEffect::affect(Context *ctx)
-{
-    ctx->from->attack(ctx, true);
-}
-// --- DoDamageBasicEffect
-
-
-// ModifyDamageBasicEffect ---
-ModifyDamageBasicEffect::ModifyDamageBasicEffect(EffectType type)
-    : BasicEffect(type)
+// ModifyDamageBasicBuff ---
+ModifyDamageBasicBuff::ModifyDamageBasicBuff(BuffType type)
+    : BasicBuff(type)
 {}
 // --- ModifyDamageBasicEffect
 
 
-// ModifyDamageByNumberBasicEffect ---
-ModifyDamageByNumberBasicEffect::ModifyDamageByNumberBasicEffect(Context ctx, EffectType type, int reducedDamage)
-    : ModifyDamageBasicEffect(type)
-	, _incDamage(reducedDamage)
-{}
-void ModifyDamageByNumberBasicEffect::affect(Context *ctx)
+// ModifyDamageByNumberBuff ---
+
+void ModifyDamageByNumberBuff::affect(Context *ctx)
 {
     ctx->damageDone += this->_incDamage;
 }
 // --- ModifyDamageByNumberBasicEffect
 
 
-// EffectDistributor ---
-void EffectDistributor::distributeBasicEffect(BasicEffect* eff, Context* ctx)
-{
-	switch (eff->_type)
-	{
-	case BasicEffect::IMMEDIATE:
-		// Execute immediately
-        eff->affect(ctx);
-		break;
 
-	default:
-        // Distribute to corresponding effect list
-        for (auto& tar : ctx->to)
-        {
-			tar->_effectList[eff->_type].push_back(eff);
-		}
-		break;
-	}
-}
-// --- EffectDistributor
-
-
-/// Deprecated
-// // Action ---
-// Action::Action(Entity *owner)
-//     : _owner(owner)
-//     , _effectList()
-// {}
-// // --- Action
-
-// void Hurt::act(Context *ctx, bool triggerEffect)
-// {
-//     int initialHp = this->_owner->getHp();
-//     this->_owner->setHp(initialHp - ctx->damageDone);
-// }

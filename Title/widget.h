@@ -5,8 +5,12 @@
 #include <QGraphicsPixmapItem>
 #include <QGraphicsView>
 #include <QGraphicsScene>
-#include <login1.h>
-#include <setting.h>
+#include <QPushButton>
+#include <QToolButton>
+
+#include "ui_widget.h"
+#include "login1.h"
+#include "setting.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {

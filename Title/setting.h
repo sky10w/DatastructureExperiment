@@ -2,7 +2,6 @@
 #define SETTING_H
 
 #include <QWidget>
-#include "widget.h"
 
 namespace Ui {
 class setting;
