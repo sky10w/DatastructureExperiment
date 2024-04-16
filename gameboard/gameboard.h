@@ -33,6 +33,7 @@
 #include <iostream>
 #include <map>
 #include <set>
+
 using namespace std;
 
 class HandsView;
@@ -140,6 +141,8 @@ protected:
   void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
   void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
   void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+  void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
+  void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
 };
 
 class HandsView : public QObject //手牌场景

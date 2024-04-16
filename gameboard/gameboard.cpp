@@ -1,5 +1,5 @@
 #include "gameboard.h"
-QMap<QString, QString> MP_description = {{"1", u8"这是易伤BUFF"}};
+QMap<QString, QString> MP_description = {{"1", "这是易伤BUFF"}};
 QMap<QString, QPixmap> CardIcon;
 QMap<QString, CardInfo> cards = {{"1", {"1", "name", "1", "1", 1, 1}}};
 const int HANDSLIMIT = 7;
@@ -214,6 +214,7 @@ void BuffView::update_buff(QString id, int delta) {
     newbufficon->setPixmap("://res/" + id + ".png");
     newbufficon->description = MP_description[id];
     newbufficon->setToolTip(newbufficon->description);
+    // std::cout << (newbufficon->description.toStdString()) << std::endl;
     Buffs[id] = newbuff;
     bufficon[id] = newbufficon;
     // cout << 11111 << endl;
@@ -250,6 +251,7 @@ void CardView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
   auto deny = [this]() -> void {
     setPos(curposx, curposy);
     setFlag(QGraphicsItem::ItemIsMovable, true);
+    setZValue(0);
   };
   if (distance < 200)
     deny();
@@ -294,6 +296,17 @@ void CardView::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
 }
 void CardView::mousePressEvent(QGraphicsSceneMouseEvent *event) {
   QGraphicsItem::mousePressEvent(event);
+  this->setZValue(1);
+}
+void CardView::hoverEnterEvent(QGraphicsSceneHoverEvent *event) {
+  QGraphicsItem::hoverEnterEvent(event);
+  this->setZValue(1);
+  this->setPos(this->pos().x(), this->pos().y() - 50);
+}
+void CardView::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) {
+  QGraphicsItem::hoverLeaveEvent(event);
+  this->setZValue(0);
+  this->setPos(curposx, curposy);
 }
 void CardView::init() {
   setPixmap(QPixmap("://res/card.jpg"));
@@ -302,6 +315,7 @@ void CardView::init() {
   valid = 1;
   arrow.setParentItem(this);
 }
+// void CardView::mouse
 void HandsView::init() {
   handsscene->setItemIndexMethod(QGraphicsScene::NoIndex);
 }
@@ -314,6 +328,7 @@ void HandsView::carddraw(CardView *x) {
   x->setParent(this);
   x->inhands = true;
   x->setFlag(QGraphicsItem::ItemIsMovable, true);
+  x->setAcceptHoverEvents(true);
   connect(x, &CardView::playcard, this, &HandsView::consumecard);
   hands.push_front(x);
   updatecard();
