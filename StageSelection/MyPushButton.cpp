@@ -25,10 +25,11 @@ void MyPushButton::move2()
     this->move(w);
 }
 
-MyPushButton::MyPushButton(QString nor, QString pre)
+MyPushButton::MyPushButton(int btnno,QString nor, QString pre)
 {
     this->normal_img = nor;
     this->press_img = pre;
+    this->btnid = btnno;
 
     QPixmap map;
     map.load(nor);
@@ -39,4 +40,8 @@ MyPushButton::MyPushButton(QString nor, QString pre)
     //设置图片
     this->setIcon(map);
     this->setIconSize(QSize(map.width(), map.height()));
+}
+
+void MyPushButton::nosend(){
+    emit nosended(btnid);
 }
