@@ -1,15 +1,15 @@
 <RCC>
     <qresource prefix="/Stagechoice1">
-        <file>src/image/c9bc97f432.jpg</file>
-        <file>src/image/1.jpg</file>
-        <file>src/image/back1.png</file>
-        <file>src/image/back2.png</file>
-        <file>src/image/map.png</file>
-        <file>src/image/battle1.png</file>
-        <file>src/image/battle2.png</file>
-        <file>src/image/boss1.png</file>
-        <file>src/image/boss2.png</file>
-        <file>src/image/settings1.png</file>
-        <file>src/image/settings2.png</file>
+        <file>res/image/c9bc97f432.jpg</file>
+        <file>res/image/1.jpg</file>
+        <file>res/image/back1.png</file>
+        <file>res/image/back2.png</file>
+        <file>res/image/map.png</file>
+        <file>res/image/battle1.png</file>
+        <file>res/image/battle2.png</file>
+        <file>res/image/boss1.png</file>
+        <file>res/image/boss2.png</file>
+        <file>res/image/settings1.png</file>
+        <file>res/image/settings2.png</file>
     </qresource>
 </RCC>

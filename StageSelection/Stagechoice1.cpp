@@ -17,7 +17,7 @@ Stagechoice1::Stagechoice1(QWidget* parent)
             btn[i]->move2();
         });
         connect(btn[i],&MyPushButton::clicked,btn[i],&MyPushButton::nosend);
-        connect(btn[i],SIGNAL(nosended(int)),this,SLOT(levelChose(int)));
+        connect(btn[i],SIGNAL(nosended(int)),this,SLOT(levelChoose(int)));
 
         connect(btn[i],&MyPushButton::clicked,btn[i],&MyPushButton::nosend);
         connect(btn[i],SIGNAL(nosended(int)),this,SLOT(levelClear(int)));

@@ -1,0 +1,18 @@
+[
+    {
+        "id": "0001",
+        "class_name": "ModifyDamageByNumberBuff ON_HURT -2",
+        "buff_name": "强壮",
+        "description": "将每次受到的伤害减2",
+        "type": "ON_HURT",
+        "icon_path": ""
+    },
+    {
+        "id": "0002",
+        "class_name": "ModifyDamageByNumberBuff ON_ATTACK +2",
+        "buff_name": "力量",
+        "description": "将每次攻击的伤害加2",
+        "type": "ON_ATTACK",
+        "icon_path": ""
+    }
+]

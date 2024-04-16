@@ -10,8 +10,8 @@
 #include <QVector>
 #include <QPainter>
 #include <QImage>
-#include<QPair>
-#include"levelgenerator.h"
+#include <QPair>
+#include "levelgenerator.h"
 #include "StageSelection/MyPushButton.h"
 #include<QDebug>
 

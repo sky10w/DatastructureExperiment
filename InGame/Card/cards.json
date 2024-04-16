@@ -4,26 +4,39 @@
     "name": "Normal Attack",
     "description": "Deal 6 points of damage",
     "path": "/MainGame/res/cards/card_1.png",
-    "target_type": 1,
+    "target_type": "ONE",
     "energy": 1,
+    "act_type": "attack",
     "action": "attack 6"
   },
   {
     "uuid": "13jd",
     "name": "Ranged Attack",
-    "description": "Deal 9 points of damage",
+    "description": "Deal 5 points of damage",
     "path": "/MainGame/res/cards/card_2.png",
-    "target_type": 1,
+    "target_type": "ALL",
     "energy": 2,
+    "act_type": "attack",
     "action": "attack 9"
   },
   {
     "uuid": "1i92",
     "name": "Defend",
-    "description": "Gain 5 points of armor and ",
+    "description": "Gain 5 points of armor",
     "path": "/MainGame/res/cards/card_2.png",
-    "target_type": 0,
+    "target_type": "SELF",
     "energy": 1,
+    "act_type": "defend",
     "action": "defend 5"
+  },
+  {
+      "uuid": "1i93",
+      "name": "Buff",
+      "description": "",
+      "path": "/MainGame/res/cards/card_2.png",
+      "target_type": "SELF",
+      "energy": 2,
+      "act_type": "buff",
+      "action": "buff 0001"
   }
 ]

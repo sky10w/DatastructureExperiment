@@ -11,37 +11,43 @@
 #include <qjsonobject.h>
 #include <QEvent>
 
+#include "ActionParser.h"
+
 #include "InGame/globalOptions.h"
 
-struct CardInfo{
-public:
+/// CardInfo(id, name, description, path, targetType, energy, QList<Action*> action)
+struct CardInfo
+{
+    enum targetType_t : int {
+        ONE,
+        ALL,
+        RANDOM,
+        SELF,
+
+        NOT_FOUND
+    };
 	QString id;
 	QString name;
 	QString description;
 	QString path;
-	int targetType;
+    targetType_t targetType;
+    Action::Act_t actType;
 	int energy;
-    QString action;
-public:
-    CardInfo() = default;
-	bool operator==(const CardInfo& rhs) const {return this->id == rhs.id;}
-	friend size_t qHash(CardInfo k, size_t seed);
-    friend size_t qHash(const CardInfo& k, size_t seed);
-    void setPath(const QString &newPath);
-};
-size_t qHash(CardInfo k, size_t seed);
-size_t qHash(const CardInfo& k, size_t seed);
+    QList<Action*> action;
 
-namespace CardSystem
-{
-    QHash<QString, CardInfo> InitCards();
-    const QHash<QString, CardInfo> cards = InitCards();
+    bool operator==(const CardInfo& rhs) const {return this->id == rhs.id;}
 };
+
+struct Card
+{
+    QString id;
+    bool valid;
+};
+
 
 // const QVector<QString> PlayerOwnedCards = {"01ef", "13jd", "1i92"};
-class CardStack : public QObject
+class CardStack
 {
-	Q_OBJECT
 public:
 	CardStack() = default;
 	CardStack(const QVector<QString>& cards);

@@ -5,21 +5,6 @@ Entity::Entity(bool isPlayer)
     : _isPlayer(isPlayer)
 {}
 
-void Entity::RoundBegin()
-{
-    for (auto eff : this->_buffList[BasicBuff::ON_ROUNDBEGIN])
-	{
-        eff->affect(nullptr);
-	}
-}
-void Entity::RoundEnd()
-{
-    for (auto eff : this->_buffList[BasicBuff::ON_ROUNDEND])
-	{
-        eff->affect(nullptr);
-    }
-}
-
 bool Entity::isPlayer() const
 {
     return this->_isPlayer;
@@ -33,6 +18,41 @@ int Entity::getHp() const
 int Entity::getArmor() const
 {
     return this->_armor;
+}
+
+void Entity::roundBegin()
+{
+    Context* ctx = new Context{this, {this}};
+    for (auto eff : this->_buffList[BuffInfo::ON_ROUNDBEGIN])
+	{
+        eff->affect(ctx);
+	}
+    delete ctx;
+}
+
+void Entity::roundEnd()
+{
+    Context* ctx = new Context{this, {this}};
+    for (auto eff : this->_buffList[BuffInfo::ON_ROUNDEND])
+	{
+        eff->affect(ctx);
+    }
+    delete ctx;
+}
+
+void Entity::heal(Context *ctx)
+{
+    this->_hp += ctx->hpHealed;
+}
+
+void Entity::removeBuff(Context *ctx)
+{
+    auto type = BuffSystem::getBuffInfo(ctx->buffGiven).type;
+    auto &tarList = this->_buffList[type];
+    auto res = std::find(tarList.begin(), tarList.end(), ctx->buffGiven);
+    if(res == tarList.end()) return;
+
+    tarList.erase(res);
 }
 
 void Entity::attack(Context *ctx, bool triggerBuff)
@@ -82,7 +102,7 @@ void Entity::giveBuff(Context *ctx, bool triggerBuff)
 {
     if(triggerBuff)
     {
-        for(auto &item :this->_buffList[BasicBuff::ON_GIVEBUFF])
+        for(auto &item :this->_buffList[BuffInfo::ON_GIVEBUFF])
         {
             item->affect(ctx);
         }
@@ -97,12 +117,14 @@ void Entity::getBuffed(Context *ctx, bool triggerBuff)
 {
     if(triggerBuff)
     {
-        for(auto &item :this->_buffList[BasicBuff::ON_GETBUFFED])
+        for(auto &item :this->_buffList[BuffInfo::ON_GETBUFFED])
         {
             item->affect(ctx);
         }
     }
-    const auto buff = ctx->buffGiven;
+    const auto buffInfo = BuffSystem::getBuffInfo(ctx->buffGiven);
+    auto buff = BuffParser::parse(buffInfo.className);
+    /// TODO
     this->_buffList[buff->getType()].push_back(buff);
 }
 // --- Entity
@@ -112,10 +134,6 @@ Enemy::Enemy()
     : Entity(false)
 {}
 
-void Enemy::RoundMid()
-{
-
-}
 // --- Enemy
 
 
@@ -125,43 +143,6 @@ Player::Player()
     : Entity(true)
 {}
 
-void Player::RoundBegin()
-{
-	/// TODO Write something...
-	this->Entity::RoundBegin();
-}
-
-void Player::RoundMid()
-{
-	/// TODO Write something...
-}
 // --- Player
-
-// BasicBuff ---
-BasicBuff::BasicBuff(BuffType type)
-    : _type(type)
-{}
-
-BasicBuff::BuffType BasicBuff::getType() const
-{
-    return this->_type;
-}
-// --- BasicEffect
-
-// ModifyDamageBasicBuff ---
-ModifyDamageBasicBuff::ModifyDamageBasicBuff(BuffType type)
-    : BasicBuff(type)
-{}
-// --- ModifyDamageBasicEffect
-
-
-// ModifyDamageByNumberBuff ---
-
-void ModifyDamageByNumberBuff::affect(Context *ctx)
-{
-    ctx->damageDone += this->_incDamage;
-}
-// --- ModifyDamageByNumberBasicEffect
-
 
 

@@ -9,15 +9,17 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    InGame/Card/ActionParser.cpp \
     InGame/Basic.cpp \
-    InGame/Buff.cpp \
-    InGame/GameCard.cpp \
-    InGame/InGame.cpp \
-    InGame/Stageconfig.cpp \
-    InGame/styles.cpp \
+    InGame/Buff/Buff.cpp \
+    InGame/Buff/BuffParser.cpp \
+    InGame/Buff/BuffSystem.cpp \
+    InGame/Card/CardSystem.cpp \
+    InGame/Card/GameCard.cpp \
     InGame/System.cpp \
     StageSelection/MyPushButton.cpp \
     StageSelection/Stagechoice1.cpp \
+    StageSelection/levelgenerator.cpp \
     Title/login1.cpp \
     Title/setting.cpp \
     Title/widget.cpp \
@@ -25,16 +27,19 @@ SOURCES += \
     mainwindow.cpp
 
 HEADERS += \
+    InGame/Card/ActionParser.h \
     InGame/Basic.h \
-    InGame/Buff.h \
-    InGame/GameCard.h \
-    InGame/InGame.h \
-    InGame/Stageconfig.h \
+    InGame/Buff/Buff.h \
+    InGame/Buff/BuffParser.h \
+    InGame/Buff/BuffSystem.h \
+    InGame/Card/CardSystem.h \
+    InGame/Context.h \
+    InGame/Card/GameCard.h \
     InGame/globalOptions.h \
-    InGame/styles.h \
     InGame/System.h \
     StageSelection/MyPushButton.h \
     StageSelection/Stagechoice1.h \
+    StageSelection/levelgenerator.h \
     Title/login1.h \
     Title/setting.h \
     Title/widget.h \
@@ -58,6 +63,6 @@ RESOURCES += \
     Title/src.qrc
 
 DISTFILES += \
-    InGame/buff.json \
-    InGame/cards.json \
+    InGame/Buff/buff.json \
+    InGame/Card/cards.json \
     InGame/interface.md
