@@ -1,4 +1,5 @@
 QT       += core gui
+QT  +=openglwidgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -23,6 +24,8 @@ SOURCES += \
     Title/login1.cpp \
     Title/setting.cpp \
     Title/widget.cpp \
+    gameboard/gameboard.cpp \
+    gameboard/myopenglwidget.cpp \
     main.cpp \
     mainwindow.cpp
 
@@ -43,6 +46,8 @@ HEADERS += \
     Title/login1.h \
     Title/setting.h \
     Title/widget.h \
+    gameboard/gameboard.h \
+    gameboard/myopenglwidget.h \
     mainwindow.h
 
 FORMS += \
@@ -51,6 +56,7 @@ FORMS += \
     Title/login1.ui \
     Title/setting.ui \
     Title/widget.ui \
+    gameboard/gameboard.ui \
     mainwindow.ui
 
 # Default rules for deployment.
@@ -61,9 +67,10 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 RESOURCES += \
     InGame.qrc \
     StageSelection/Stagechoice1.qrc \
-    Title/src.qrc
-
+    Title/src.qrc \
+    gameboard/gameboard.qrc
 DISTFILES += \
     InGame/buff.json \
     InGame/cards.json \
     InGame/interface.md
+

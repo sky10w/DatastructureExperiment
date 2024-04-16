@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "StageSelection/Stagechoice1.h"
 #include "InGame/System.h"
+#include "gameboard/gameboard.h"
 
 #include <QApplication>
 #include <QLabel>
@@ -13,7 +14,7 @@ int main(int argc, char *argv[])
     CardSystem::initCard();
 
     // MainWindow w;
-    Stagechoice1 w;
+    gameboard w;
     w.setFixedSize(1280, 720);
     w.show();
 

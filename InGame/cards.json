@@ -1,6 +1,7 @@
 [
   {
     "uuid": "01ef",
+<<<<<<< HEAD
     "name": "攻击",
     "description": "Deal 6 points of damage",
     "path": "/MainGame/res/cards/card_1.png",
@@ -8,10 +9,18 @@
     "energy": 1,
     "act_type": "attack",
     "action": "attack 6"
+=======
+    "name": "Normal Attack",
+    "description": "Deal 6 points of damage",
+    "path": "/MainGame/res/card_1.png",
+    "target_type": 1,
+    "energy": 1
+>>>>>>> wy_
   },
   {
     "uuid": "13jd",
     "name": "Ranged Attack",
+<<<<<<< HEAD
     "description": "Deal 5 points of damage",
     "path": "/MainGame/res/cards/card_2.png",
     "target_type": "ALL",
@@ -50,3 +59,19 @@
       "action": "give_buff 0001"
   }
 ]
+=======
+    "description": "Deal 9 points of damage",
+    "path": "/MainGame/res/card_2.png",
+    "target_type": 1,
+    "energy": 2
+  },
+  {
+    "uuid": "1i92",
+    "name": "Defend",
+    "description": "Gain 5 points of armor",
+    "path": "/MainGame/res/card_2.png",
+    "target_type": 0,
+    "energy": 1
+  }
+]
+>>>>>>> wy_

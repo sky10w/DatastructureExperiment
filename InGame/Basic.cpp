@@ -160,22 +160,3 @@ void Entity::getBuffed(Context *ctx, bool triggerBuff)
     /// TODO
     this->_buffList[buff->getType()].push_back(buff);
 }
-// --- Entity
-
-// Enemy ---
-Enemy::Enemy(int index)
-    : Entity(false, index)
-{}
-
-// --- Enemy
-
-
-// Player ---
-
-Player::Player(int index)
-    : Entity(true, index)
-{}
-
-// --- Player
-
-

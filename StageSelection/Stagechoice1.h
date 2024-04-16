@@ -82,4 +82,3 @@ private:
     Ui::Stagechoice1Class ui;
 
 };
-

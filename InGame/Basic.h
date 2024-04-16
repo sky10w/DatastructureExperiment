@@ -61,6 +61,7 @@ class Enemy : public Entity
 	Q_OBJECT
 public:
     Enemy(int index);
+
 };
 
 class Player : public Entity
@@ -69,8 +70,5 @@ class Player : public Entity
 public:
     Player(int index);
 };
-
-
-
 
 

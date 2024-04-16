@@ -1,0 +1,19 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/player.png</file>
+        <file>res/1.png</file>
+        <file>res/OIG2 (1).jpg</file>
+        <file>res/OIG4.EEaacwq6f9sGYh.jpg</file>
+        <file>res/OIG4.jpg</file>
+        <file>res/OIG4.jWuyF.jpg</file>
+        <file>res/OIG4.YG5cQ5P20b0G.jpg</file>
+        <file>res/card.png</file>
+        <file>res/card2.png</file>
+        <file>res/card.jpeg</file>
+        <file>res/card.jpg</file>
+        <file>res/background.png</file>
+        <file>res/1713154927636415.png</file>
+        <file>res/1713155278729455.png</file>
+        <file>res/enemy.jpg</file>
+    </qresource>
+</RCC>

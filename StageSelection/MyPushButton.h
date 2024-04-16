@@ -28,4 +28,3 @@ public slots:
 };
 
 #endif // MYPUSHBUTTON_H
-
