@@ -38,7 +38,7 @@ QList<Action *> ActionParser::parse(const QString &str)
 {
     QList<Action*> resList;
     QVector<QString> temp = str.split(" ");
-    qDebug() << "The string list:" << temp;
+    // qDebug() << "The string list:" << temp;
     int cnter = 0;
     for(auto iter = temp.begin(); iter != temp.end(); iter++)
     {
@@ -61,48 +61,14 @@ QList<Action *> ActionParser::parse(const QString &str)
 }
 
 
-AttackAction::AttackAction(int damage)
-    : Action(Action::ATTACK)
-{
-    this->_ctx->damageDone = damage;
-}
 
-void AttackAction::act()
-{
-    qDebug() << "Acting attack" << this->_ctx->damageDone;
-}
-
-DefendAction::DefendAction(int armor)
-    : Action(Action::DEFEND)
-{
-    this->_ctx->armorGained = armor;
-}
-
-void DefendAction::act()
-{
-    qDebug() << "Acting defend"  << this->_ctx->armorGained;
-}
-
-GiveBuffAction::GiveBuffAction(const QString &buffName)
-    : Action(Action::BUFF)
-{
-    this->_ctx->buffGiven = buffName;
-}
-
-void GiveBuffAction::act()
-{
-    qDebug() << "Acting giveBuff" << this->_ctx->buffGiven;
-}
-
-RemoveBuffAction::RemoveBuffAction(const QString &buffID)
-    : Action(Action::BUFF)
-{}
 
 
 const QHash<QString, Action::Act_t> Action::_act = {
     {"attack", Action::ATTACK},
     {"defend", Action::DEFEND},
-    {"buff", Action::BUFF}
+    {"buff", Action::BUFF},
+    {"disable_act", Action::ACTION},
 };
 
 Action::Act_t Action::strToActType(const QString &str)
@@ -116,7 +82,7 @@ Action::Act_t Action::getType() const
     return this->_type;
 }
 
-Context *Action::getContex() const
+Context *Action::getContext() const
 {
     return this->_ctx;
 }
@@ -126,4 +92,68 @@ Action::Action(Act_t actType)
     , _ctx(new Context())
 {}
 
+AttackAction::AttackAction(int damage)
+    : Action(Action::ATTACK)
+{
+    this->_ctx->damageDone = damage;
+}
 
+void AttackAction::debug()
+{
+    qDebug() << "Acting attack" << this->_ctx->damageDone;
+}
+
+DefendAction::DefendAction(int armor)
+    : Action(Action::DEFEND)
+{
+    this->_ctx->armorGained = armor;
+}
+
+void DefendAction::debug()
+{
+    qDebug() << "Acting defend"  << this->_ctx->armorGained;
+}
+
+GiveBuffAction::GiveBuffAction(const QString &buffID)
+    : Action(Action::BUFF)
+{
+    this->_ctx->buffGiven = buffID;
+}
+
+void GiveBuffAction::debug()
+{
+    qDebug() << "Acting giveBuff" << this->_ctx->buffGiven;
+}
+
+RemoveBuffAction::RemoveBuffAction(const QString &buffID)
+    : Action(Action::BUFF)
+{
+    this->_ctx->buffGiven = buffID;
+}
+
+void RemoveBuffAction::debug()
+{
+    qDebug() << "Acting removeBuff" << this->_ctx->buffGiven;
+}
+
+RestrictAction::RestrictAction(Act_t type)
+    : Action(Action::ACTION)
+{
+
+}
+
+void RestrictAction::debug()
+{
+    qDebug() << "Acting removeBuff" << this->_ctx->buffGiven;
+}
+
+UnrestrictAction::UnrestrictAction(Act_t type)
+    : Action(Action::ACTION)
+{
+
+}
+
+void UnrestrictAction::debug()
+{
+    qDebug() << "Acting removeBuff" << this->_ctx->buffGiven;
+}

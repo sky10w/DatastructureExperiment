@@ -1,11 +1,6 @@
 #include "GameCard.h"
 
 
-// CardSystem
-
-
-
-
 // CardStack
 
 CardStack::CardStack(const QVector<QString>& cards)

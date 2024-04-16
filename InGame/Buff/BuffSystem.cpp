@@ -18,6 +18,7 @@ QHash<QString, BuffInfo> BuffSystem::initBuff()
         return {};
     }
     QByteArray data = file.readAll();
+    // qDebug() << data;
     file.close();
 
     QJsonParseError err;
@@ -54,8 +55,8 @@ QHash<QString, BuffInfo> BuffSystem::initBuff()
             qWarning() << "Warning: invalid json format";
         }
         const QString id = obj["id"].toString();
-        const QString className = obj["className"].toString();
-        const QString buffName = obj["buffName"].toString();
+        const QString className = obj["class_name"].toString();
+        const QString buffName = obj["buff_name"].toString();
         const QString description = obj["description"].toString();
         const QString iconPath = obj["iconPath"].toString();
         const QString typeStr = obj["type"].toString();
@@ -63,15 +64,19 @@ QHash<QString, BuffInfo> BuffSystem::initBuff()
         if(type == BuffInfo::NOT_FOUND)
         {
             qFatal("Error when parsing the buffID: %s -> type error", id.toLatin1().data());
+            return {};
         }
 
+        // qDebug() << className;
         auto res = BuffParser::parse(className);
         if(res == nullptr)
         {
-            qFatal("Error when parsing the buffID: %s -> type error", id.toLatin1().data());
+            qFatal("Error when parsing the buffID: %s -> parse error", id.toLatin1().data());
+            return {};
         }
+        res->setID(id);
 
-        qDebug() << "Successfully load a buff " << className << " -> " << iconPath;
+        qDebug() << "Successfully load a buff" << className << "->" << iconPath;
         temp[className] = BuffInfo{id, className, buffName, description, type, iconPath, res};
     }
     BuffSystem::_buff = temp;

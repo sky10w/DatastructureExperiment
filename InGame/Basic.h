@@ -18,11 +18,12 @@ class Entity : public QObject
 {
 	Q_OBJECT
 public:
-    explicit Entity(bool isPlayer);
+    explicit Entity(bool isPlayer, int index);
 
     virtual bool isPlayer() const;
     virtual int getHp() const;
     virtual int getArmor() const;
+    virtual bool isDead() const;
 
     // Actions
 
@@ -30,6 +31,9 @@ public:
     virtual void roundEnd();
     virtual void heal(Context* ctx);
     virtual void removeBuff(Context* ctx);
+    virtual void buffRemoved(Context* ctx);
+    virtual void restrictAction(Context* ctx);
+    virtual void unrestrictAction(Context* ctx);
 
     virtual void attack(Context* ctx, bool triggerBuff);
     virtual void gainArmor(Context* ctx, bool triggerBuff);
@@ -38,15 +42,16 @@ public:
     virtual void getBuffed(Context* ctx, bool triggerBuff);
 
 signals:
-    void hpChanged(int delta);
-    void armorChanged(int delta);
-    void buffChanged(bool dir, QString buffID);
+    void actionChanged(Action::Act_t type, bool isRestrict);
+    void hpChanged(int id, int delta);
+    void armorChanged(int id, int delta);
+    void buffChanged(int id, bool isPlus, QString buffID);
 
 protected:
 	int _hp;
 	int _armor;
     bool _isPlayer;
-    QString _id;
+    int _id;
 
     std::list<BasicBuff*> _buffList[7];
 };
@@ -55,16 +60,14 @@ class Enemy : public Entity
 {
 	Q_OBJECT
 public:
-    Enemy();
+    Enemy(int index);
 };
 
 class Player : public Entity
 {
 	Q_OBJECT
 public:
-    Player();
-private:
-    QList<QString> _cards;
+    Player(int index);
 };
 
 

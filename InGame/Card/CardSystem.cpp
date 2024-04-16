@@ -12,6 +12,7 @@ QHash<QString, CardInfo> CardSystem::initCard()
         return {};
     }
     QByteArray data = file.readAll();
+    // qDebug() << data;
     file.close();
 
     QJsonParseError err;
@@ -55,14 +56,17 @@ QHash<QString, CardInfo> CardSystem::initCard()
         tempInfo.description = obj["description"].toString();
         tempInfo.path = obj["path"].toString();
         tempInfo.energy = obj["energy"].toInt();
+
+        // specify action list
         const QString actStr = obj["action"].toString();
-        auto res = ActionParser::parse(actStr);
-        if(res.size() == 0)
+        auto action = ActionParser::parse(actStr);
+        if(action.size() == 0)
         {
             qFatal("Error when parsing the actionID: %s", tempInfo.id.toLatin1().data());
         }
+        tempInfo.action = action;
 
-
+        // specify act_type
         auto actType = Action::strToActType(obj["act_type"].toString());
         if(actType == Action::NOT_FOUND)
         {
@@ -70,7 +74,7 @@ QHash<QString, CardInfo> CardSystem::initCard()
         }
         tempInfo.actType = actType;
 
-        // specified target_type
+        // specify target_type
         auto targetType = CardSystem::strToTargetType(obj["target_type"].toString());
         if(targetType == CardInfo::NOT_FOUND)
         {
@@ -78,7 +82,7 @@ QHash<QString, CardInfo> CardSystem::initCard()
         }
         tempInfo.targetType = targetType;
 
-        qDebug() << "Successfully load a card " << tempInfo.id << " -> " << tempInfo.path;
+        qDebug() << "Successfully load a card" << tempInfo.id << "->" << tempInfo.path;
         temp[tempInfo.id] = tempInfo;
     }
     CardSystem::_cards = temp;

@@ -3,8 +3,9 @@
 
 #include "BuffParser.h"
 
-struct BuffSystem
+class BuffSystem
 {
+public:
     static BuffInfo getBuffInfo(const QString &buffID);
     static QHash<QString, BuffInfo> initBuff();
 private:

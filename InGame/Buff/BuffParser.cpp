@@ -25,9 +25,9 @@ const QHash<QString, std::function<BuffParser::res_t(BuffParser::iter_t, BuffPar
             const int damage = damageStr.toInt(&ok);
             if(!ok) return {false, nullptr};
 
-            ++iter;
-            if(iter == end) return {false, nullptr};
-            if(*iter != "end") return {false, nullptr};
+            // ++iter;
+            // if(iter == end) return {false, nullptr};
+            // if(*iter != "end") return {false, nullptr};
 
             auto buff = new ModifyDamageByNumberBuff(type, damage);
             return {true, buff};
@@ -39,7 +39,7 @@ BasicBuff* BuffParser::parse(const QString &str)
 {
     QList<BasicBuff*> resList;
     auto temp = str.split(" ");
-    qDebug() << "The string list:" << temp;
+    // qDebug() << "The string list:" << temp;
 
     auto iter = temp.begin();
     const QString cur = *iter;

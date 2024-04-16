@@ -3,9 +3,10 @@
 
 #include "GameCard.h"
 
-struct CardSystem
+class CardSystem
 {
-    CardInfo getCardInfo(const QString& cardID);
+public:
+    static CardInfo getCardInfo(const QString& cardID);
     static QHash<QString, CardInfo> initCard();
 private:
     static const QHash<QString, CardInfo::targetType_t> _map;

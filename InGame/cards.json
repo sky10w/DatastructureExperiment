@@ -1,7 +1,7 @@
 [
   {
     "uuid": "01ef",
-    "name": "Normal Attack",
+    "name": "攻击",
     "description": "Deal 6 points of damage",
     "path": "/MainGame/res/cards/card_1.png",
     "target_type": "ONE",
@@ -21,7 +21,7 @@
   },
   {
     "uuid": "1i92",
-    "name": "Defend",
+    "name": "防御",
     "description": "Gain 5 points of armor",
     "path": "/MainGame/res/cards/card_2.png",
     "target_type": "SELF",
@@ -30,13 +30,23 @@
     "action": "defend 5"
   },
   {
+      "uuid": "1234",
+      "name": "蓄势",
+      "description": "当前回合无法使用攻击牌，但下回合伤害翻倍",
+      "path": "/MainGame/res/cards/card_1.png",
+      "target_type": "SELF",
+      "energy": 2,
+      "act_type": "buff",
+      "action": ""
+  },
+  {
       "uuid": "1i93",
-      "name": "Buff",
+      "name": "火烧乌巢",
       "description": "",
       "path": "/MainGame/res/cards/card_2.png",
       "target_type": "SELF",
       "energy": 2,
       "act_type": "buff",
-      "action": "buff 0001"
+      "action": "give_buff 0001"
   }
 ]

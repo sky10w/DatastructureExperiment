@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/json">
+        <file>InGame/buff.json</file>
+        <file>InGame/cards.json</file>
+    </qresource>
+</RCC>

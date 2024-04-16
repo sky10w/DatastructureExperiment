@@ -1,8 +1,9 @@
 #include "Basic.h"
 
 // Entity ---
-Entity::Entity(bool isPlayer)
+Entity::Entity(bool isPlayer, int index)
     : _isPlayer(isPlayer)
+    , _id(index)
 {}
 
 bool Entity::isPlayer() const
@@ -18,6 +19,11 @@ int Entity::getHp() const
 int Entity::getArmor() const
 {
     return this->_armor;
+}
+
+bool Entity::isDead() const
+{
+    return this->_hp <= 0;
 }
 
 void Entity::roundBegin()
@@ -47,19 +53,46 @@ void Entity::heal(Context *ctx)
 
 void Entity::removeBuff(Context *ctx)
 {
+    for(auto &tar : ctx->to)
+    {
+        tar->buffRemoved(ctx);
+    }
+}
+
+void Entity::buffRemoved(Context *ctx)
+{
     auto type = BuffSystem::getBuffInfo(ctx->buffGiven).type;
     auto &tarList = this->_buffList[type];
-    auto res = std::find(tarList.begin(), tarList.end(), ctx->buffGiven);
-    if(res == tarList.end()) return;
+    // find the corresponding buff
+    const auto buffInfo = BuffSystem::getBuffInfo(ctx->buffGiven);
+    for(auto i = tarList.begin(); i != tarList.end();)
+    {
+        auto cur = *i;
+        if(cur->getID() == ctx->buffGiven)
+        {
+            i = tarList.erase(i);
+            continue;
+        }
+        ++i;
+    }
+    emit buffChanged(0, ctx->buffGiven);
+}
 
-    tarList.erase(res);
+void Entity::restrictAction(Context *ctx)
+{
+    emit actionChanged(ctx->actAltered, true);
+}
+
+void Entity::unrestrictAction(Context *ctx)
+{
+    emit actionChanged(ctx->actAltered, false);
 }
 
 void Entity::attack(Context *ctx, bool triggerBuff)
 {
     if(triggerBuff)
     {
-        for(auto &item :this->_buffList[BasicBuff::ON_ATTACK])
+        for(auto &item :this->_buffList[BuffInfo::ON_ATTACK])
         {
             item->affect(ctx);
         }
@@ -75,7 +108,7 @@ void Entity::gainArmor(Context *ctx, bool triggerBuff)
 {
     if(triggerBuff)
     {
-        for(auto &item :this->_buffList[BasicBuff::ON_GAINARMOR])
+        for(auto &item :this->_buffList[BuffInfo::ON_GAINARMOR])
         {
             item->affect(ctx);
         }
@@ -88,7 +121,7 @@ void Entity::hurt(Context *ctx, bool triggerBuff)
 {
     if(triggerBuff)
     {
-        for(auto &item :this->_buffList[BasicBuff::ON_HURT])
+        for(auto &item :this->_buffList[BuffInfo::ON_HURT])
         {
             item->affect(ctx);
         }
@@ -130,8 +163,8 @@ void Entity::getBuffed(Context *ctx, bool triggerBuff)
 // --- Entity
 
 // Enemy ---
-Enemy::Enemy()
-    : Entity(false)
+Enemy::Enemy(int index)
+    : Entity(false, index)
 {}
 
 // --- Enemy
@@ -139,8 +172,8 @@ Enemy::Enemy()
 
 // Player ---
 
-Player::Player()
-    : Entity(true)
+Player::Player(int index)
+    : Entity(true, index)
 {}
 
 // --- Player

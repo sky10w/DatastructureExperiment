@@ -19,12 +19,14 @@ public:
         ATTACK = (1 << 0),
         DEFEND = (1 << 1),
         BUFF = (1 << 2),
+        ACTION = (1 << 3),
         NOT_FOUND = -1
     };
     static Act_t strToActType(const QString& str);
-    virtual void act() = 0;
+
+    virtual void debug() = 0;
     Act_t getType() const;
-    Context *getContex() const;
+    Context *getContext() const;
     Action(Act_t actType);
 protected:
     Act_t _type;
@@ -37,28 +39,42 @@ class AttackAction : public Action
 {
 public:
     AttackAction(int damage);
-    virtual void act() override;
+    virtual void debug() override;
 };
 
 class DefendAction : public Action
 {
 public:
     DefendAction(int armor);
-    virtual void act() override;
+    virtual void debug() override;
 };
 
 class GiveBuffAction : public Action
 {
 public:
     GiveBuffAction(const QString &buffID);
-    virtual void act() override;
+    virtual void debug() override;
 };
 
 class RemoveBuffAction : public Action
 {
 public:
     RemoveBuffAction(const QString &buffID);
-    virtual void act() override;
+    virtual void debug() override;
+};
+
+class RestrictAction : public Action
+{
+public:
+    RestrictAction(Action::Act_t type);
+    virtual void debug() override;
+};
+
+class UnrestrictAction : public Action
+{
+public:
+    UnrestrictAction(Action::Act_t type);
+    virtual void debug() override;
 };
 
 class ActionParser

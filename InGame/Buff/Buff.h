@@ -41,15 +41,21 @@ struct BuffInfo
 class BasicBuff
 {
 public:
-
-public:
     BasicBuff(BuffInfo::BuffType type);
+    virtual bool isValid() const;
+    virtual BuffInfo::BuffType getType() const;
+    virtual QString getID() const;
+
     virtual void affect(Context *ctx) = 0;
     virtual void degrade() = 0;
-    virtual BuffInfo::BuffType getType() const;
 
 protected:
+    QString _id;
     BuffInfo::BuffType _type;
+    int _degree;
+private:
+    virtual void setID(QString id);
+    friend class BuffSystem;
 };
 
 
@@ -71,6 +77,17 @@ public:
 
 protected:
     int _incDamage;
+};
+
+class ModifyDamageByPercentBuff : public ModifyDamageBasicBuff
+{
+public:
+    ModifyDamageByPercentBuff(BuffInfo::BuffType type, int percent);
+    virtual void affect(Context *ctx) override;
+    virtual void degrade() override;
+
+protected:
+    int _percent;
 };
 
 

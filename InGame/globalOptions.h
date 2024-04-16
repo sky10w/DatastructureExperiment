@@ -2,6 +2,6 @@
 #include <qstring.h>
 
 namespace opt{
-    const QString cardJsonFilePath = "./cards.json";
-    const QString buffJsonFilePath = "./buff.json";
+    const QString cardJsonFilePath = ":/json/InGame/cards.json";
+    const QString buffJsonFilePath = ":/json/InGame/buff.json";
 }

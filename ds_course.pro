@@ -59,10 +59,11 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
+    InGame.qrc \
     StageSelection/Stagechoice1.qrc \
     Title/src.qrc
 
 DISTFILES += \
-    InGame/Buff/buff.json \
-    InGame/Card/cards.json \
+    InGame/buff.json \
+    InGame/cards.json \
     InGame/interface.md

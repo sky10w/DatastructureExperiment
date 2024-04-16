@@ -38,12 +38,6 @@ struct CardInfo
     bool operator==(const CardInfo& rhs) const {return this->id == rhs.id;}
 };
 
-struct Card
-{
-    QString id;
-    bool valid;
-};
-
 
 // const QVector<QString> PlayerOwnedCards = {"01ef", "13jd", "1i92"};
 class CardStack

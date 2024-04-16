@@ -15,6 +15,7 @@ struct Context
     int damageDone;
     int armorGained;
     int hpHealed;
+    int actAltered;
     QString buffGiven; // Using buffID
 };
 
