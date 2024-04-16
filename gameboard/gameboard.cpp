@@ -228,9 +228,7 @@ Buff::Buff(QString uuid, int strength) {
   this->uuid = uuid;
   this->strength = strength;
 }
-BuffView::BuffView() {
-  // getBuff();
-}
+BuffView::BuffView() {}
 void BuffView::updateview() {}
 void CardView::get_valid(bool isvalid) { valid = isvalid; }
 void CardView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {

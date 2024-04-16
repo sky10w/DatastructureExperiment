@@ -71,7 +71,6 @@ public:
   void update_buff(QString uuid, int delta);
   void updateview();
 signals:
-  void getBuff();
 
   // void hoverEnterEvent(QGraphicsSceneEvent *event);
   // void hoverLeaveEvent(QGraphicsSceneEvent *event);
@@ -132,10 +131,10 @@ public:
   void init();
 
 signals:
-  void playcard(QString id);
-  void request_valid(int cardtype);
+  void playcard(QString id);        //这是前端内部的
+  void request_valid(int cardtype); //请求valid值
 public slots:
-  void get_valid(bool isvalid);
+  void get_valid(bool isvalid); // valid
 
 protected:
   void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
@@ -155,9 +154,9 @@ public:
   void init();
 
 public slots:
-  void updatecard();              //更新手牌排布
-  void consumecard(QString name); //对name打出卡牌
-  void carddraw(CardView *);      //抽卡
+  void updatecard();              //更新手牌排布//这是前端内部的
+  void consumecard(QString name); //对name打出卡牌//这是前端内部的
+  void carddraw(CardView *);      //抽卡//这是前端内部的
 signals:
   void discardcard(CardView *card);
   void playcard(int index, QString name); //对name打出第index张牌
@@ -188,7 +187,7 @@ signals:
   void shuffle();
   void send_card_to_hands(CardView *card);
 public slots:
-  void drawcard(QString uuid);
+  void drawcard(QString uuid); //抽到一张uuid的牌
 };
 class gameboard : public MyOpenGLWidget {
   Q_OBJECT
@@ -221,13 +220,15 @@ signals:
 public slots:
   void discardcard(CardView *card);
   void shuffle();
-  void updateenergy(int delta);
-  void setenergy(int x);
-  void updatebuff(QString buffid, int strength, QString name = "");
-  void updatehp(QString name, int delta);
-  void updatearmor(QString name, int delta);
-  void initenemy(int id, QString name, int HP_MAX);
-  void initplayer(int id, QString name, int HP_MAX);
+  void updateenergy(int delta); //能量+=delta
+  void setenergy(int x);        //设定能量为x
+  void
+  updatebuff(QString buffid, int strength,
+             QString name = "曹操"); //对name施加一个强度为strength的uuidbuff
+  void updatehp(QString name, int delta);            // name的hp+=delta
+  void updatearmor(QString name, int delta);         // name的armor+=delta
+  void initenemy(int id, QString name, int HP_MAX);  //初始化一个敌人
+  void initplayer(int id, QString name, int HP_MAX); //初始化一个玩家
   // int get
 };
 #endif // GAMEBOARD_H
