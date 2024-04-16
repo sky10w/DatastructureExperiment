@@ -6,9 +6,8 @@
 #include "Card/CardSystem.h"
 #include "Buff/BuffSystem.h"
 #include "Basic.h"
+#include "gameboard/gameboard.h"
 #include <random>
-
-class View;
 
 class GlobalStatus
 {
@@ -46,7 +45,7 @@ signals:
     void armorChanged(int id, int delta);
     void handCardChanged(QVector<QString> oldCards, QVector<QString> newCards);
 public slots:
-    virtual void playerUsingCard(const QString& cardID, int targetIndex);
+    virtual void playerUsingCard(int targetIndex, const QString& cardID);
     /// Round end for player's round
     virtual void roundEnd();
 
@@ -66,7 +65,7 @@ private:
     int _enemyNum;
     int _curEntity;
     CardStack* _stack[2];
-    View* _view;
+    gameboard* _view;
     QVector<QString> _handCard;
 };
 

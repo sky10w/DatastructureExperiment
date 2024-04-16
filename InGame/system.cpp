@@ -13,8 +13,9 @@ int GlobalStatus::playerEnergy = 3;
 const int InGameSystem::_playerSlot = 0;
 
 InGameSystem::InGameSystem()
-    // Init actionDisabled, handCard
+    // Init actionDisabled, handCard, view
     : _actionDisabled(0)
+    , _view(new gameboard())
     , _handCard({})
 {
     // Init entities, enemyNum, curEntity, stack
@@ -38,6 +39,10 @@ InGameSystem::InGameSystem()
         swap(list[ind], list[i]);
     }
 
+    for(auto &i : this->_stack)
+    {
+        i = new CardStack();
+    }
     this->_stack[DRAW]->push(list);
 }
 
@@ -51,10 +56,10 @@ void InGameSystem::run()
 
 void InGameSystem::connectSignalSLot(Entity *entity)
 {
-    QObject::connect(entity, SIGNAL(actionChanged(Action::Act_t,bool)), this, SLOT(updateAction(Action::Act_t,bool)));
-    QObject::connect(entity, SIGNAL(hpChanged(int,int)), /**/, SLOT(updatehp(int,int)));
-    QObject::connect(entity, SIGNAL(armorChanged(int,int)), /*this*/, SLOT(updatearmor(int,int)));
-    QObject::connect(entity, SIGNAL(buffChanged(int,bool,QString)), /*this*/, SLOT(updatebuff(int,bool,QString)));
+    QObject::connect(entity, SIGNAL(actionChanged(Action::Act_t,bool)), _view, SLOT(updateAction(Action::Act_t,bool)));
+    QObject::connect(entity, SIGNAL(hpChanged(int,int)), _view, SLOT(updatehp(int,int)));
+    QObject::connect(entity, SIGNAL(armorChanged(int,int)), _view, SLOT(updatearmor(int,int)));
+    QObject::connect(entity, SIGNAL(buffChanged(int,bool,QString)), _view, SLOT(updatebuff(int,bool,QString)));
 }
 
 void InGameSystem::updateAction(Action::Act_t type, bool isRestrict)
@@ -65,7 +70,7 @@ void InGameSystem::updateAction(Action::Act_t type, bool isRestrict)
         this->_actionDisabled &= ~type;
 }
 
-void InGameSystem::playerUsingCard(const QString &cardID, int targetIndex)
+void InGameSystem::playerUsingCard(int targetIndex, const QString &cardID)
 {
     const auto res = CardSystem::getCardInfo(cardID);
     const auto actList = res.action;
@@ -81,6 +86,7 @@ void InGameSystem::playerUsingCard(const QString &cardID, int targetIndex)
     for(auto &i : actList)
     {
         auto ctx = i->getContext();
+
     }
 }
 

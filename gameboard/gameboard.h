@@ -1,7 +1,7 @@
 #ifndef GAMEBOARD_H
 #define GAMEBOARD_H
 
-#include "InGame/GameCard.h"
+#include "InGame/Card/GameCard.h"
 #include "myopenglwidget.h"
 #include <QApplication>
 #include <QDebug>
