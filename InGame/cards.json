@@ -1,0 +1,26 @@
+[
+  {
+    "uuid": "01ef",
+    "name": "Normal Attack",
+    "description": "Deal 6 points of damage",
+    "path": "/MainGame/res/card_1.png",
+    "target_type": 1,
+    "energy": 1
+  },
+  {
+    "uuid": "13jd",
+    "name": "Ranged Attack",
+    "description": "Deal 9 points of damage",
+    "path": "/MainGame/res/card_2.png",
+    "target_type": 1,
+    "energy": 2
+  },
+  {
+    "uuid": "1i92",
+    "name": "Defend",
+    "description": "Gain 5 points of armor",
+    "path": "/MainGame/res/card_2.png",
+    "target_type": 0,
+    "energy": 1
+  }
+]
