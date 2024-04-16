@@ -48,8 +48,8 @@ protected:
 
 class Buff {
 public:
-  Buff(int uuid, int strength);
-  int uuid;
+  Buff(QString uuid, int strength);
+  QString uuid;
   int strength; // buff strength
 };
 
@@ -58,8 +58,8 @@ class BuffView : public QObject //状态视图
   Q_OBJECT
 public:
   QGraphicsView buffview;
-  map<int, Buff *> Buffs;
-  map<int, BuffIcon *> bufficon;
+  map<QString, Buff *> Buffs;
+  map<QString, BuffIcon *> bufficon;
   QGraphicsScene buffscene;
   int MAXBUFFSUM;
   BuffView();
@@ -67,8 +67,7 @@ public:
 
   void init(int posx, int posy);
   void print();
-  void updatebuff(int id, int delta);
-  void updateset(set<pair<int, int>> x);
+  void update_buff(QString uuid, int delta);
   void updateview();
 signals:
   void getBuff();
@@ -99,11 +98,12 @@ public:
   QGraphicsSimpleTextItem armornumber;
   QGraphicsPixmapItem action; // only for enemy
   void init(int hp);
-  void initasplayer();
-  void initasenemy();
+  void initasplayer(int id, QString name);
+  void initasenemy(int id, QString name);
   void updatehpview();
   void updatearmorview();
-  void updatebuff(int id, int delta);
+  void update_buff(QString id, int delta);
+
   void update_HP(int delta);
   void update_armor(int delta);
   void update_action(int id);
@@ -131,7 +131,7 @@ public:
   void init();
 
 signals:
-  void playcard(int id);
+  void playcard(QString id);
   void request_valid(int cardtype);
 public slots:
   void get_valid(bool isvalid);
@@ -152,12 +152,12 @@ public:
   void init();
 
 public slots:
-  void updatecard();         //更新手牌排布
-  void consumecard(int id);  //对id打出卡牌
-  void carddraw(CardView *); //抽卡
+  void updatecard();              //更新手牌排布
+  void consumecard(QString name); //对name打出卡牌
+  void carddraw(CardView *);      //抽卡
 signals:
   void discardcard(CardView *card);
-  void playcard(int index, int id); //对id打出第index张牌
+  void playcard(int index, QString name); //对name打出第index张牌
 };
 
 class DiscardPileView : public QGraphicsScene {
@@ -200,7 +200,7 @@ public:
   QPushButton EndButton;
   QVector<QPushButton *> buttons;
   EntityView *Player;
-  vector<EntityView *> Enemy;
+  map<QString, EntityView *> Enemy;
   // EntityView Enemy2;
   HandsView *myhands;
   DrawPileView *drawpile;
@@ -218,10 +218,13 @@ signals:
 public slots:
   void discardcard(CardView *card);
   void shuffle();
-  void updateenergy(int x);
-  void updatebuff(int buffid, int strength, int objectid = 0);
-  void updatehp(int id, int delta);
-  void updatearmor(int id, int delta);
+  void updateenergy(int delta);
+  void setenergy(int x);
+  void updatebuff(QString buffid, int strength, QString name = "");
+  void updatehp(QString name, int delta);
+  void updatearmor(QString name, int delta);
+  void initenemy(int id, QString name, int HP_MAX);
+  void initplayer(int id, QString name, int HP_MAX);
   // int get
 };
 #endif // GAMEBOARD_H
