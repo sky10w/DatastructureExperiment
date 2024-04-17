@@ -120,6 +120,7 @@ void InGameSystem::handleContext(Context *ctx) {
 }
 
 void InGameSystem::playerUsingCard(int targetIndex, const QString &cardID) {
+    qDebug() << "Player using card - id:" << cardID;
   const auto info = CardSystem::getCardInfo(cardID);
   if (this->_playerEnergy < info.energy) {
     qFatal("In function %s: Unable to use card - cardID: %s - No energy",
