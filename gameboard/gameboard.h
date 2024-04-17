@@ -98,8 +98,8 @@ public:
   QGraphicsSimpleTextItem armornumber;
   QGraphicsPixmapItem action; // only for enemy
   void init(int hp);
-  void initasplayer(int id, QString name);
-  void initasenemy(int id, QString name);
+  void initasplayer(int id);
+  void initasenemy(int id);
   void updatehpview();
   void updatearmorview();
   void update_buff(QString id, int delta);
@@ -120,7 +120,7 @@ class CardView : public QObject,
 {
   Q_OBJECT
 public:
-  bool valid;
+  // bool valid;
   bool inhands;
   int curposx, curposy;
   int cardtype;
@@ -131,10 +131,10 @@ public:
   void init();
 
 signals:
-  void playcard(QString id);        //这是前端内部的
-  void request_valid(int cardtype); //请求valid值
+  void playcard(QString id);                    //这是前端内部的
+  void request_valid(QString uuid, int *valid); //请求valid值
 public slots:
-  void get_valid(bool isvalid); // valid
+  // void get_valid(bool isvalid); // valid
 
 protected:
   void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
@@ -181,13 +181,14 @@ public:
   multimap<QString, CardView *> st;
   void init();
   void removecard(QString uuid);
-  void addcard(QString uuid);
+
   void update();
 signals:
   void shuffle();
   void send_card_to_hands(CardView *card);
 public slots:
   void drawcard(QString uuid); //抽到一张uuid的牌
+  void addcard(QString uuid);
 };
 class gameboard : public MyOpenGLWidget {
   Q_OBJECT
@@ -202,7 +203,7 @@ public:
   QPushButton EndButton;
   QVector<QPushButton *> buttons;
   EntityView *Player;
-  map<QString, EntityView *> Enemy;
+  map<int /*id*/, EntityView *> Enemy;
   // EntityView Enemy2;
   HandsView *myhands;
   DrawPileView *drawpile;
@@ -218,17 +219,16 @@ public:
 signals:
   void roundover();
 public slots:
-  void discardcard(CardView *card);
-  void shuffle();
-  void updateenergy(int delta); //能量+=delta
-  void setenergy(int x);        //设定能量为x
-  void
-  updatebuff(QString buffid, int strength,
-             QString name = "曹操"); //对name施加一个强度为strength的uuidbuff
-  void updatehp(QString name, int delta);            // name的hp+=delta
-  void updatearmor(QString name, int delta);         // name的armor+=delta
-  void initenemy(int id, QString name, int HP_MAX);  //初始化一个敌人
-  void initplayer(int id, QString name, int HP_MAX); //初始化一个玩家
+  void discardcard(CardView *card); //这是前端内部的
+  void shuffle();                   //洗牌
+  void updateenergy(int delta);     //能量+=delta
+  void setenergy(int x);            //设定能量为x
+  void updatebuff(QString buffid, int strength,
+                  int id); //对name施加一个强度为strength的uuidbuff
+  void updatehp(int id, int delta);    // name的hp+=delta
+  void updatearmor(int id, int delta); // name的armor+=delta
+  void initenemy(int id, int HP_MAX);  //初始化一个敌人
+  void initplayer(int id, int HP_MAX); //初始化一个玩家
   // int get
 };
 #endif // GAMEBOARD_H
