@@ -32,14 +32,14 @@ InGameSystem::InGameSystem(bool isBossLevel)
         for (int i = 0; i < this->_enemyNum; ++i) {
             _entities.push_back(new Enemy(i + 1, 20));
             connectSignalSlotForEntities(_entities[i + 1]);
-            this->_view->initenemy(i + 1, 20);
+            this->_view->initenemy(i + 1, "", 20);
         }
     }
     else
     {
         _entities.push_back(new Boss(1, 30));
         connectSignalSlotForEntities(_entities[1]);
-        this->_view->initenemy(1, 30);
+        this->_view->initenemy(1, "", 30);
     }
 }
 
@@ -150,7 +150,19 @@ bool InGameSystem::drawCard()
 
 int InGameSystem::checkGameover()
 {
+    bool flag = true;
+    for(int i = 1; i < this->_entities.size(); ++i)
+    {
+        if(!this->_entities[i]->isDead())
+        {
+            flag = false;
+            break;
+        }
+    }
 
+    if(flag == true) return 1;
+    if(this->_entities[0]->isDead()) return 2;
+    return 0;
 }
 
 void InGameSystem::handleContext(Context *ctx) {
