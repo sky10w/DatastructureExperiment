@@ -115,10 +115,9 @@ void Entity::getBuffed(Context *ctx, bool triggerBuff)
         this->handleBuffList(ctx, BuffInfo::ON_GETBUFFED);
     }
     const auto buffInfo = BuffSystem::getBuffInfo(ctx->buffGiven);
-    auto buff = BuffParser::parse(buffInfo.className);
     /// TODO
-    auto buffCopy = buff->getCopy();
-    this->_buffList[buff->getType()].push_back(buff);
+    auto buffCopy = buffInfo.buff->getCopy();
+    this->_buffList[buffInfo.type].push_back(buffCopy);
     emit buffChanged(ctx->buffGiven, -99999, this->_id);
 }
 

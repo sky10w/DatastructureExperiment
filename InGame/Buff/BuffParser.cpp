@@ -67,6 +67,24 @@ const QHash<QString, std::function<BuffParser::res_t(BuffParser::iter_t, BuffPar
 
          auto buff = new ReadyToAttackBuff(type, degrade);
          return {true, buff};
+     }},
+    {
+     "HealBuff", [](iter_t iter, end_t end) -> res_t {
+         ++iter;
+         if(iter == end) return {false, nullptr};
+         const QString typeName = *iter;
+         const BuffInfo::BuffType type = BuffParser::strToType(typeName);
+         if (type == BuffInfo::NOT_FOUND) return {false, nullptr};
+
+         ++iter;
+         if(iter == end) return {false, nullptr};
+         const QString healStr = *iter;
+         bool ok;
+         const int heal = healStr.toInt(&ok);
+         if(!ok) return {false, nullptr};
+
+         auto buff = new HealBuff(type, heal);
+         return {true, buff};
      }}
 };
 

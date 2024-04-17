@@ -89,7 +89,7 @@ void ReadyToAttackBuff::affect(Context *ctx)
     degrade();
     if(this->_degree == 0)
     {
-        ctx->buffGiven = "0004";
+        ctx->buffGiven = "+0004";
         // emit degreeToZero();
     }
 }
@@ -97,4 +97,24 @@ void ReadyToAttackBuff::affect(Context *ctx)
 void ReadyToAttackBuff::degrade()
 {
     this->_degree--;
+}
+
+HealBuff::HealBuff(BuffInfo::BuffType type, int healAmount)
+    : BasicBuff(type)
+    , _healAmount(healAmount)
+{}
+
+BasicBuff *HealBuff::getCopy()
+{
+    return new HealBuff(*this);
+}
+
+void HealBuff::affect(Context *ctx)
+{
+    ctx->hpHealed = this->_healAmount;
+}
+
+void HealBuff::degrade()
+{
+    // Do Nothing
 }

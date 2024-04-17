@@ -21,5 +21,9 @@
         <file>res/image/settings1.png</file>
         <file>res/image/settings2.png</file>
         <file>res/image/swords.png</file>
+        <file>res/cards/attack.png</file>
+        <file>res/cards/defend.png</file>
+        <file>res/cards/fire.png</file>
+        <file>res/cards/range_attack.png</file>
     </qresource>
 </RCC>

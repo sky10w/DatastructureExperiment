@@ -30,5 +30,21 @@
         "description": "所有攻击牌伤害翻倍",
         "type": "ON_ATTACK",
         "icon_path": ""
-    }
+    },
+    {
+        "id": "0005",
+        "class_name": "ModifyDamageByPercentBuff ON_ATTACK -75",
+        "buff_name": "虚弱",
+        "description": "所有攻击牌伤害减75%",
+        "type": "ON_ATTACK",
+        "icon_path": ""
+    },
+    {
+        "id": "0006",
+        "class_name": "HealBuff ON_ROUNDBEGIN +3",
+        "buff_name": "运粮",
+        "description": "每回合恢复3点生命值",
+        "type": "ON_ROUNDBEGIN",
+        "icon_path": ""
+    },
 ]

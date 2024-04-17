@@ -5,7 +5,16 @@ QHash<QString, BuffInfo> BuffSystem::_buff;
 
 BuffInfo BuffSystem::getBuffInfo(const QString &buffID)
 {
-    if(!BuffSystem::_buff.contains(buffID)) return BuffInfo{"-1"};
+    qDebug() << "Getting buffInfo" << buffID;
+    for(auto& i : BuffSystem::_buff)
+    {
+        qDebug() << i.id << i.buffName;
+    }
+    if(!BuffSystem::_buff.contains(buffID))
+    {
+        qFatal("Error: no existing buff - id: %s", buffID.toLatin1().data());
+        return BuffInfo{"-1"};
+    }
     return _buff[buffID];
 }
 
@@ -67,7 +76,7 @@ QHash<QString, BuffInfo> BuffSystem::initBuff()
             return {};
         }
 
-        qDebug() << className;
+        qDebug() << "Parsing buffID" << id << "class_name" << className;
         auto res = BuffParser::parse(className);
         if(res == nullptr)
         {
@@ -76,10 +85,15 @@ QHash<QString, BuffInfo> BuffSystem::initBuff()
         }
         res->setID(id);
 
-        qDebug() << "Successfully load a buff" << className << "->" << iconPath;
-        temp[className] = BuffInfo{id, className, buffName, description, type, iconPath, res};
+        qDebug() << "Successfully load a buff" << className << "->" << iconPath << '\n';
+        temp[id] = BuffInfo{id, className, buffName, description, type, iconPath, res};
     }
     BuffSystem::_buff = temp;
+    for(auto &i : _buff)
+    {
+        qDebug() << i.id << i.buffName;
+    }
+
     return temp;
 }
 
