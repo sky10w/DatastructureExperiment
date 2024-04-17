@@ -62,3 +62,24 @@ void ModifyDamageByPercentBuff::degrade()
 {
     this->_degree--;
 }
+
+ReadyToAttackBuff::ReadyToAttackBuff(BuffInfo::BuffType type, int degradeLevel)
+    : BasicBuff(type)
+{
+    this->_degree = degradeLevel;
+}
+
+void ReadyToAttackBuff::affect(Context *ctx)
+{
+    degrade();
+    if(this->_degree == 0)
+    {
+        ctx->actAltered = (-1) * Action::ATTACK;
+        emit degreeToZero();
+    }
+}
+
+void ReadyToAttackBuff::degrade()
+{
+    this->_degree--;
+}

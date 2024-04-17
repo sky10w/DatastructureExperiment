@@ -31,13 +31,47 @@ const QHash<QString, std::function<BuffParser::res_t(BuffParser::iter_t, BuffPar
 
             auto buff = new ModifyDamageByNumberBuff(type, damage);
             return {true, buff};
-     }
-    },
+     }},
+    {
+     "ModifyDamageByPercentBuff", [](iter_t iter, end_t end) -> res_t {
+         ++iter;
+         if(iter == end) return {false, nullptr};
+         const QString typeName = *iter;
+         const BuffInfo::BuffType type = BuffParser::strToType(typeName);
+         if (type == BuffInfo::NOT_FOUND) return {false, nullptr};
+
+         ++iter;
+         if(iter == end) return {false, nullptr};
+         const QString percentStr = *iter;
+         bool ok;
+         const int percent = percentStr.toInt(&ok);
+         if(!ok) return {false, nullptr};
+
+         auto buff = new ModifyDamageByPercentBuff(type, percent);
+         return {true, buff};
+     }},
+    {
+     "ReadyToAttackBuff", [](iter_t iter, end_t end) -> res_t {
+         ++iter;
+         if(iter == end) return {false, nullptr};
+         const QString typeName = *iter;
+         const BuffInfo::BuffType type = BuffParser::strToType(typeName);
+         if (type == BuffInfo::NOT_FOUND) return {false, nullptr};
+
+         ++iter;
+         if(iter == end) return {false, nullptr};
+         const QString degradeStr = *iter;
+         bool ok;
+         const int degrade = degradeStr.toInt(&ok);
+         if(!ok) return {false, nullptr};
+
+         auto buff = new ReadyToAttackBuff(type, degrade);
+         return {true, buff};
+     }}
 };
 
 BasicBuff* BuffParser::parse(const QString &str)
 {
-    QList<BasicBuff*> resList;
     auto temp = str.split(" ");
     // qDebug() << "The string list:" << temp;
 

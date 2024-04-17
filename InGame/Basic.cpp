@@ -33,6 +33,7 @@ void Entity::roundBegin()
 	{
         eff->affect(ctx);
 	}
+    emit requestHandleContext(ctx);
     delete ctx;
 }
 
@@ -43,12 +44,14 @@ void Entity::roundEnd()
 	{
         eff->affect(ctx);
     }
+    emit requestHandleContext(ctx);
     delete ctx;
 }
 
 void Entity::heal(Context *ctx)
 {
     this->_hp += ctx->hpHealed;
+    emit hpChanged(this->_id, ctx->hpHealed);
 }
 
 void Entity::removeBuff(Context *ctx)
@@ -75,18 +78,10 @@ void Entity::buffRemoved(Context *ctx)
         }
         ++i;
     }
-    emit buffChanged(0, ctx->buffGiven);
+    /// TODO
+    emit buffChanged(this->_id, -99999, ctx->buffGiven);
 }
 
-void Entity::restrictAction(Context *ctx)
-{
-    emit actionChanged(ctx->actAltered, true);
-}
-
-void Entity::unrestrictAction(Context *ctx)
-{
-    emit actionChanged(ctx->actAltered, false);
-}
 
 void Entity::attack(Context *ctx, bool triggerBuff)
 {
@@ -115,6 +110,7 @@ void Entity::gainArmor(Context *ctx, bool triggerBuff)
     }
 
     this->_armor += ctx->armorGained;
+    emit this->armorChanged(this->_id, ctx->armorGained);
 }
 
 void Entity::hurt(Context *ctx, bool triggerBuff)
@@ -129,6 +125,7 @@ void Entity::hurt(Context *ctx, bool triggerBuff)
 
     int dealDamage = std::min(ctx->damageDone, this->_armor);
     ctx->damageDone -= dealDamage;
+    emit this->hpChanged(this->_id, -dealDamage);
 }
 
 void Entity::giveBuff(Context *ctx, bool triggerBuff)

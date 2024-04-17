@@ -32,6 +32,18 @@ const QHash<QString, std::function<ActionParser::res_t(ActionParser::iter_t, Act
          if(cur == end) return {false, nullptr};
          const QString temp = *cur;
          return {true, new RemoveBuffAction(temp)};
+     }},
+    {"restrict_action", [](iter_t cur, end_t end) -> res_t {
+         cur++;
+         if(cur == end) return {false, nullptr};
+         const QString temp = *cur;
+         return {true, new RestrictAction(Action::strToActType(temp))};
+    }},
+    {"unrestrict_action", [](iter_t cur, end_t end) -> res_t {
+         cur++;
+         if(cur == end) return {false, nullptr};
+         const QString temp = *cur;
+         return {true, new UnrestrictAction(Action::strToActType(temp))};
      }}
 };
 QList<Action *> ActionParser::parse(const QString &str)
@@ -68,7 +80,7 @@ const QHash<QString, Action::Act_t> Action::_act = {
     {"attack", Action::ATTACK},
     {"defend", Action::DEFEND},
     {"buff", Action::BUFF},
-    {"disable_act", Action::ACTION},
+    {"action", Action::ACTION},
 };
 
 Action::Act_t Action::strToActType(const QString &str)
@@ -117,7 +129,7 @@ void DefendAction::debug()
 GiveBuffAction::GiveBuffAction(const QString &buffID)
     : Action(Action::BUFF)
 {
-    this->_ctx->buffGiven = buffID;
+    this->_ctx->buffGiven = "+" + buffID;
 }
 
 void GiveBuffAction::debug()
@@ -128,7 +140,7 @@ void GiveBuffAction::debug()
 RemoveBuffAction::RemoveBuffAction(const QString &buffID)
     : Action(Action::BUFF)
 {
-    this->_ctx->buffGiven = buffID;
+    this->_ctx->buffGiven = "-" + buffID;
 }
 
 void RemoveBuffAction::debug()
@@ -139,7 +151,7 @@ void RemoveBuffAction::debug()
 RestrictAction::RestrictAction(Act_t type)
     : Action(Action::ACTION)
 {
-
+    this->_ctx->actAltered = type;
 }
 
 void RestrictAction::debug()
@@ -150,7 +162,7 @@ void RestrictAction::debug()
 UnrestrictAction::UnrestrictAction(Act_t type)
     : Action(Action::ACTION)
 {
-
+    this->_ctx->actAltered = -type;
 }
 
 void UnrestrictAction::debug()

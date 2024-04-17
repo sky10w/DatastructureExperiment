@@ -10,6 +10,7 @@
 
 #include "InGame/globalOptions.h"
 #include "InGame/Context.h"
+#include "InGame/Card/ActionParser.h"
 
 class BasicBuff;
 
@@ -48,6 +49,9 @@ public:
 
     virtual void affect(Context *ctx) = 0;
     virtual void degrade() = 0;
+
+signals:
+    void degreeToZero();
 
 protected:
     QString _id;
@@ -88,6 +92,14 @@ public:
 
 protected:
     int _percent;
+};
+
+class ReadyToAttackBuff : public BasicBuff
+{
+public:
+    ReadyToAttackBuff(BuffInfo::BuffType type, int degradeLevel);
+    virtual void affect(Context* ctx) override;
+    virtual void degrade() override;
 };
 
 

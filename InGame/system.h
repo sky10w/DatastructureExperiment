@@ -28,13 +28,12 @@ public:
     };
     InGameSystem();
     void run();
-    void connectSignalSLot(Entity* entity);
+    void connectSignalSlotForEntities(Entity* entity);
 
 private:
     static const int _playerSlot;
 
 public slots:
-    virtual void updateAction(Action::Act_t type, bool isRestrict);
 
 signals:
     void nextRoundHint(QHash<Entity*, Action::Act_t> act);
@@ -45,6 +44,7 @@ signals:
     void armorChanged(int id, int delta);
     void handCardChanged(QVector<QString> oldCards, QVector<QString> newCards);
 public slots:
+    virtual void handleContext(Context* ctx); // from Entity
     virtual void playerUsingCard(int targetIndex, const QString& cardID);
     /// Round end for player's round
     virtual void roundEnd();

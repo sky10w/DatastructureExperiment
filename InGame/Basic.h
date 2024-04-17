@@ -29,11 +29,10 @@ public:
 
     virtual void roundBegin();
     virtual void roundEnd();
+
     virtual void heal(Context* ctx);
     virtual void removeBuff(Context* ctx);
     virtual void buffRemoved(Context* ctx);
-    virtual void restrictAction(Context* ctx);
-    virtual void unrestrictAction(Context* ctx);
 
     virtual void attack(Context* ctx, bool triggerBuff);
     virtual void gainArmor(Context* ctx, bool triggerBuff);
@@ -42,10 +41,10 @@ public:
     virtual void getBuffed(Context* ctx, bool triggerBuff);
 
 signals:
-    void actionChanged(Action::Act_t type, bool isRestrict);
-    void hpChanged(int id, int delta);
-    void armorChanged(int id, int delta);
-    void buffChanged(int id, bool isPlus, QString buffID);
+    void requestHandleContext(Context* ctx);
+    void hpChanged(int id, int delta); // to view
+    void armorChanged(int id, int delta); // to view
+    void buffChanged(int id, int strength, QString buffID); // to view
 
 protected:
 	int _hp;

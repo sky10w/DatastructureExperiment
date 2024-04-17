@@ -13,15 +13,16 @@ int GlobalStatus::playerEnergy = 3;
 const int InGameSystem::_playerSlot = 0;
 
 InGameSystem::InGameSystem()
-    // Init actionDisabled, handCard, view
     : _actionDisabled(0)
     , _view(new gameboard())
     , _handCard({})
 {
-    // Init entities, enemyNum, curEntity, stack
+    // Init player
     auto player = new Player(InGameSystem::_playerSlot);
     _entities.push_back(player);
+    connectSignalSlotForEntities(player);
 
+    // Init enemies
     std::default_random_engine e;
     e.seed(std::time(nullptr));
     this->_enemyNum = e() % 3 + 1;
@@ -29,8 +30,10 @@ InGameSystem::InGameSystem()
     for(int i = 0; i < this->_enemyNum; ++i)
     {
         _entities.push_back(new Enemy(i+1));
+        connectSignalSlotForEntities(_entities[i+1]);
     }
 
+    // Init cardStack
     auto list = GlobalStatus::allCardOwned;
     int len = list.size();
     for(int i = len-1; i >= 0; --i)
@@ -38,56 +41,116 @@ InGameSystem::InGameSystem()
         int ind = e() % (i+1);
         swap(list[ind], list[i]);
     }
-
     for(auto &i : this->_stack)
     {
         i = new CardStack();
     }
     this->_stack[DRAW]->push(list);
+
+    // Init signals and slots
+    QObject::connect(_view, SIGNAL(roundover()), this, SLOT(roundEnd()));
+
+    // Init handCard
+    for(int i = 0; i < 5; ++i)
+    {
+        const auto cardID = this->_stack[DRAW]->getPopOne();
+        _handCard.push_back(cardID);
+
+    }
 }
 
 void InGameSystem::run()
 {
-    auto oldHandCard = _handCard;
-    _handCard = this->_stack[DRAW]->getPopN(5);
-    emit handCardChanged(oldHandCard, _handCard);
     emit roundBegin(_playerSlot);
 }
 
-void InGameSystem::connectSignalSLot(Entity *entity)
+void InGameSystem::connectSignalSlotForEntities(Entity *entity)
 {
-    QObject::connect(entity, SIGNAL(actionChanged(Action::Act_t,bool)), _view, SLOT(updateAction(Action::Act_t,bool)));
+    QObject::connect(entity, SIGNAL(requestHandleContext(Context*)), this, SLOT(handleContext(Context*)));
     QObject::connect(entity, SIGNAL(hpChanged(int,int)), _view, SLOT(updatehp(int,int)));
     QObject::connect(entity, SIGNAL(armorChanged(int,int)), _view, SLOT(updatearmor(int,int)));
     QObject::connect(entity, SIGNAL(buffChanged(int,bool,QString)), _view, SLOT(updatebuff(int,bool,QString)));
 }
 
-void InGameSystem::updateAction(Action::Act_t type, bool isRestrict)
+void InGameSystem::handleContext(Context *ctx)
 {
-    if(isRestrict)
-        this->_actionDisabled |= type;
-    else
-        this->_actionDisabled &= ~type;
+    if(ctx->damageDone != 0)
+    {
+        ctx->from->attack(ctx, true);
+    }
+    if(ctx->armorGained != 0)
+    {
+        for(auto i : ctx->to)
+        {
+            i->gainArmor(ctx, true);
+        }
+    }
+    if(ctx->buffGiven != "")
+    {
+        ctx->from->giveBuff(ctx, true);
+    }
+    if(ctx->actAltered != 0)
+    {
+        this->_actionDisabled ^= ctx->actAltered;
+    }
+    if(ctx->hpHealed != 0)
+    {
+        for(auto i : ctx->to)
+        {
+            i->heal(ctx);
+        }
+    }
 }
 
 void InGameSystem::playerUsingCard(int targetIndex, const QString &cardID)
 {
     const auto res = CardSystem::getCardInfo(cardID);
     const auto actList = res.action;
-    if(targetIndex > _entities.size())
+    if(targetIndex >= _entities.size())
     {
-        qFatal("In function \"%s\": Unable to access to entities[%d]", __FUNCTION__, targetIndex);
+        qFatal("In function %s: Unable to access to entity - index: %d", __FUNCTION__, targetIndex);
     }
     const auto target = _entities[targetIndex];
     if(target->isDead())
     {
-        qFatal("In function \"%s\": Unable to target a dead entity - index: ", __FUNCTION__, targetIndex);
+        qFatal("In function %s: Unable to target a dead entity - index: %d", __FUNCTION__, targetIndex);
     }
+    const auto actType = res.actType;
+    if((actType & this->_actionDisabled) > 0)
+    {
+        qFatal("In function %s: Player using an invalid card - id: ", __FUNCTION__);
+    }
+    // process targetList
+    const auto targetType = res.targetType;
+    QVector<Entity*> targetList = {};
+    switch (targetType) {
+    case CardInfo::SELF:
+        targetList.push_back(_entities[_playerSlot]);
+        break;
+    case CardInfo::ONE:
+        targetList.push_back(_entities[targetIndex]);
+        break;
+    case CardInfo::ALL:
+        for(int i = 1; i < _entities.size(); ++i)
+        {
+            targetList.push_back(_entities[i]);
+        }
+        break;
+    case CardInfo::RANDOM:
+        default_random_engine *e = new default_random_engine();
+        targetList.push_back(_entities[(*e)() % (_entities.size() - 1) + 1]);
+        delete e;
+        break;
+    }
+
     for(auto &i : actList)
     {
         auto ctx = i->getContext();
-
+        ctx->from = this->_entities[_playerSlot];
+        ctx->to = targetList;
+        this->handleContext(ctx);
     }
+    this->_stack[DROP]->push({cardID});
 }
 
 // Round end for player's round

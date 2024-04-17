@@ -11,9 +11,15 @@
 #include <QPainter>
 #include <QImage>
 #include <QPair>
-#include "levelgenerator.h"
+#include "StageSelection/levelgenerator.h"
 #include "StageSelection/MyPushButton.h"
-#include<QDebug>
+#include <QDebug>
+
+QT_BEGIN_NAMESPACE
+namespace Ui {
+class Stagechoice1;
+}
+QT_END_NAMESPACE
 
 
 class Stagechoice1 : public QWidget
@@ -79,6 +85,6 @@ protected:
 
 
 private:
-    Ui::Stagechoice1Class ui;
+    Ui::Stagechoice1* ui;
 
 };

@@ -1,7 +1,7 @@
 #include "gameboard.h"
 QMap<QString, QString> MP_description = {{"1", "这是易伤BUFF"}};
 QMap<QString, QPixmap> CardIcon;
-QMap<QString, CardInfo> cards = {{"1", {"1", "name", "1", "1", 1, 1}}};
+// QMap<QString, CardInfo> cards = {{"1", {"1", "name", "1", "1", 1, 1}}};
 const int HANDSLIMIT = 7;
 const int WIDGETW = 1280;
 const int WIDGETH = 720;

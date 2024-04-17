@@ -17,6 +17,18 @@
     },
     {
         "id": "0003",
-        "class_name": "",
+        "class_name": "ReadyToAttackBuff ON_ROUNDEND 1",
+        "buff_name": "蓄势",
+        "description": "当前回合无法使用攻击牌，下个回合给予\"就绪\"增益",
+        "type": "ON_ROUNDBEGIN",
+        "icon_path": ""
+    },
+    {
+        "id": "0004",
+        "class_name": "ModifyDamageByPercentBuff ON_ATTACK +100",
+        "buff_name": "就绪",
+        "description": "所有攻击牌伤害翻倍",
+        "type": "ON_ATTACK",
+        "icon_path": ""
     }
 ]
