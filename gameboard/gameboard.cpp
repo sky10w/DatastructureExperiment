@@ -13,13 +13,17 @@ gameboard::gameboard(MyOpenGLWidget *parent) : MyOpenGLWidget{parent} {
   // this->setStyleSheet("background:white");
   // Player = new EntityView();
 
-  energy = 15;
-  updateenergyview();
+  // energy = 15;
+  // updateenergyview();
   myhands = new HandsView();
-  buttons = {&DiscardPileButton, &DrawPileButton, &EndButton, &SettingsButton,
-             &EnergyButton};
-  initplayer(0, 100);
-  initenemy(1, 100);
+  myhands->handsview = &view;
+  myhands->handsscene = &scene;
+  myhands->setParent(this);
+  myhands->init();
+
+  // initplayer(0, 100);
+  // initenemy(1, 100);
+
   drawpile = new DrawPileView();
   discardpile = new DiscardPileView();
   discardpile->init();
@@ -31,6 +35,8 @@ gameboard::gameboard(MyOpenGLWidget *parent) : MyOpenGLWidget{parent} {
   scene.setSceneRect(0, 0, WIDGETW, WIDGETH);
   scene.setItemIndexMethod(QGraphicsScene::NoIndex);
 
+  buttons = {&DiscardPileButton, &DrawPileButton, &EndButton, &SettingsButton,
+             &EnergyButton};
   DiscardPileButton.setParent(this);
   DrawPileButton.setParent(this);
   SettingsButton.setParent(this);
@@ -49,7 +55,10 @@ gameboard::gameboard(MyOpenGLWidget *parent) : MyOpenGLWidget{parent} {
   EndButton.move(1000, 500);
   connect(drawpile, &DrawPileView::send_card_to_hands, myhands,
           &HandsView::carddraw);
-  connect(&EndButton, &QPushButton::pressed, [=]() { QApplication::quit(); });
+  connect(&EndButton, &QPushButton::pressed, [=]() {
+    playerround = 0;
+    emit roundover();
+  });
   connect(&DiscardPileButton, &QPushButton::pressed, [=]() {
     if (view.scene() == discardpile) {
       for (auto x : buttons)
@@ -90,11 +99,8 @@ gameboard::gameboard(MyOpenGLWidget *parent) : MyOpenGLWidget{parent} {
       view.setScene(drawpile);
     }
   });
-  connect(&EnergyButton, &QPushButton::pressed, this, [=]() {
-    drawpile->drawcard("1");
-    // myhands->que.push_back(te)
-  });
-  connect(&SettingsButton, &QPushButton::pressed, [=]() { this->shuffle(); });
+  connect(&EnergyButton, &QPushButton::pressed, this, [=]() {});
+  connect(&SettingsButton, &QPushButton::pressed, [=]() {});
   connect(myhands, &HandsView::discardcard, this, &gameboard::discardcard);
   connect(drawpile, &DrawPileView::shuffle, this, &gameboard::shuffle);
 
@@ -106,10 +112,6 @@ gameboard::gameboard(MyOpenGLWidget *parent) : MyOpenGLWidget{parent} {
   EnergyButton.setText("当前能量为:?");
   SettingsButton.setText("设置");
 
-  myhands->handsview = &view;
-  myhands->handsscene = &scene;
-  myhands->setParent(this);
-  myhands->init();
   // for (int i = 0; i < 5; i++)
   //  drawpile->addcard("1");
   view.show();
@@ -151,6 +153,11 @@ void EntityView::initasenemy(int id) {
   setPixmap(QPixmap("://res/enemy.jpg"));
   mybuff.init(500 + 200 * id, 200);
   id = id;
+
+  action.setParentItem(this);
+  action.setPixmap(QString("://res/action.jpg") /*现在还没有action icon */);
+  action.setPos((width - action.pixmap().width()) / 2,
+                -action.pixmap().height());
   // name = name;
 }
 
@@ -181,10 +188,31 @@ void EntityView::update_armor(int delta) {
   updatearmorview();
 }
 
-void EntityView::update_action(int id) {}
+void EntityView::update_action(int actionid) {
+  action.setPixmap(QString(";//"));
+}
 
 void gameboard::updateenergyview() {
   EnergyButton.setText(QString(u8"当前能量为:") + QString::number(energy));
+}
+
+void gameboard::roundbegin() {
+  playerround = 1;
+  QGraphicsPixmapItem *msg = new QGraphicsPixmapItem();
+  msg->setPixmap(QString("://res/roundbegin.png"));
+  scene.addItem(msg);
+  msg->setPos(WIDGETW - msg->pixmap().width() >> 1,
+              WIDGETH - msg->pixmap().height() >> 1);
+  // 创建一个定时器
+  QTimer *timer = new QTimer();
+  timer->setSingleShot(true); // 设置定时器只触发一次
+  // 连接定时器的timeout信号到一个lambda函数，该函数将删除item
+  QObject::connect(timer, &QTimer::timeout, this, [=] {
+    // 在场景中删除item
+    scene.removeItem(msg);
+    delete msg;
+  });
+  timer->start(3000);
 }
 void BuffView::init(int posx, int posy) {
   buffview.setScene(&buffscene);
@@ -214,10 +242,8 @@ void BuffView::update_buff(QString id, int delta) {
     newbufficon->setPixmap("://res/" + id + ".png");
     newbufficon->description = MP_description[id];
     newbufficon->setToolTip(newbufficon->description);
-    // std::cout << (newbufficon->description.toStdString()) << std::endl;
     Buffs[id] = newbuff;
     bufficon[id] = newbufficon;
-    // cout << 11111 << endl;
   }
   int k = 0;
   for (auto x : bufficon) {
@@ -230,7 +256,6 @@ Buff::Buff(QString uuid, int strength) {
 }
 BuffView::BuffView() {}
 void BuffView::updateview() {}
-// void CardView::get_valid(bool isvalid) { valid = isvalid; }
 void CardView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
 
   QGraphicsItem::mouseReleaseEvent(event);
@@ -260,6 +285,8 @@ void CardView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
   else if (itembelow == nullptr)
     deny();
   else if (cardtype == 1 && itembelow->type == "enemy")
+    deny();
+  else if (w->playerround == 0)
     deny();
   else {
     w->energy -= info.energy;

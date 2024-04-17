@@ -27,6 +27,7 @@
 #include <QSharedPointer>
 #include <QString>
 #include <QTextDocument>
+#include <QTimer>
 #include <QToolTip>
 #include <QWidget>
 #include <QtOpenGLWidgets/QOpenGLWidget>
@@ -106,13 +107,8 @@ public:
 
   void update_HP(int delta);
   void update_armor(int delta);
-  void update_action(int id);
+  void update_action(int actionid);
   // QRectF boundingRect() const override;
-};
-class MyGraphicsLineItem : public QGraphicsLineItem {
-  // Q_OBJECT
-  // protected:
-  QRectF boundingRect() const override;
 };
 
 class CardView : public QObject,
@@ -131,7 +127,7 @@ public:
   void init();
 
 signals:
-  void playcard(QString id);                    //这是前端内部的
+  void playcard(QString id); //这是前端内部的
 
 public slots:
   // void get_valid(bool isvalid); // valid
@@ -208,6 +204,7 @@ public:
   HandsView *myhands;
   DrawPileView *drawpile;
   DiscardPileView *discardpile;
+  bool playerround;
   int energy;
   void DiscardPileButton_clicked();
   void DrawPileButton_clicked();
@@ -220,6 +217,7 @@ signals:
   void roundover();
   void request_valid(QString uuid, int *valid); //请求valid值
 public slots:
+  void roundbegin();
   void discardcard(CardView *card); //这是前端内部的
   void shuffle();                   //洗牌
   void updateenergy(int delta);     //能量+=delta
@@ -230,6 +228,7 @@ public slots:
   void updatearmor(int id, int delta); // name的armor+=delta
   void initenemy(int id, int HP_MAX);  //初始化一个敌人
   void initplayer(int id, int HP_MAX); //初始化一个玩家
+
   // int get
 };
 #endif // GAMEBOARD_H
