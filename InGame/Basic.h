@@ -18,7 +18,7 @@ class Entity : public QObject
 {
 	Q_OBJECT
 public:
-    explicit Entity(bool isPlayer, int index);
+    explicit Entity(bool isPlayer, int index, int hp);
 
     virtual bool isPlayer() const;
     virtual int getHp() const;
@@ -44,7 +44,7 @@ signals:
     void requestHandleContext(Context* ctx); // to system
     void hpChanged(int id, int delta); // to view
     void armorChanged(int id, int delta); // to view
-    void buffChanged(int id, int strength, QString buffID); // to view
+    void buffChanged(QString buffI, int strength, int id); // to view
 
 protected:
 	int _hp;
@@ -60,7 +60,7 @@ class Enemy : public Entity
 {
 	Q_OBJECT
 public:
-    Enemy(int index);
+    Enemy(int index, int hp);
 
 };
 
@@ -68,7 +68,7 @@ class Player : public Entity
 {
 	Q_OBJECT
 public:
-    Player(int index);
+    Player(int index, int hp);
 };
 
 

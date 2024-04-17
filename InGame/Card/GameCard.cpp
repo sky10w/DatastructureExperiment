@@ -14,6 +14,10 @@ CardStack::CardStack(const QVector<QString>& cards)
 
 QString CardStack::getPopOne()
 {
+    if(this->empty())
+    {
+        return "-1";
+    }
 	const QString temp = this->_list.front();
 	this->_list.pop_front();
 	return temp;
@@ -21,6 +25,10 @@ QString CardStack::getPopOne()
 
 QVector<QString> CardStack::getPopN(int n)
 {
+    if(this->empty())
+    {
+        return {"-1"};
+    }
 	QVector<QString> tempList;
 	for (int i = 0; i < n && this->_list.size() > 0; ++i)
 	{
@@ -33,6 +41,10 @@ QVector<QString> CardStack::getPopN(int n)
 
 QVector<QString> CardStack::getPopAll()
 {
+    if(this->empty())
+    {
+        return {"-1"};
+    }
 	QVector<QString> tempList;
 	while (this->_list.size() > 0)
 	{

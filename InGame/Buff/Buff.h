@@ -47,6 +47,7 @@ public:
     virtual BuffInfo::BuffType getType() const;
     virtual QString getID() const;
 
+    virtual BasicBuff* getCopy() = 0;
     virtual void affect(Context *ctx) = 0;
     virtual void degrade() = 0;
 
@@ -65,6 +66,7 @@ class ModifyDamageBasicBuff : public BasicBuff
 {
 public:
     ModifyDamageBasicBuff(BuffInfo::BuffType type);
+    virtual BasicBuff* getCopy() override = 0;
     virtual void affect(Context *ctx) override = 0;
     virtual void degrade() override = 0;
 };
@@ -73,6 +75,7 @@ class ModifyDamageByNumberBuff : public ModifyDamageBasicBuff
 {
 public:
     ModifyDamageByNumberBuff(BuffInfo::BuffType type, int incDamage);
+    virtual BasicBuff *getCopy() override;
     virtual void affect(Context *ctx) override;
     virtual void degrade() override;
 
@@ -84,6 +87,7 @@ class ModifyDamageByPercentBuff : public ModifyDamageBasicBuff
 {
 public:
     ModifyDamageByPercentBuff(BuffInfo::BuffType type, int percent);
+    virtual BasicBuff* getCopy()override;
     virtual void affect(Context *ctx) override;
     virtual void degrade() override;
 
@@ -95,6 +99,7 @@ class ReadyToAttackBuff : public BasicBuff
 {
 public:
     ReadyToAttackBuff(BuffInfo::BuffType type, int degradeLevel);
+    virtual BasicBuff* getCopy()override;
     virtual void affect(Context* ctx) override;
     virtual void degrade() override;
 };

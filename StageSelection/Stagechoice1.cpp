@@ -1,7 +1,8 @@
 ﻿#include "Stagechoice1.h"
 
-Stagechoice1::Stagechoice1(QWidget *parent) : QWidget(parent) {
-  // ui.setupUi(this);
+Stagechoice1::Stagechoice1(QWidget* parent)
+    : QWidget(parent)
+{
 
   LevelGenerator generator;
   for (int i = 0; i < 9; i++) {

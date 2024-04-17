@@ -1,7 +1,8 @@
 #include "system.h"
 
 QVector<QString> GlobalStatus::allCardOwned = {
-    "0001", "0001", "0001", "0002", "0003", "0003", "0003", "0004", "0005"};
+    "0001", "0001", "0001", "0002", "0003", "0003", "0003", "0004", "0005"
+};
 int GlobalStatus::playerMaxHp = 40;
 int GlobalStatus::playerMaxEnergy = 3;
 
@@ -14,10 +15,10 @@ InGameSystem::InGameSystem()
   connectSignalSlotForView();
 
   // Init player
-  auto player = new Player(InGameSystem::_playerSlot);
+  auto player = new Player(InGameSystem::_playerSlot, 40);
   _entities.push_back(player);
   connectSignalSlotForEntities(player);
-  _view->initplayer(0, GlobalStatus::playerMaxHp);
+  this->_view->initplayer(InGameSystem::_playerSlot, GlobalStatus::playerMaxHp);
 
   // Init enemies
   std::default_random_engine e;
@@ -25,9 +26,9 @@ InGameSystem::InGameSystem()
   this->_enemyNum = e() % 3 + 1;
 
   for (int i = 0; i < this->_enemyNum; ++i) {
-    _entities.push_back(new Enemy(i + 1));
+    _entities.push_back(new Enemy(i + 1, 20));
     connectSignalSlotForEntities(_entities[i + 1]);
-    _view->initenemy(i + 1, 100);
+    this->_view->initenemy(i + 1, 20);
   }
 }
 
@@ -58,25 +59,27 @@ void InGameSystem::run() {
     emit addCardToHand(cardID);
   }
 
-  emit setEnergy(GlobalStatus::playerMaxHp);
-  emit roundBegin();
+    this->_actionDisabled = 0;
+    emit setEnergy(GlobalStatus::playerMaxEnergy);
+    emit roundBegin();
+
 }
 
 void InGameSystem::connectSignalSlotForEntities(Entity *entity) {
-  QObject::connect(entity, SIGNAL(requestHandleContext(Context *)), this,
-                   SLOT(handleContext(Context *)));
-  QObject::connect(entity, SIGNAL(hpChanged(int, int)), _view,
-                   SLOT(updatehp(int, int)));
-  QObject::connect(entity, SIGNAL(armorChanged(int, int)), _view,
-                   SLOT(updatearmor(int, int)));
-  QObject::connect(entity, SIGNAL(buffChanged(int, bool, QString)), _view,
-                   SLOT(updatebuff(QString, int, bool)));
+  QObject::connect(entity, SIGNAL(requestHandleContext(Context*)), this,
+                   SLOT(handleContext(Context*)));
+  QObject::connect(entity, SIGNAL(hpChanged(int,int)), _view,
+                   SLOT(updatehp(int,int)));
+  QObject::connect(entity, SIGNAL(armorChanged(int,int)), _view,
+                   SLOT(updatearmor(int,int)));
+  QObject::connect(entity, SIGNAL(buffChanged(QString,int,int)), _view,
+                   SLOT(updatebuff(QString,int,int)));
 }
 
 void InGameSystem::connectSignalSlotForView() {
   QObject::connect(_view, SIGNAL(roundover()), this, SLOT(roundEnd()));
-  QObject::connect(_view, SIGNAL(request_valid(QString, int *)), this,
-                   SLOT(handleCardValid(QString, int *)));
+  QObject::connect(_view, SIGNAL(request_valid(QString,int*)), this,
+                   SLOT(handleCardValid(QString,int*)));
   QObject::connect(this, SIGNAL(updateEnergy(int)), _view,
                    SLOT(updateenergy(int)));
   QObject::connect(this, SIGNAL(addCardToStack(QString)), _view->drawpile,
@@ -90,7 +93,7 @@ void InGameSystem::connectSignalSlotForView() {
 
 void InGameSystem::shuffle() {
   emit this->sendShuffle();
-  auto list = this->_stack[DROP]->getPopAll();
+  const auto list = this->_stack[DROP]->getPopAll();
   this->_stack[DRAW]->push(list);
 }
 
@@ -123,9 +126,9 @@ void InGameSystem::playerUsingCard(int targetIndex, const QString &cardID) {
            __FUNCTION__, info.id.toLatin1().data());
   }
   this->_playerEnergy -= info.energy;
-  emit
+  emit this->updateEnergy(-info.energy);
 
-      const auto actList = info.action;
+    const auto actList = info.action;
   if (targetIndex >= _entities.size()) {
     qFatal("In function %s: Unable to access to entity - index: %d",
            __FUNCTION__, targetIndex);
@@ -177,9 +180,7 @@ void InGameSystem::playerUsingCard(int targetIndex, const QString &cardID) {
     }
   }
   this->_stack[DROP]->push({cardID});
-  if (this->_stack[DRAW]->size() == 0) {
-    shuffle();
-  }
+
 }
 
 // Round end for player's round
@@ -203,16 +204,24 @@ void InGameSystem::roundEnd() {
   }
   _curEntity = 0;
 
-  for (int i = 0; i < 2; ++i) {
-    const auto cardID = this->_stack[DRAW]->getPopOne();
-    _handCard.push_back(cardID);
-    emit addCardToHand(cardID);
+  if (this->_stack[DRAW]->empty()) {
+      shuffle();
   }
-  emit setEnergy(GlobalStatus::playerMaxHp);
-  emit roundBegin();
+    for(int i = 0; i < 2; ++i)
+    {
+        const auto cardID = this->_stack[DRAW]->getPopOne();
+        if(cardID == "-1") break;
+        _handCard.push_back(cardID);
+        emit addCardToHand(cardID);
+    }
+    emit setEnergy(GlobalStatus::playerMaxEnergy);
+    this->_actionDisabled = 0;
+    emit roundBegin();
+
 }
 
-void InGameSystem::handleCardValid(QString cardID, int *valid) {
-  const auto info = CardSystem::getCardInfo(cardID);
-  *valid = !(info.actType & this->_actionDisabled);
+void InGameSystem::handleCardValid(QString cardID, int *valid)
+{
+    const auto info = CardSystem::getCardInfo(cardID);
+    *valid = !(info.actType & this->_actionDisabled);
 }

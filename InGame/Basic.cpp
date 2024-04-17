@@ -1,7 +1,13 @@
 #include "Basic.h"
 
 // Entity ---
-Entity::Entity(bool isPlayer, int index) : _isPlayer(isPlayer), _id(index) {}
+Entity::Entity(bool isPlayer, int index, int hp)
+    : _isPlayer(isPlayer)
+    , _id(index)
+    , _hp(hp)
+    , _armor(0)
+{
+}
 
 bool Entity::isPlayer() const { return this->_isPlayer; }
 
@@ -54,7 +60,7 @@ void Entity::buffRemoved(Context *ctx) {
     ++i;
   }
   /// TODO
-  emit buffChanged(this->_id, -99999, ctx->buffGiven);
+  emit buffChanged(ctx->buffGiven, -99999, this->_id);
 }
 
 void Entity::attack(Context *ctx, bool triggerBuff) {
@@ -95,25 +101,36 @@ void Entity::giveBuff(Context *ctx, bool triggerBuff) {
   }
 }
 
-void Entity::getBuffed(Context *ctx, bool triggerBuff) {
-  if (triggerBuff) {
-    this->handleBuffList(ctx, BuffInfo::ON_GETBUFFED);
-  }
-  const auto buffInfo = BuffSystem::getBuffInfo(ctx->buffGiven);
-  auto buff = BuffParser::parse(buffInfo.className);
-  /// TODO
-  this->_buffList[buff->getType()].push_back(buff);
+
+void Entity::getBuffed(Context *ctx, bool triggerBuff)
+{
+    if(triggerBuff)
+    {
+        this->handleBuffList(ctx, BuffInfo::ON_GETBUFFED);
+    }
+    const auto buffInfo = BuffSystem::getBuffInfo(ctx->buffGiven);
+    auto buff = BuffParser::parse(buffInfo.className);
+    /// TODO
+    auto buffCopy = buff->getCopy();
+    this->_buffList[buff->getType()].push_back(buff);
+    emit buffChanged(ctx->buffGiven, -99999, this->_id);
 }
 
-void Entity::handleBuffList(Context *ctx, BuffInfo::BuffType type) {
-  auto &tarBuffList = this->_buffList[type];
-  for (auto eff = tarBuffList.begin(); eff != tarBuffList.end();) {
-    (*eff)->affect(ctx);
-    (*eff)->degrade();
-    if (!(*eff)->isValid())
-      eff = tarBuffList.erase(eff);
-  }
+void Entity::handleBuffList(Context *ctx, BuffInfo::BuffType type)
+{
+    auto &tarBuffList = this->_buffList[type];
+    for (auto eff = tarBuffList.begin(); eff != tarBuffList.end();)
+    {
+        (*eff)->affect(ctx);
+        (*eff)->degrade();
+        if(!(*eff)->isValid()) eff = tarBuffList.erase(eff);
+    }
 }
-Player::Player(int index) : Entity(true, index) {}
 
-Enemy::Enemy(int index) : Entity(false, index) {}
+Player::Player(int index, int hp)
+    : Entity(true, index, hp)
+{}
+
+Enemy::Enemy(int index, int hp)
+    : Entity(false, index, hp)
+{}

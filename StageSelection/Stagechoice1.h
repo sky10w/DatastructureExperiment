@@ -10,19 +10,20 @@
 #include <QImage>
 #include <QLabel>
 #include <QLayout>
+#include <QGraphicsView>
+#include <QGraphicsScene>
+#include <QGraphicsEllipseItem>
+#include <QVector>
 #include <QPainter>
 #include <QPair>
 #include <QVector>
 #include <QtWidgets/QWidget>
 
-QT_BEGIN_NAMESPACE
-namespace Ui {
-class Stagechoice1;
-}
-QT_END_NAMESPACE
-class Stagechoice1;
-class Stagechoice1 : public QWidget {
-  Q_OBJECT
+
+class Stagechoice1 : public QWidget
+{
+    Q_OBJECT
+
 
 public:
   QVector<MyPushButton *> btn;
@@ -72,12 +73,11 @@ protected:
         } else if (bossable == 1) {
           drawDashedLine(QPoint(900, 340), QPoint(1000, 340));
         }
-
-        else {
-        }
       }
+
     }
   }
+
 
   // private:
   // Ui::Stagechoice1 ui;
