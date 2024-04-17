@@ -18,6 +18,9 @@ InGameSystem::InGameSystem()
     , _view(new gameboard())
     , _handCard({})
 {
+    // Init signals and slots
+    connectSignalSlotForView(_view);
+
     // Init player
     auto player = new Player(InGameSystem::_playerSlot);
     _entities.push_back(player);
@@ -34,9 +37,15 @@ InGameSystem::InGameSystem()
         connectSignalSlotForEntities(_entities[i+1]);
     }
 
+
+}
+
+void InGameSystem::run()
+{
     // Init cardStack
     auto list = GlobalStatus::allCardOwned;
     int len = list.size();
+    std::default_random_engine e;
     for(int i = len-1; i >= 0; --i)
     {
         int ind = e() % (i+1);
@@ -52,8 +61,6 @@ InGameSystem::InGameSystem()
         emit addCardToStack(i);
     }
 
-    // Init signals and slots
-    QObject::connect(_view, SIGNAL(roundover()), this, SLOT(roundEnd()));
 
     // Init handCard
     for(int i = 0; i < 5; ++i)
@@ -62,10 +69,6 @@ InGameSystem::InGameSystem()
         _handCard.push_back(cardID);
         emit addCardToHand(cardID);
     }
-}
-
-void InGameSystem::run()
-{
     emit roundBegin(_playerSlot);
 }
 
@@ -164,12 +167,22 @@ void InGameSystem::playerUsingCard(int targetIndex, const QString &cardID)
         break;
     }
 
+    auto ctx = Context{};
+    ctx.from = this->_entities[_playerSlot];
+    ctx.to = targetList;
     for(auto &i : actList)
     {
-        auto ctx = i->getContext();
-        ctx->from = this->_entities[_playerSlot];
-        ctx->to = targetList;
-        this->handleContext(ctx);
+        i->act(&ctx);
+    }
+    this->handleContext(&ctx);
+
+    for(auto iter = this->_handCard.begin(); iter != this->_handCard.end(); ++iter)
+    {
+        if((*iter) == cardID)
+        {
+            this->_handCard.erase(iter);
+            break;
+        }
     }
     this->_stack[DROP]->push({cardID});
 }
@@ -185,6 +198,10 @@ void InGameSystem::roundEnd()
 
         emit roundBegin(i);
 
+        /// Test
+        auto ctx = new Context{_entities[i], {_entities[0]}, 5};
+        this->handleContext(ctx);
+
         _entities[i]->roundEnd();
 
         /// TODO
@@ -192,28 +209,4 @@ void InGameSystem::roundEnd()
     }
     _curEntity = 0;
     emit roundBegin(0);
-}
-
-void InGameSystem::needCardValid(const QString &id)
-{
-    bool valid = (CardSystem::getCardInfo(id).actType & (~this->_actionDisabled)) > 0;
-    emit sendCardValid(id, valid);
-}
-
-void InGameSystem::needCardStack(bool isDrawStack)
-{
-    const auto allcards = _stack[isDrawStack]->getAll();
-    emit sendCardStackInfo(allcards);
-}
-
-void InGameSystem::needHandCard()
-{
-    emit sendHandCard(this->_handCard);
-}
-
-void InGameSystem::handleCardValid(QString cardID, int *valid)
-{
-    auto info = CardSystem::getCardInfo(cardID);
-    int res = this->_actionDisabled & info.actType;
-    *valid = !res;
 }

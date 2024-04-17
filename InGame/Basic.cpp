@@ -29,10 +29,7 @@ bool Entity::isDead() const
 void Entity::roundBegin()
 {
     Context* ctx = new Context{this, {this}};
-    for (auto eff : this->_buffList[BuffInfo::ON_ROUNDBEGIN])
-	{
-        eff->affect(ctx);
-	}
+    this->handleBuffList(ctx, BuffInfo::ON_ROUNDBEGIN);
     emit requestHandleContext(ctx);
     delete ctx;
 }
@@ -40,10 +37,7 @@ void Entity::roundBegin()
 void Entity::roundEnd()
 {
     Context* ctx = new Context{this, {this}};
-    for (auto eff : this->_buffList[BuffInfo::ON_ROUNDEND])
-	{
-        eff->affect(ctx);
-    }
+    this->handleBuffList(ctx, BuffInfo::ON_ROUNDEND);
     emit requestHandleContext(ctx);
     delete ctx;
 }
@@ -87,10 +81,7 @@ void Entity::attack(Context *ctx, bool triggerBuff)
 {
     if(triggerBuff)
     {
-        for(auto &item :this->_buffList[BuffInfo::ON_ATTACK])
-        {
-            item->affect(ctx);
-        }
+        this->handleBuffList(ctx, BuffInfo::ON_ATTACK);
     }
 
     for(auto &tar: ctx->to)
@@ -103,10 +94,7 @@ void Entity::gainArmor(Context *ctx, bool triggerBuff)
 {
     if(triggerBuff)
     {
-        for(auto &item :this->_buffList[BuffInfo::ON_GAINARMOR])
-        {
-            item->affect(ctx);
-        }
+        this->handleBuffList(ctx, BuffInfo::ON_GAINARMOR);
     }
 
     this->_armor += ctx->armorGained;
@@ -117,10 +105,7 @@ void Entity::hurt(Context *ctx, bool triggerBuff)
 {
     if(triggerBuff)
     {
-        for(auto &item :this->_buffList[BuffInfo::ON_HURT])
-        {
-            item->affect(ctx);
-        }
+        this->handleBuffList(ctx, BuffInfo::ON_HURT);
     }
 
     int dealDamage = std::min(ctx->damageDone, this->_armor);
@@ -132,10 +117,7 @@ void Entity::giveBuff(Context *ctx, bool triggerBuff)
 {
     if(triggerBuff)
     {
-        for(auto &item :this->_buffList[BuffInfo::ON_GIVEBUFF])
-        {
-            item->affect(ctx);
-        }
+        this->handleBuffList(ctx, BuffInfo::ON_GIVEBUFF);
     }
     for(auto &tar: ctx->to)
     {
@@ -147,13 +129,21 @@ void Entity::getBuffed(Context *ctx, bool triggerBuff)
 {
     if(triggerBuff)
     {
-        for(auto &item :this->_buffList[BuffInfo::ON_GETBUFFED])
-        {
-            item->affect(ctx);
-        }
+        this->handleBuffList(ctx, BuffInfo::ON_GETBUFFED);
     }
     const auto buffInfo = BuffSystem::getBuffInfo(ctx->buffGiven);
     auto buff = BuffParser::parse(buffInfo.className);
     /// TODO
     this->_buffList[buff->getType()].push_back(buff);
+}
+
+void Entity::handleBuffList(Context *ctx, BuffInfo::BuffType type)
+{
+    auto &tarBuffList = this->_buffList[type];
+    for (auto eff = tarBuffList.begin(); eff != tarBuffList.end();)
+    {
+        (*eff)->affect(ctx);
+        (*eff)->degrade();
+        if(!(*eff)->isValid()) eff = tarBuffList.erase(eff);
+    }
 }

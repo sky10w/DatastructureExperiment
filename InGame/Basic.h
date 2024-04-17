@@ -41,7 +41,7 @@ public:
     virtual void getBuffed(Context* ctx, bool triggerBuff);
 
 signals:
-    void requestHandleContext(Context* ctx);
+    void requestHandleContext(Context* ctx); // to system
     void hpChanged(int id, int delta); // to view
     void armorChanged(int id, int delta); // to view
     void buffChanged(int id, int strength, QString buffID); // to view
@@ -53,6 +53,7 @@ protected:
     int _id;
 
     std::list<BasicBuff*> _buffList[7];
+    void handleBuffList(Context* ctx, BuffInfo::BuffType type);
 };
 
 class Enemy : public Entity

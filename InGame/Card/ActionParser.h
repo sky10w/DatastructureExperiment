@@ -28,7 +28,6 @@ public:
     virtual void act(Context* ctx) = 0;
 
     Act_t getType() const;
-    Context *getContext() const;
     Action(Act_t actType);
 protected:
     Act_t _type;
@@ -42,6 +41,8 @@ public:
     AttackAction(int damage);
     virtual void debug() override;
     virtual void act(Context* ctx) override;
+protected:
+    int _damage;
 };
 
 class DefendAction : public Action
@@ -50,6 +51,8 @@ public:
     DefendAction(int armor);
     virtual void debug() override;
     virtual void act(Context* ctx) override;
+protected:
+    int _armor;
 };
 
 class GiveBuffAction : public Action
@@ -58,6 +61,8 @@ public:
     GiveBuffAction(const QString &buffID);
     virtual void debug() override;
     virtual void act(Context* ctx) override;
+protected:
+    QString _buffID;
 };
 
 class RemoveBuffAction : public Action
@@ -66,6 +71,8 @@ public:
     RemoveBuffAction(const QString &buffID);
     virtual void debug() override;
     virtual void act(Context* ctx) override;
+protected:
+    QString _buffID;
 };
 
 class RestrictAction : public Action
@@ -74,6 +81,8 @@ public:
     RestrictAction(Action::Act_t type);
     virtual void debug() override;
     virtual void act(Context* ctx) override;
+protected:
+    Action::Act_t _type;
 };
 
 class UnrestrictAction : public Action
@@ -82,6 +91,8 @@ public:
     UnrestrictAction(Action::Act_t type);
     virtual void debug() override;
     virtual void act(Context* ctx) override;
+protected:
+    Action::Act_t _type;
 };
 
 class ActionParser

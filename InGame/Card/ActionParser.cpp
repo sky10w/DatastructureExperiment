@@ -94,78 +94,96 @@ Action::Act_t Action::getType() const
     return this->_type;
 }
 
-Context *Action::getContext() const
-{
-    return this->_ctx;
-}
-
 Action::Action(Act_t actType)
     : _type(actType)
-    , _ctx(new Context())
 {}
 
 AttackAction::AttackAction(int damage)
     : Action(Action::ATTACK)
-{
-    this->_ctx->damageDone = damage;
-}
+    , _damage(damage)
+{}
 
 void AttackAction::debug()
 {
-    qDebug() << "Acting attack" << this->_ctx->damageDone;
+    qDebug() << "Acting attack" << this->_damage;
+}
+
+void AttackAction::act(Context *ctx)
+{
+    ctx->damageDone = this->_damage;
 }
 
 DefendAction::DefendAction(int armor)
     : Action(Action::DEFEND)
-{
-    this->_ctx->armorGained = armor;
-}
+    , _armor(armor)
+{}
 
 void DefendAction::debug()
 {
-    qDebug() << "Acting defend"  << this->_ctx->armorGained;
+    qDebug() << "Acting defend"  << this->_armor;
+}
+
+void DefendAction::act(Context *ctx)
+{
+    ctx->armorGained = this->_armor;
 }
 
 GiveBuffAction::GiveBuffAction(const QString &buffID)
     : Action(Action::BUFF)
-{
-    this->_ctx->buffGiven = "+" + buffID;
-}
+    , _buffID(buffID)
+{}
 
 void GiveBuffAction::debug()
 {
-    qDebug() << "Acting giveBuff" << this->_ctx->buffGiven;
+    qDebug() << "Acting giveBuff" << this->_buffID;
+}
+
+void GiveBuffAction::act(Context *ctx)
+{
+    ctx->buffGiven = "+" + this->_buffID;
 }
 
 RemoveBuffAction::RemoveBuffAction(const QString &buffID)
     : Action(Action::BUFF)
-{
-    this->_ctx->buffGiven = "-" + buffID;
-}
+    , _buffID(buffID)
+{}
 
 void RemoveBuffAction::debug()
 {
-    qDebug() << "Acting removeBuff" << this->_ctx->buffGiven;
+    qDebug() << "Acting removeBuff" << this->_buffID;
+}
+
+void RemoveBuffAction::act(Context *ctx)
+{
+    ctx->buffGiven = "-" + this->_buffID;
 }
 
 RestrictAction::RestrictAction(Act_t type)
     : Action(Action::ACTION)
-{
-    this->_ctx->actAltered = type;
-}
+    , _type(type)
+{}
 
 void RestrictAction::debug()
 {
-    qDebug() << "Acting removeBuff" << this->_ctx->buffGiven;
+    qDebug() << "Acting restrict action";
+}
+
+void RestrictAction::act(Context *ctx)
+{
+    ctx->actAltered = this->_type;
 }
 
 UnrestrictAction::UnrestrictAction(Act_t type)
     : Action(Action::ACTION)
-{
-    this->_ctx->actAltered = -type;
-}
+    , _type(type)
+{}
 
 void UnrestrictAction::debug()
 {
-    qDebug() << "Acting removeBuff" << this->_ctx->buffGiven;
+    qDebug() << "Acting unrestrict action";
+}
+
+void UnrestrictAction::act(Context *ctx)
+{
+    ctx->actAltered = -1 * this->_type;
 }
