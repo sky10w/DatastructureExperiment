@@ -31,6 +31,7 @@ public:
     void connectSignalSlotForEntities(Entity* entity);
     void connectSignalSlotForView();
     void shuffle();
+    bool drawCard();
 
 private:
     static const int _playerSlot;

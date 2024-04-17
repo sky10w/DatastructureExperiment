@@ -10,53 +10,53 @@ const int InGameSystem::_playerSlot = 0;
 
 InGameSystem::InGameSystem()
     : _actionDisabled(0), _playerEnergy(GlobalStatus::playerMaxEnergy),
-      _view(new gameboard()), _handCard({}) {
-  // Init signals and slots
-  connectSignalSlotForView();
+      _view(new gameboard()), _handCard({})
+{
+    // Init signals and slots
+    connectSignalSlotForView();
 
-  // Init player
-  auto player = new Player(InGameSystem::_playerSlot, 40);
-  _entities.push_back(player);
-  connectSignalSlotForEntities(player);
-  this->_view->initplayer(InGameSystem::_playerSlot, GlobalStatus::playerMaxHp);
+    // Init player
+    auto player = new Player(InGameSystem::_playerSlot, 40);
+    _entities.push_back(player);
+    connectSignalSlotForEntities(player);
+    this->_view->initplayer(InGameSystem::_playerSlot, GlobalStatus::playerMaxHp);
 
-  // Init enemies
-  std::default_random_engine e;
-  e.seed(std::time(nullptr));
-  this->_enemyNum = e() % 3 + 1;
+    // Init enemies
+    std::default_random_engine e;
+    e.seed(std::time(nullptr));
+    this->_enemyNum = e() % 3 + 1;
 
-  for (int i = 0; i < this->_enemyNum; ++i) {
-    _entities.push_back(new Enemy(i + 1, 20));
-    connectSignalSlotForEntities(_entities[i + 1]);
-    this->_view->initenemy(i + 1, 20);
-  }
+    for (int i = 0; i < this->_enemyNum; ++i) {
+        _entities.push_back(new Enemy(i + 1, 20));
+        connectSignalSlotForEntities(_entities[i + 1]);
+        this->_view->initenemy(i + 1, 20);
+    }
 }
 
 void InGameSystem::run() {
-  _view->resize(1280, 720);
-  _view->show();
+    _view->resize(1280, 720);
+    _view->show();
 
-  // Init cardStack
-  auto list = GlobalStatus::allCardOwned;
-  int len = list.size();
-  std::default_random_engine e;
-  for (int i = len - 1; i >= 0; --i) {
-    int ind = e() % (i + 1);
-    swap(list[ind], list[i]);
-  }
-  for (auto &i : this->_stack) {
-    i = new CardStack();
-  }
-  this->_stack[DRAW]->push(list);
-  for (auto &i : list) {
-    emit addCardToStack(i);
-  }
+    // Init cardStack
+    auto list = GlobalStatus::allCardOwned;
+    int len = list.size();
+    std::default_random_engine e;
+    for (int i = len - 1; i >= 0; --i) {
+        int ind = e() % (i + 1);
+        swap(list[ind], list[i]);
+    }
+    for (auto &i : this->_stack) {
+        i = new CardStack();
+    }
+    this->_stack[DRAW]->push(list);
+    for (auto &i : list) {
+        emit addCardToStack(i);
+    }
 
-  // Init handCard
+    // Init handCard
     for (int i = 0; i < 5; ++i) {
-        const auto cardID = this->_stack[DRAW]->getPopOne();
-        _handCard.push_front(cardID);
-        emit addCardToHand(cardID);
+        const auto res = drawCard();
+        if(res == false) break;
     }
 
     this->_actionDisabled = 0;
@@ -83,6 +83,8 @@ void InGameSystem::roundEnd() {
         /// TODO
         QThread::msleep(1000);
     }
+
+    /// Player round
     _curEntity = 0;
 
     if (this->_stack[DRAW]->empty()) {
@@ -90,10 +92,8 @@ void InGameSystem::roundEnd() {
     }
     for(int i = 0; i < 2; ++i)
     {
-        const auto cardID = this->_stack[DRAW]->getPopOne();
-        if(cardID == "-1") break;
-        _handCard.push_front(cardID);
-        emit addCardToHand(cardID);
+        const auto res = drawCard();
+        if(res == false) break;
     }
     emit setEnergy(GlobalStatus::playerMaxEnergy);
     this->_actionDisabled = 0;
@@ -124,6 +124,15 @@ void InGameSystem::shuffle() {
   emit this->sendShuffle();
   const auto list = this->_stack[DROP]->getPopAll();
   this->_stack[DRAW]->push(list);
+}
+
+bool InGameSystem::drawCard()
+{
+    const auto cardID = this->_stack[DRAW]->getPopOne();
+    if(cardID == "-1") return false;
+    _handCard.push_front(cardID);
+    emit addCardToHand(cardID);
+    return true;
 }
 
 void InGameSystem::handleContext(Context *ctx) {

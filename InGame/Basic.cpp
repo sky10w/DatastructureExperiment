@@ -5,6 +5,7 @@ Entity::Entity(bool isPlayer, int index, int hp)
     : _isPlayer(isPlayer)
     , _id(index)
     , _hp(hp)
+    , _maxHp(hp)
     , _armor(0)
 {
 }
@@ -139,3 +140,44 @@ Player::Player(int index, int hp)
 Enemy::Enemy(int index, int hp)
     : Entity(false, index, hp)
 {}
+
+void Enemy::enemyAct(Context *ctx)
+{
+    ctx->damageDone = 5;
+}
+
+Boss::Boss(int index, int hp)
+    : Enemy(index, hp)
+{}
+
+void Boss::enemyAct(Context *ctx)
+{
+    std::default_random_engine e;
+    if(this->_hp > this->_maxHp)
+    {
+        int randRes = e() % 2;
+        switch (randRes) {
+        case 0:
+            ctx->damageDone = 6;
+            break;
+        case 1:
+            ctx->armorGained = 4;
+            break;
+        default:
+            break;
+        }
+
+        return;
+    }
+    int randRes = e() % 2;
+    switch (randRes) {
+    case 0:
+        ctx->damageDone = 6;
+        break;
+    case 1:
+        ctx->buffGiven = "+0006";
+        break;
+    default:
+        break;
+    }
+}

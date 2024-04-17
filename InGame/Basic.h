@@ -2,6 +2,7 @@
 #include <QWidget>
 #include <QVector>
 #include <algorithm>
+#include <random>
 
 #include "Context.h"
 #include "Card/CardSystem.h"
@@ -47,6 +48,7 @@ signals:
     void buffChanged(QString buffI, int strength, int id); // to view
 
 protected:
+    int _maxHp;
 	int _hp;
 	int _armor;
     bool _isPlayer;
@@ -61,14 +63,15 @@ class Enemy : public Entity
 	Q_OBJECT
 public:
     Enemy(int index, int hp);
-
+    virtual void enemyAct(Context* ctx);
 };
 
 class Boss : public Enemy
 {
     Q_OBJECT
 public:
-
+    Boss(int index, int hp);
+    virtual void enemyAct(Context* ctx) override;
 };
 
 class Player : public Entity
