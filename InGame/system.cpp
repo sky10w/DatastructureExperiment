@@ -199,7 +199,7 @@ void InGameSystem::roundEnd() {
     _entities[i]->roundEnd();
 
     /// TODO
-    QThread::msleep(2000);
+    QThread::msleep(1000);
   }
   _curEntity = 0;
 
