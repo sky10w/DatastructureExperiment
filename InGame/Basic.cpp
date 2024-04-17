@@ -138,6 +138,7 @@ void Entity::getBuffed(Context *ctx, bool triggerBuff)
     const auto buffInfo = BuffSystem::getBuffInfo(ctx->buffGiven);
     auto buff = BuffParser::parse(buffInfo.className);
     /// TODO
+    auto buffCopy = new BasicBuff(buff);
     this->_buffList[buff->getType()].push_back(buff);
 }
 
@@ -151,3 +152,11 @@ void Entity::handleBuffList(Context *ctx, BuffInfo::BuffType type)
         if(!(*eff)->isValid()) eff = tarBuffList.erase(eff);
     }
 }
+
+Player::Player(int index)
+    : Entity(true, index)
+{}
+
+Enemy::Enemy(int index)
+    : Entity(false, index)
+{}

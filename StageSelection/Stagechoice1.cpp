@@ -2,9 +2,8 @@
 
 Stagechoice1::Stagechoice1(QWidget* parent)
     : QWidget(parent)
-    , ui(new Ui::Stagechoice1)
 {
-    ui->setupUi(this);
+    // ui.setupUi(this);
 
     LevelGenerator generator;
     for(int i = 0;i<9;i++){

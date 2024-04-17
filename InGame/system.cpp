@@ -235,3 +235,9 @@ void InGameSystem::roundEnd()
     emit setEnergy(GlobalStatus::playerMaxHp);
     emit roundBegin();
 }
+
+void InGameSystem::handleCardValid(QString cardID, int *valid)
+{
+    const auto info = CardSystem::getCardInfo(cardID);
+    *valid = !(info.actType & this->_actionDisabled);
+}
