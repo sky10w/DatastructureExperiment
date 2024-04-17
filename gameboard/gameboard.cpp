@@ -33,7 +33,7 @@ gameboard::gameboard(MyOpenGLWidget *parent) : MyOpenGLWidget{parent} {
   view.setScene(&scene);
   scene.setParent(this);
   scene.setSceneRect(0, 0, WIDGETW, WIDGETH);
-  scene.setItemIndexMethod(QGraphicsScene::NoIndex);
+  // scene.setItemIndexMethod(QGraphicsScene::NoIndex);
 
   buttons = {&DiscardPileButton, &DrawPileButton, &EndButton, &SettingsButton,
              &EnergyButton};
@@ -154,14 +154,14 @@ void EntityView::initasplayer(int id) {
   setPos(100, 200);
   setPixmap(QPixmap("://res/player.png"));
   mybuff.init(100, 200);
-  id = id;
+  this->id = id;
   // name = name;
 }
 void EntityView::initasenemy(int id) {
   setPos(500 + 200 * id, 200);
   setPixmap(QPixmap("://res/enemy.jpg"));
   mybuff.init(500 + 200 * id, 200);
-  id = id;
+  this->id = id;
 
   action.setParentItem(this);
   action.setPixmap(QString("://res/action.jpg") /*现在还没有action icon */);
