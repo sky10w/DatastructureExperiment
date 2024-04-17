@@ -64,6 +64,43 @@ void InGameSystem::run() {
     emit roundBegin();
 }
 
+// Round end for player's round
+// Need to execute the following enemies' action
+void InGameSystem::roundEnd() {
+    for (int i = 1; i <= _enemyNum; ++i) {
+        _curEntity = i;
+        _entities[i]->roundBegin();
+
+        /// Test
+        auto ctx = new Context{};
+        ctx->from = _entities[i];
+        ctx->to = {_entities[0]};
+        ctx->damageDone = 5;
+        this->handleContext(ctx);
+
+        _entities[i]->roundEnd();
+
+        /// TODO
+        QThread::msleep(1000);
+    }
+    _curEntity = 0;
+
+    if (this->_stack[DRAW]->empty()) {
+        shuffle();
+    }
+    for(int i = 0; i < 2; ++i)
+    {
+        const auto cardID = this->_stack[DRAW]->getPopOne();
+        if(cardID == "-1") break;
+        _handCard.push_front(cardID);
+        emit addCardToHand(cardID);
+    }
+    emit setEnergy(GlobalStatus::playerMaxEnergy);
+    this->_actionDisabled = 0;
+    emit roundBegin();
+
+}
+
 void InGameSystem::connectSignalSlotForEntities(Entity *entity) {
   QObject::connect(entity, SIGNAL(requestHandleContext(Context*)), this, SLOT(handleContext(Context*)));
   QObject::connect(entity, SIGNAL(hpChanged(int,int)), _view, SLOT(updatehp(int,int)));
@@ -191,42 +228,7 @@ void InGameSystem::playerUsingCard(int cardIndex,int targetIndex) {
     this->_stack[DROP]->push({cardID});
 }
 
-// Round end for player's round
-// Need to execute the following enemies' action
-void InGameSystem::roundEnd() {
-    for (int i = 1; i <= _enemyNum; ++i) {
-        _curEntity = i;
-        _entities[i]->roundBegin();
 
-        /// Test
-        auto ctx = new Context{};
-        ctx->from = _entities[i];
-        ctx->to = {_entities[0]};
-        ctx->damageDone = 5;
-        this->handleContext(ctx);
-
-        _entities[i]->roundEnd();
-
-        /// TODO
-        QThread::msleep(1000);
-    }
-    _curEntity = 0;
-
-    if (this->_stack[DRAW]->empty()) {
-        shuffle();
-    }
-    for(int i = 0; i < 2; ++i)
-    {
-        const auto cardID = this->_stack[DRAW]->getPopOne();
-        if(cardID == "-1") break;
-        _handCard.push_front(cardID);
-        emit addCardToHand(cardID);
-    }
-    emit setEnergy(GlobalStatus::playerMaxEnergy);
-    this->_actionDisabled = 0;
-    emit roundBegin();
-
-}
 
 void InGameSystem::handleCardValid(QString cardID, int *valid)
 {

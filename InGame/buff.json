@@ -46,5 +46,5 @@
         "description": "每回合恢复3点生命值",
         "type": "ON_ROUNDBEGIN",
         "icon_path": ""
-    },
+    }
 ]
