@@ -60,7 +60,7 @@ void InGameSystem::run() {
   }
 
     this->_actionDisabled = 0;
-    emit setEnergy(GlobalStatus::playerMaxHp);
+    emit setEnergy(GlobalStatus::playerMaxEnergy);
     emit roundBegin();
 
 }
@@ -72,8 +72,8 @@ void InGameSystem::connectSignalSlotForEntities(Entity *entity) {
                    SLOT(updatehp(int,int)));
   QObject::connect(entity, SIGNAL(armorChanged(int,int)), _view,
                    SLOT(updatearmor(int,int)));
-  QObject::connect(entity, SIGNAL(buffChanged(int,bool,QString)), _view,
-                   SLOT(updatebuff(QString,int,bool)));
+  QObject::connect(entity, SIGNAL(buffChanged(QString,int,int)), _view,
+                   SLOT(updatebuff(QString,int,int)));
 }
 
 void InGameSystem::connectSignalSlotForView() {
@@ -93,7 +93,7 @@ void InGameSystem::connectSignalSlotForView() {
 
 void InGameSystem::shuffle() {
   emit this->sendShuffle();
-  auto list = this->_stack[DROP]->getPopAll();
+  const auto list = this->_stack[DROP]->getPopAll();
   this->_stack[DRAW]->push(list);
 }
 
@@ -126,9 +126,9 @@ void InGameSystem::playerUsingCard(int targetIndex, const QString &cardID) {
            __FUNCTION__, info.id.toLatin1().data());
   }
   this->_playerEnergy -= info.energy;
-  emit
+  emit this->updateEnergy(-info.energy);
 
-      const auto actList = info.action;
+    const auto actList = info.action;
   if (targetIndex >= _entities.size()) {
     qFatal("In function %s: Unable to access to entity - index: %d",
            __FUNCTION__, targetIndex);
@@ -180,9 +180,7 @@ void InGameSystem::playerUsingCard(int targetIndex, const QString &cardID) {
     }
   }
   this->_stack[DROP]->push({cardID});
-  if (this->_stack[DRAW]->size() == 0) {
-    shuffle();
-  }
+
 }
 
 // Round end for player's round
@@ -206,13 +204,17 @@ void InGameSystem::roundEnd() {
   }
   _curEntity = 0;
 
+  if (this->_stack[DRAW]->empty()) {
+      shuffle();
+  }
     for(int i = 0; i < 2; ++i)
     {
         const auto cardID = this->_stack[DRAW]->getPopOne();
+        if(cardID == "-1") break;
         _handCard.push_back(cardID);
         emit addCardToHand(cardID);
     }
-    emit setEnergy(GlobalStatus::playerMaxHp);
+    emit setEnergy(GlobalStatus::playerMaxEnergy);
     this->_actionDisabled = 0;
     emit roundBegin();
 

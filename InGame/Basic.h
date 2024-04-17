@@ -44,7 +44,7 @@ signals:
     void requestHandleContext(Context* ctx); // to system
     void hpChanged(int id, int delta); // to view
     void armorChanged(int id, int delta); // to view
-    void buffChanged(int id, int strength, QString buffID); // to view
+    void buffChanged(QString buffI, int strength, int id); // to view
 
 protected:
 	int _hp;

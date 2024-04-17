@@ -60,7 +60,7 @@ void Entity::buffRemoved(Context *ctx) {
     ++i;
   }
   /// TODO
-  emit buffChanged(this->_id, -99999, ctx->buffGiven);
+  emit buffChanged(ctx->buffGiven, -99999, this->_id);
 }
 
 void Entity::attack(Context *ctx, bool triggerBuff) {
@@ -113,6 +113,7 @@ void Entity::getBuffed(Context *ctx, bool triggerBuff)
     /// TODO
     auto buffCopy = buff->getCopy();
     this->_buffList[buff->getType()].push_back(buff);
+    emit buffChanged(ctx->buffGiven, -99999, this->_id);
 }
 
 void Entity::handleBuffList(Context *ctx, BuffInfo::BuffType type)
