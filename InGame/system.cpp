@@ -18,7 +18,7 @@ InGameSystem::InGameSystem()
   auto player = new Player(InGameSystem::_playerSlot, 40);
   _entities.push_back(player);
   connectSignalSlotForEntities(player);
-  this->_view->initplayer(InGameSystem::_playerSlot, 40);
+  this->_view->initplayer(InGameSystem::_playerSlot, GlobalStatus::playerMaxHp);
 
   // Init enemies
   std::default_random_engine e;
@@ -85,7 +85,7 @@ void InGameSystem::connectSignalSlotForView() {
   QObject::connect(this, SIGNAL(addCardToStack(QString)), _view->drawpile,
                    SLOT(addcard(QString)));
   QObject::connect(this, SIGNAL(addCardToHand(QString)), _view->drawpile,
-                   SLOT(drawCard(QString)));
+                   SLOT(drawcard(QString)));
   QObject::connect(this, SIGNAL(roundBegin()), _view, SLOT(roundbegin()));
   QObject::connect(this, SIGNAL(sendShuffle()), _view, SLOT(shuffle()));
   QObject::connect(this, SIGNAL(setEnergy(int)), _view, SLOT(setenergy(int)));

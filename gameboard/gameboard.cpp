@@ -103,7 +103,7 @@ gameboard::gameboard(MyOpenGLWidget *parent) : MyOpenGLWidget{parent} {
       view.setScene(drawpile);
     }
   });
-  connect(&EnergyButton, &QPushButton::pressed, this, [=]() {});
+  connect(&EnergyButton, &QPushButton::pressed, this, [=]() { shuffle(); });
   connect(&SettingsButton, &QPushButton::pressed, [=]() {});
   connect(myhands, &HandsView::discardcard, this, &gameboard::discardcard);
   connect(drawpile, &DrawPileView::shuffle, this, &gameboard::shuffle);
@@ -269,7 +269,7 @@ void CardView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
   HandsView *hands = dynamic_cast<HandsView *>(this->parent());
   gameboard *w = dynamic_cast<gameboard *>(hands->parent());
   arrow.hide();
-  int *valid = 0;
+  int *valid = new int();
   emit w->request_valid(uuid, valid);
 
   auto distance = QLineF(curposx + 120, curposy + 120, event->scenePos().x(),
@@ -329,19 +329,24 @@ void CardView::mousePressEvent(QGraphicsSceneMouseEvent *event) {
 }
 void CardView::hoverEnterEvent(QGraphicsSceneHoverEvent *event) {
   QGraphicsItem::hoverEnterEvent(event);
-  this->setZValue(1);
-  this->setPos(this->pos().x(), this->pos().y() - 50);
+  if (this->inhands) {
+    this->setZValue(1);
+    this->setPos(this->pos().x(), this->pos().y() - 50);
+  }
 }
 void CardView::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) {
   QGraphicsItem::hoverLeaveEvent(event);
-  this->setZValue(0);
-  this->setPos(curposx, curposy);
+  if (this->inhands) {
+    this->setZValue(0);
+    this->setPos(curposx, curposy);
+  }
 }
 void CardView::init() {
+  info = CardSystem::getCardInfo(this->uuid);
   setPixmap(QPixmap(info.path));
   this->setFlag(QGraphicsItem::ItemIsMovable, false);
   // info = cards[uuid];
-  info = CardSystem::getCardInfo(this->uuid);
+
   // valid = 1;
   arrow.setParentItem(this);
 }
@@ -390,6 +395,7 @@ void HandsView::consumecard(QString name) {
 }
 void gameboard::discardcard(CardView *card) {
   discardpile->addcard(card);
+
   /// card = nullptr;
 }
 
@@ -460,6 +466,7 @@ void gameboard::shuffle() {
 }
 void DiscardPileView::addcard(CardView *card) {
   addItem(card);
+  card->inhands = 0;
   card->setFlag(QGraphicsItem::ItemIsMovable, false);
   auto it = card->uuid;
   st.insert({it, card});
@@ -487,6 +494,8 @@ void DiscardPileView::update() {
   int i = 0, j = 0;
   for (auto &x : st) {
     x.second->setPos(265 + i * 150, 100 + j * 250);
+    x.second->curposx = 265 + i * 150;
+    x.second->curposy = 100 + j * 250;
     i++;
     if (i == 5)
       i = 0, j++;
@@ -496,6 +505,8 @@ void DrawPileView::update() {
   int i = 0, j = 0;
   for (auto &x : st) {
     x.second->setPos(265 + i * 150, 100 + j * 250);
+    x.second->curposx = 265 + i * 150;
+    x.second->curposy = 100 + j * 250;
     i++;
     if (i == 5)
       i = 0, j++;
@@ -528,6 +539,7 @@ void DrawPileView::addcard(QString uuid) {
   st.insert({uuid, newcard});
   newcard->uuid = uuid;
   newcard->init();
+  // std::cout << newcard->info.path.toStdString() << endl;
   addItem(newcard);
   update();
   newcard = nullptr;

@@ -2,5 +2,24 @@
     <qresource prefix="/json">
         <file>InGame/buff.json</file>
         <file>InGame/cards.json</file>
+        <file>res/card_1.png</file>
+        <file>res/card_2.png</file>
+        <file>res/cards/card_1.png</file>
+        <file>res/cards/card_2.png</file>
+        <file>res/image/1.jpg</file>
+        <file>res/image/back1.png</file>
+        <file>res/image/back2.png</file>
+        <file>res/image/back-arrow.png</file>
+        <file>res/image/battle1.png</file>
+        <file>res/image/battle2.png</file>
+        <file>res/image/boss1.png</file>
+        <file>res/image/boss2.png</file>
+        <file>res/image/c9bc97f432.jpg</file>
+        <file>res/image/map.png</file>
+        <file>res/image/monster.png</file>
+        <file>res/image/settings.png</file>
+        <file>res/image/settings1.png</file>
+        <file>res/image/settings2.png</file>
+        <file>res/image/swords.png</file>
     </qresource>
 </RCC>
