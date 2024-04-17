@@ -58,6 +58,7 @@ gameboard::gameboard(MyOpenGLWidget *parent) : MyOpenGLWidget{parent} {
   connect(&EndButton, &QPushButton::pressed, [=]() {
     playerround = 0;
     emit roundover();
+    // roundbegin();
   });
   connect(&DiscardPileButton, &QPushButton::pressed, [=]() {
     if (view.scene() == discardpile) {
@@ -116,6 +117,23 @@ gameboard::gameboard(MyOpenGLWidget *parent) : MyOpenGLWidget{parent} {
   //  drawpile->addcard("1");
   view.show();
 }
+void gameboard::setanimation(QString path, int time, int posx, int posy) {
+  QGraphicsPixmapItem *msg = new QGraphicsPixmapItem();
+  msg->setPixmap(path);
+  scene.addItem(msg);
+  msg->setPos(posx, posy);
+  // 创建一个定时器
+  QTimer *timer = new QTimer();
+  timer->setSingleShot(true); // 设置定时器只触发一次
+  // 连接定时器的timeout信号到一个lambda函数，该函数将删除item
+  QObject::connect(timer, &QTimer::timeout, this, [=] {
+    // 在场景中删除item
+    scene.removeItem(msg);
+    delete msg;
+  });
+  timer->start(time);
+}
+
 void EntityView::init(int hp) {
   HP = hp;
   HP_MAX = hp;
@@ -141,24 +159,27 @@ void EntityView::init(int hp) {
   armornumber.setText(QString::number(armor));
   armornumber.setFont(QFont("Arial", 15, 0, true));
 }
-void EntityView::initasplayer(int id) {
+void EntityView::initasplayer(int id, QString name) {
   setPos(100, 200);
   setPixmap(QPixmap("://res/player.png"));
   mybuff.init(100, 200);
+  type = "player";
   id = id;
-  // name = name;
+  name = name;
 }
-void EntityView::initasenemy(int id) {
+void EntityView::initasenemy(int id, QString name) {
   setPos(500 + 200 * id, 200);
-  setPixmap(QPixmap("://res/enemy.jpg"));
+  setPixmap(QPixmap("://res/" + name + ".jpg"));
   mybuff.init(500 + 200 * id, 200);
+
+  type = "enemy";
   id = id;
 
   action.setParentItem(this);
   action.setPixmap(QString("://res/action.jpg") /*现在还没有action icon */);
   action.setPos((width - action.pixmap().width()) / 2,
                 -action.pixmap().height());
-  // name = name;
+  name = name;
 }
 
 void EntityView::updatehpview() {
@@ -198,21 +219,10 @@ void gameboard::updateenergyview() {
 
 void gameboard::roundbegin() {
   playerround = 1;
-  QGraphicsPixmapItem *msg = new QGraphicsPixmapItem();
-  msg->setPixmap(QString("://res/roundbegin.png"));
-  scene.addItem(msg);
-  msg->setPos(WIDGETW - msg->pixmap().width() >> 1,
-              WIDGETH - msg->pixmap().height() >> 1);
-  // 创建一个定时器
-  QTimer *timer = new QTimer();
-  timer->setSingleShot(true); // 设置定时器只触发一次
-  // 连接定时器的timeout信号到一个lambda函数，该函数将删除item
-  QObject::connect(timer, &QTimer::timeout, this, [=] {
-    // 在场景中删除item
-    scene.removeItem(msg);
-    delete msg;
-  });
-  timer->start(3000);
+  QGraphicsPixmapItem temp(QString("://res/roundbegin.png"));
+  setanimation(QString("://res/roundbegin.png"), 3000,
+               WIDGETW - temp.pixmap().width() >> 1,
+               WIDGETH - temp.pixmap().height() >> 1);
 }
 void BuffView::init(int posx, int posy) {
   buffview.setScene(&buffscene);
@@ -285,6 +295,8 @@ void CardView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
   else if (itembelow == nullptr)
     deny();
   else if (cardtype == 1 && itembelow->type == "enemy")
+    deny();
+  else if (w->playerround == 0)
     deny();
   else {
     w->energy -= info.energy;
@@ -417,21 +429,21 @@ void gameboard::updatearmor(int id, int delta) {
     Player->update_armor(delta);
 }
 
-void gameboard::initenemy(int id /*QString name,*/, int HP_MAX) {
+void gameboard::initenemy(int id, QString name, int HP_MAX) {
   EntityView *newenemy = new EntityView();
   scene.addItem(newenemy);
   newenemy->init(HP_MAX);
-  newenemy->initasenemy(id);
+  newenemy->initasenemy(id, name);
   newenemy->setParent(this);
   newenemy->mybuff.buffview.setParent(this);
   Enemy[id] = newenemy;
 }
-void gameboard::initplayer(int id /*, QString name,*/, int HP_MAX) {
+void gameboard::initplayer(int id, QString name, int HP_MAX) {
   // Player->HP_MAX = HP_MAX;
   EntityView *newplayer = new EntityView();
   scene.addItem(newplayer);
   newplayer->init(HP_MAX);
-  newplayer->initasplayer(id);
+  newplayer->initasplayer(id, name);
   newplayer->setParent(this);
   newplayer->mybuff.buffview.setParent(this);
   Enemy[id] = newplayer;
