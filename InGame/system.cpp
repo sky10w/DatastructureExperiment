@@ -148,6 +148,11 @@ bool InGameSystem::drawCard()
     return true;
 }
 
+int InGameSystem::checkGameover()
+{
+
+}
+
 void InGameSystem::handleContext(Context *ctx) {
     if (ctx->damageDone != 0) {
         ctx->from->attack(ctx, true);

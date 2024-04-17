@@ -159,7 +159,7 @@ void EntityView::initasplayer(int id) {
 }
 void EntityView::initasenemy(int id) {
   setPos(500 + 200 * id, 200);
-  setPixmap(QPixmap("://res/enemy.jpg"));
+  setPixmap(QPixmap(this->name));
   mybuff.init(500 + 200 * id, 200);
   this->id = id;
 
@@ -254,7 +254,7 @@ void BuffView::update_buff(QString id, int delta) {
     Buff *newbuff = new Buff(id, delta);
     BuffIcon *newbufficon = new BuffIcon();
     buffscene.addItem(newbufficon);
-    newbufficon->setPixmap("://res/" + id + ".png");
+    newbufficon->setPixmap(":/json/res/buff" + id + ".png");
     newbufficon->description = MP_description[id];
     newbufficon->setToolTip(newbufficon->description);
     Buffs[id] = newbuff;
@@ -450,59 +450,60 @@ void gameboard::updatearmor(int id, int delta) {
     Player->update_armor(delta);
 }
 
-void gameboard::initenemy(int id /*QString name,*/, int HP_MAX) {
-  EntityView *newenemy = new EntityView();
-  scene.addItem(newenemy);
-  newenemy->init(HP_MAX);
-  newenemy->initasenemy(id);
-  newenemy->setParent(this);
-  newenemy->mybuff.buffview.setParent(this);
-  Enemy[id] = newenemy;
+void gameboard::initenemy(int id, QString name, int HP_MAX) {
+    EntityView *newenemy = new EntityView();
+    scene.addItem(newenemy);
+    newenemy->name = name;
+    newenemy->init(HP_MAX);
+    newenemy->initasenemy(id);
+    newenemy->setParent(this);
+    newenemy->mybuff.buffview.setParent(this);
+    Enemy[id] = newenemy;
 }
 void gameboard::initplayer(int id /*, QString name,*/, int HP_MAX) {
-  // Player->HP_MAX = HP_MAX;
-  EntityView *newplayer = new EntityView();
-  scene.addItem(newplayer);
-  newplayer->init(HP_MAX);
-  newplayer->initasplayer(id);
-  newplayer->setParent(this);
-  newplayer->mybuff.buffview.setParent(this);
-  Player = newplayer;
-  Player->mybuff.update_buff("1", 1);
+    // Player->HP_MAX = HP_MAX;
+    EntityView *newplayer = new EntityView();
+    scene.addItem(newplayer);
+    newplayer->init(HP_MAX);
+    newplayer->initasplayer(id);
+    newplayer->setParent(this);
+    newplayer->mybuff.buffview.setParent(this);
+    Player = newplayer;
+    Player->mybuff.update_buff("1", 1);
 }
 void gameboard::shuffle() {
-  // drawpile->st.insert(discardpile->st.begin(), discardpile->st.end());
-  for (auto x : discardpile->st) {
-    discardpile->removeItem(x.second);
-    drawpile->st.insert(x);
-  }
+    // drawpile->st.insert(discardpile->st.begin(), discardpile->st.end());
+    for (auto x : discardpile->st) {
+        discardpile->removeItem(x.second);
+        drawpile->st.insert(x);
+    }
 
-  discardpile->clean();
-  for (auto &[x, y] : drawpile->st) {
-    drawpile->addItem(y);
-  }
-  drawpile->update();
+    discardpile->clean();
+    for (auto &[x, y] : drawpile->st) {
+        drawpile->addItem(y);
+    }
+    drawpile->update();
 }
 void DiscardPileView::addcard(CardView *card) {
-  addItem(card);
-  card->inhands = 0;
-  card->setFlag(QGraphicsItem::ItemIsMovable, false);
-  auto it = card->uuid;
-  st.insert({it, card});
-  // card = nullptr;
-  update();
+    addItem(card);
+    card->inhands = 0;
+    card->setFlag(QGraphicsItem::ItemIsMovable, false);
+    auto it = card->uuid;
+    st.insert({it, card});
+    // card = nullptr;
+    update();
 }
 void DiscardPileView::init() {
-  setItemIndexMethod(NoIndex);
-  description.setPixmap(QPixmap("://res/1713154927636415.png"));
-  description.setZValue(1);
-  description.setPos(475, 0);
-  background.setPixmap(QPixmap("://res/background.png"));
-  background.setZValue(0);
-  background.setPos(0, 0);
-  addItem(&description);
-  addItem(&background);
-  setSceneRect(0, 0, WIDGETW, WIDGETH);
+    setItemIndexMethod(NoIndex);
+    description.setPixmap(QPixmap("://res/1713154927636415.png"));
+    description.setZValue(1);
+    description.setPos(475, 0);
+    background.setPixmap(QPixmap("://res/background.png"));
+    background.setZValue(0);
+    background.setPos(0, 0);
+    addItem(&description);
+    addItem(&background);
+    setSceneRect(0, 0, WIDGETW, WIDGETH);
 }
 void DiscardPileView::clean() {
   for (auto &x : st)

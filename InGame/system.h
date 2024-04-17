@@ -33,6 +33,7 @@ public:
     void connectSignalSlotForView();
     void shuffle();
     bool drawCard();
+    int checkGameover();
 
 private:
     static const int _playerSlot;
@@ -47,6 +48,7 @@ signals:
     void roundBegin();
     void hpChanged(int id, int delta);
     void armorChanged(int id, int delta);
+    void gameover(bool isWin);
 public slots:
     virtual void handleContext(Context* ctx); // from Entity
     virtual void playerUsingCard(int cardIndex, int targetIndex);
