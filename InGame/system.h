@@ -29,17 +29,18 @@ public:
     InGameSystem();
     void run();
     void connectSignalSlotForEntities(Entity* entity);
-    void connectSignalSlotForView(gameboard* gameboard);
+    void connectSignalSlotForView();
+    void shuffle();
 
 private:
     static const int _playerSlot;
-
-public slots:
 
 signals:
     void nextRoundHint(QHash<Entity*, Action::Act_t> act);
     void entityAct(Action::Act_t act);
 
+    void sendShuffle();
+    void setEnergy(int energy);
     void updateEnergy(int delta);
     void roundBegin();
     void hpChanged(int id, int delta);

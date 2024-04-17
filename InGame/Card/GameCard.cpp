@@ -58,8 +58,7 @@ void CardStack::push(const QVector<QString>& cards)
 {
 	for (auto& i : cards)
 	{
-		this->_list.push_back(i);
-        emit this->addCard(i);
+        this->_list.push_back(i);
 	}
 }
 

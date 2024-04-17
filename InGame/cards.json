@@ -1,6 +1,6 @@
 [
   {
-    "uuid": "01ef",
+    "uuid": "0001",
     "name": "一般攻击",
     "description": "造成6点伤害",
     "path": "/MainGame/res/cards/card_1.png",
@@ -11,7 +11,7 @@
 
   },
   {
-    "uuid": "13jd",
+    "uuid": "0002",
     "name": "万箭齐发",
     "description": "对全体敌人造成7点伤害",
     "path": "/MainGame/res/cards/card_2.png",
@@ -21,7 +21,7 @@
     "action": "attack 7"
   },
   {
-    "uuid": "1i92",
+    "uuid": "0003",
     "name": "防御",
     "description": "获得5点护甲值",
     "path": "/MainGame/res/cards/card_2.png",
@@ -31,7 +31,7 @@
     "action": "defend 5"
   },
   {
-      "uuid": "1234",
+      "uuid": "0004",
       "name": "蓄势",
       "description": "当前回合无法使用攻击牌，但下回合伤害翻倍",
       "path": "/MainGame/res/cards/card_1.png",
@@ -41,7 +41,7 @@
       "action": "restrict_action attack give_buff 0003"
   },
   {
-      "uuid": "1i93",
+      "uuid": "0005",
       "name": "火烧乌巢",
       "description": "去除敌人的运粮效果，并给予它3层虚弱",
       "path": "/MainGame/res/cards/card_2.png",

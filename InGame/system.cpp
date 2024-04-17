@@ -3,8 +3,8 @@
 
 QVector<QString> GlobalStatus::allCardOwned = {
     "0001", "0001", "0001",
-    "0002", "0002", "0002",
-    "0003", "0004"
+    "0002", "0003", "0003",
+    "0003", "0004", "0005"
 };
 int GlobalStatus::playerMaxHp = 40;
 int GlobalStatus::playerMaxEnergy = 3;
@@ -19,7 +19,7 @@ InGameSystem::InGameSystem()
     , _handCard({})
 {
     // Init signals and slots
-    connectSignalSlotForView(_view);
+    connectSignalSlotForView();
 
     // Init player
     auto player = new Player(InGameSystem::_playerSlot);
@@ -36,12 +36,13 @@ InGameSystem::InGameSystem()
         _entities.push_back(new Enemy(i+1));
         connectSignalSlotForEntities(_entities[i+1]);
     }
-
-
 }
 
 void InGameSystem::run()
 {
+    _view->resize(1280, 720);
+    _view->show();
+
     // Init cardStack
     auto list = GlobalStatus::allCardOwned;
     int len = list.size();
@@ -61,7 +62,6 @@ void InGameSystem::run()
         emit addCardToStack(i);
     }
 
-
     // Init handCard
     for(int i = 0; i < 5; ++i)
     {
@@ -69,7 +69,9 @@ void InGameSystem::run()
         _handCard.push_back(cardID);
         emit addCardToHand(cardID);
     }
-    emit roundBegin(_playerSlot);
+
+    emit setEnergy(GlobalStatus::playerMaxHp);
+    emit roundBegin();
 }
 
 void InGameSystem::connectSignalSlotForEntities(Entity *entity)
@@ -80,7 +82,7 @@ void InGameSystem::connectSignalSlotForEntities(Entity *entity)
     QObject::connect(entity, SIGNAL(buffChanged(int,bool,QString)), _view, SLOT(updatebuff(QString,int,bool)));
 }
 
-void InGameSystem::connectSignalSlotForView(gameboard *gameboard)
+void InGameSystem::connectSignalSlotForView()
 {
     QObject::connect(_view, SIGNAL(roundover()), this, SLOT(roundEnd()));
     QObject::connect(_view, SIGNAL(request_valid(QString,int*)), this, SLOT(handleCardValid(QString,int*)));
@@ -88,6 +90,15 @@ void InGameSystem::connectSignalSlotForView(gameboard *gameboard)
     QObject::connect(this, SIGNAL(addCardToStack(QString)), _view->drawpile, SLOT(addcard(QString)));
     QObject::connect(this, SIGNAL(addCardToHand(QString)), _view->drawpile, SLOT(drawCard(QString)));
     QObject::connect(this, SIGNAL(roundBegin()), _view, SLOT(roundbegin()));
+    QObject::connect(this, SIGNAL(sendShuffle()), _view, SLOT(shuffle()));
+    QObject::connect(this, SIGNAL(setEnergy(int)), _view, SLOT(setenergy(int)));
+}
+
+void InGameSystem::shuffle()
+{
+    emit this->shuffle();
+    auto list = this->_stack[DROP]->getPopAll();
+    this->_stack[DRAW]->push(list);
 }
 
 void InGameSystem::handleContext(Context *ctx)
@@ -210,5 +221,13 @@ void InGameSystem::roundEnd()
         QThread::msleep(2000);
     }
     _curEntity = 0;
+
+    for(int i = 0; i < 2; ++i)
+    {
+        const auto cardID = this->_stack[DRAW]->getPopOne();
+        _handCard.push_back(cardID);
+        emit addCardToHand(cardID);
+    }
+    emit setEnergy(GlobalStatus::playerMaxHp);
     emit roundBegin();
 }

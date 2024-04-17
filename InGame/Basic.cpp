@@ -28,7 +28,9 @@ bool Entity::isDead() const
 
 void Entity::roundBegin()
 {
-    Context* ctx = new Context{this, {this}};
+    Context* ctx = new Context{};
+    ctx->from = this;
+    ctx->to = {this};
     this->handleBuffList(ctx, BuffInfo::ON_ROUNDBEGIN);
     emit requestHandleContext(ctx);
     delete ctx;
@@ -36,7 +38,9 @@ void Entity::roundBegin()
 
 void Entity::roundEnd()
 {
-    Context* ctx = new Context{this, {this}};
+    Context* ctx = new Context{};
+    ctx->from = this;
+    ctx->to = {this};
     this->handleBuffList(ctx, BuffInfo::ON_ROUNDEND);
     emit requestHandleContext(ctx);
     delete ctx;
