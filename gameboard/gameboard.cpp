@@ -110,8 +110,8 @@ gameboard::gameboard(MyOpenGLWidget *parent) : MyOpenGLWidget{parent} {
   myhands->handsscene = &scene;
   myhands->setParent(this);
   myhands->init();
-  for (int i = 0; i < 5; i++)
-    drawpile->addcard("1");
+  // for (int i = 0; i < 5; i++)
+  //  drawpile->addcard("1");
   view.show();
 }
 void EntityView::init(int hp) {
@@ -230,7 +230,7 @@ Buff::Buff(QString uuid, int strength) {
 }
 BuffView::BuffView() {}
 void BuffView::updateview() {}
-void CardView::get_valid(bool isvalid) { valid = isvalid; }
+// void CardView::get_valid(bool isvalid) { valid = isvalid; }
 void CardView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
 
   QGraphicsItem::mouseReleaseEvent(event);
@@ -240,8 +240,8 @@ void CardView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
   HandsView *hands = dynamic_cast<HandsView *>(this->parent());
   gameboard *w = dynamic_cast<gameboard *>(hands->parent());
   arrow.hide();
-
-  emit request_valid(cardtype);
+  int *valid = 0;
+  emit request_valid(uuid, valid);
 
   auto distance = QLineF(curposx + 120, curposy + 120, event->scenePos().x(),
                          event->scenePos().y())
@@ -253,7 +253,7 @@ void CardView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
   };
   if (distance < 200)
     deny();
-  else if (!valid)
+  else if (!*valid)
     deny();
   else if (w->energy < info.energy)
     deny();
@@ -310,7 +310,7 @@ void CardView::init() {
   setPixmap(QPixmap("://res/card.jpg"));
   this->setFlag(QGraphicsItem::ItemIsMovable, false);
   info = cards[uuid];
-  valid = 1;
+  // valid = 1;
   arrow.setParentItem(this);
 }
 // void CardView::mouse
