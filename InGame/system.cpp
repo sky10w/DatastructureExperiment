@@ -87,6 +87,7 @@ void InGameSystem::connectSignalSlotForView(gameboard *gameboard)
     QObject::connect(this, SIGNAL(updateEnergy(int)), _view, SLOT(updateenergy(int)));
     QObject::connect(this, SIGNAL(addCardToStack(QString)), _view->drawpile, SLOT(addcard(QString)));
     QObject::connect(this, SIGNAL(addCardToHand(QString)), _view->drawpile, SLOT(drawCard(QString)));
+    QObject::connect(this, SIGNAL(roundBegin()), _view, SLOT(roundbegin()));
 }
 
 void InGameSystem::handleContext(Context *ctx)
@@ -180,7 +181,7 @@ void InGameSystem::playerUsingCard(int targetIndex, const QString &cardID)
     {
         if((*iter) == cardID)
         {
-            this->_handCard.erase(iter);
+            iter = this->_handCard.erase(iter);
             break;
         }
     }
@@ -196,10 +197,11 @@ void InGameSystem::roundEnd()
         _curEntity = i;
         _entities[i]->roundBegin();
 
-        emit roundBegin(i);
-
         /// Test
-        auto ctx = new Context{_entities[i], {_entities[0]}, 5};
+        auto ctx = new Context{};
+        ctx->from = _entities[i];
+        ctx->to = {_entities[0]};
+        ctx->damageDone = 5;
         this->handleContext(ctx);
 
         _entities[i]->roundEnd();
@@ -208,5 +210,5 @@ void InGameSystem::roundEnd()
         QThread::msleep(2000);
     }
     _curEntity = 0;
-    emit roundBegin(0);
+    emit roundBegin();
 }

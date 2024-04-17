@@ -10,6 +10,15 @@ class BasicBuff;
 /// Context(from, vector(to), damageDone, armorGained, hpHealed, effectGiven)
 struct Context
 {
+    Context()
+        : from(nullptr)
+        , to({})
+        , damageDone(0)
+        , armorGained(0)
+        , hpHealed(0)
+        , actAltered(0)
+        , buffGiven("")
+    {}
     Entity* from = nullptr;
     QVector<Entity*> to = {};
     int damageDone = 0;

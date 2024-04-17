@@ -41,7 +41,7 @@ signals:
     void entityAct(Action::Act_t act);
 
     void updateEnergy(int delta);
-    void roundBegin(int id);
+    void roundBegin();
     void hpChanged(int id, int delta);
     void armorChanged(int id, int delta);
 public slots:
