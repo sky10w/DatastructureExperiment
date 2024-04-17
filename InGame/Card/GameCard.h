@@ -1,14 +1,12 @@
 #pragma once
-#include <QtWidgets/qwidget.h>
-#include <qfile.h>
-#include <qstring.h>
-#include <qstack.h>
-#include <qhash.h>
-#include <qpainter.h>
-#include <qstyleoption.h>
-#include <qjsondocument.h>
-#include <qjsonarray.h>
-#include <qjsonobject.h>
+#include <QObject>
+#include <QFile>
+#include <QString>
+#include <QStack>
+#include <QHash>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonParseError>
 #include <QEvent>
 
 #include "ActionParser.h"
@@ -43,14 +41,15 @@ struct CardInfo
 class CardStack
 {
 public:
-	CardStack() = default;
-	CardStack(const QVector<QString>& cards);
+    CardStack() = default;
+    CardStack(const QVector<QString>& cards);
 	QString getPopOne();
 	QVector<QString> getPopN(int n);
 	QVector<QString> getPopAll();
     QVector<QString> getAll() const;
 	void push(const QVector<QString>& cards);
 	bool empty() const;
+
 
 private:
 	QVector<int> utilGetRandomNum(int n);

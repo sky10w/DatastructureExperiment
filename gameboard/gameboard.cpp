@@ -241,7 +241,7 @@ void CardView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
   gameboard *w = dynamic_cast<gameboard *>(hands->parent());
   arrow.hide();
   int *valid = 0;
-  emit request_valid(uuid, valid);
+  emit w->request_valid(uuid, valid);
 
   auto distance = QLineF(curposx + 120, curposy + 120, event->scenePos().x(),
                          event->scenePos().y())

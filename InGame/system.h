@@ -13,8 +13,8 @@ class GlobalStatus
 {
 public:
     static QVector<QString> allCardOwned;
-    static int playerHp;
-    static int playerEnergy;
+    static int playerMaxHp;
+    static int playerMaxEnergy;
 };
 
 
@@ -29,6 +29,7 @@ public:
     InGameSystem();
     void run();
     void connectSignalSlotForEntities(Entity* entity);
+    void connectSignalSlotForView(gameboard* gameboard);
 
 private:
     static const int _playerSlot;
@@ -39,10 +40,10 @@ signals:
     void nextRoundHint(QHash<Entity*, Action::Act_t> act);
     void entityAct(Action::Act_t act);
 
+    void updateEnergy(int delta);
     void roundBegin(int id);
     void hpChanged(int id, int delta);
     void armorChanged(int id, int delta);
-    void handCardChanged(QVector<QString> oldCards, QVector<QString> newCards);
 public slots:
     virtual void handleContext(Context* ctx); // from Entity
     virtual void playerUsingCard(int targetIndex, const QString& cardID);
@@ -50,20 +51,24 @@ public slots:
     virtual void roundEnd();
 
 signals:
-    void sendCardValid(QString cardID, bool isValid);
-    void sendEntityList(QVector<Entity *> list);
-    void sendHandCard(const QVector<QString> &card);
-    void sendCardStackInfo(QVector<QString> list);
+    void addCardToStack(QString cardID);
+    void addCardToHand(QString cardID);
+
+    // void sendEntityList(QVector<Entity *> list);
+    // void sendHandCard(const QVector<QString> &card);
+    // void sendCardStackInfo(QVector<QString> list);
 public slots:
-    virtual void needCardValid(const QString& id);
-    virtual void needCardStack(bool isDrawStack);
-    virtual void needHandCard();
+    // virtual void needCardValid(const QString& id);
+    // virtual void needCardStack(bool isDrawStack);
+    // virtual void needHandCard();
+    virtual void handleCardValid(QString cardID, int* valid);
 
 private:
     int _actionDisabled;
     QVector<Entity*> _entities;
     int _enemyNum;
     int _curEntity;
+    int _playerEnergy;
     CardStack* _stack[2];
     gameboard* _view;
     QVector<QString> _handCard;

@@ -2,6 +2,7 @@
 #define CARDSYSTEM_H
 
 #include "GameCard.h"
+#include <QJsonObject>
 
 class CardSystem
 {

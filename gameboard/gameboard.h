@@ -132,7 +132,7 @@ public:
 
 signals:
   void playcard(QString id);                    //这是前端内部的
-  void request_valid(QString uuid, int *valid); //请求valid值
+
 public slots:
   // void get_valid(bool isvalid); // valid
 
@@ -218,6 +218,7 @@ public:
 
 signals:
   void roundover();
+  void request_valid(QString uuid, int *valid); //请求valid值
 public slots:
   void discardcard(CardView *card); //这是前端内部的
   void shuffle();                   //洗牌

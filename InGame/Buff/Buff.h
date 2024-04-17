@@ -50,9 +50,6 @@ public:
     virtual void affect(Context *ctx) = 0;
     virtual void degrade() = 0;
 
-signals:
-    void degreeToZero();
-
 protected:
     QString _id;
     BuffInfo::BuffType _type;

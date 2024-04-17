@@ -25,12 +25,13 @@ public:
     static Act_t strToActType(const QString& str);
 
     virtual void debug() = 0;
+    virtual void act(Context* ctx) = 0;
+
     Act_t getType() const;
     Context *getContext() const;
     Action(Act_t actType);
 protected:
     Act_t _type;
-    Context *_ctx;
 private:
     static const QHash<QString, Act_t> _act;
 };
@@ -40,6 +41,7 @@ class AttackAction : public Action
 public:
     AttackAction(int damage);
     virtual void debug() override;
+    virtual void act(Context* ctx) override;
 };
 
 class DefendAction : public Action
@@ -47,6 +49,7 @@ class DefendAction : public Action
 public:
     DefendAction(int armor);
     virtual void debug() override;
+    virtual void act(Context* ctx) override;
 };
 
 class GiveBuffAction : public Action
@@ -54,6 +57,7 @@ class GiveBuffAction : public Action
 public:
     GiveBuffAction(const QString &buffID);
     virtual void debug() override;
+    virtual void act(Context* ctx) override;
 };
 
 class RemoveBuffAction : public Action
@@ -61,6 +65,7 @@ class RemoveBuffAction : public Action
 public:
     RemoveBuffAction(const QString &buffID);
     virtual void debug() override;
+    virtual void act(Context* ctx) override;
 };
 
 class RestrictAction : public Action
@@ -68,6 +73,7 @@ class RestrictAction : public Action
 public:
     RestrictAction(Action::Act_t type);
     virtual void debug() override;
+    virtual void act(Context* ctx) override;
 };
 
 class UnrestrictAction : public Action
@@ -75,6 +81,7 @@ class UnrestrictAction : public Action
 public:
     UnrestrictAction(Action::Act_t type);
     virtual void debug() override;
+    virtual void act(Context* ctx) override;
 };
 
 class ActionParser

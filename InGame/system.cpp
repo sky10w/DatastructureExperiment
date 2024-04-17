@@ -6,14 +6,15 @@ QVector<QString> GlobalStatus::allCardOwned = {
     "0002", "0002", "0002",
     "0003", "0004"
 };
-int GlobalStatus::playerHp = 40;
-int GlobalStatus::playerEnergy = 3;
+int GlobalStatus::playerMaxHp = 40;
+int GlobalStatus::playerMaxEnergy = 3;
 
 
 const int InGameSystem::_playerSlot = 0;
 
 InGameSystem::InGameSystem()
     : _actionDisabled(0)
+    , _playerEnergy(GlobalStatus::playerMaxEnergy)
     , _view(new gameboard())
     , _handCard({})
 {
@@ -46,6 +47,10 @@ InGameSystem::InGameSystem()
         i = new CardStack();
     }
     this->_stack[DRAW]->push(list);
+    for(auto &i : list)
+    {
+        emit addCardToStack(i);
+    }
 
     // Init signals and slots
     QObject::connect(_view, SIGNAL(roundover()), this, SLOT(roundEnd()));
@@ -55,7 +60,7 @@ InGameSystem::InGameSystem()
     {
         const auto cardID = this->_stack[DRAW]->getPopOne();
         _handCard.push_back(cardID);
-
+        emit addCardToHand(cardID);
     }
 }
 
@@ -69,7 +74,16 @@ void InGameSystem::connectSignalSlotForEntities(Entity *entity)
     QObject::connect(entity, SIGNAL(requestHandleContext(Context*)), this, SLOT(handleContext(Context*)));
     QObject::connect(entity, SIGNAL(hpChanged(int,int)), _view, SLOT(updatehp(int,int)));
     QObject::connect(entity, SIGNAL(armorChanged(int,int)), _view, SLOT(updatearmor(int,int)));
-    QObject::connect(entity, SIGNAL(buffChanged(int,bool,QString)), _view, SLOT(updatebuff(int,bool,QString)));
+    QObject::connect(entity, SIGNAL(buffChanged(int,bool,QString)), _view, SLOT(updatebuff(QString,int,bool)));
+}
+
+void InGameSystem::connectSignalSlotForView(gameboard *gameboard)
+{
+    QObject::connect(_view, SIGNAL(roundover()), this, SLOT(roundEnd()));
+    QObject::connect(_view, SIGNAL(request_valid(QString,int*)), this, SLOT(handleCardValid(QString,int*)));
+    QObject::connect(this, SIGNAL(updateEnergy(int)), _view, SLOT(updateenergy(int)));
+    QObject::connect(this, SIGNAL(addCardToStack(QString)), _view->drawpile, SLOT(addcard(QString)));
+    QObject::connect(this, SIGNAL(addCardToHand(QString)), _view->drawpile, SLOT(drawCard(QString)));
 }
 
 void InGameSystem::handleContext(Context *ctx)
@@ -104,8 +118,15 @@ void InGameSystem::handleContext(Context *ctx)
 
 void InGameSystem::playerUsingCard(int targetIndex, const QString &cardID)
 {
-    const auto res = CardSystem::getCardInfo(cardID);
-    const auto actList = res.action;
+    const auto info = CardSystem::getCardInfo(cardID);
+    if(this->_playerEnergy < info.energy)
+    {
+        qFatal("In function %s: Unable to use card - cardID: %s - No energy", __FUNCTION__, info.id.toLatin1().data());
+    }
+    this->_playerEnergy -= info.energy;
+    emit
+
+    const auto actList = info.action;
     if(targetIndex >= _entities.size())
     {
         qFatal("In function %s: Unable to access to entity - index: %d", __FUNCTION__, targetIndex);
@@ -115,13 +136,13 @@ void InGameSystem::playerUsingCard(int targetIndex, const QString &cardID)
     {
         qFatal("In function %s: Unable to target a dead entity - index: %d", __FUNCTION__, targetIndex);
     }
-    const auto actType = res.actType;
+    const auto actType = info.actType;
     if((actType & this->_actionDisabled) > 0)
     {
         qFatal("In function %s: Player using an invalid card - id: ", __FUNCTION__);
     }
     // process targetList
-    const auto targetType = res.targetType;
+    const auto targetType = info.targetType;
     QVector<Entity*> targetList = {};
     switch (targetType) {
     case CardInfo::SELF:
@@ -188,4 +209,11 @@ void InGameSystem::needCardStack(bool isDrawStack)
 void InGameSystem::needHandCard()
 {
     emit sendHandCard(this->_handCard);
+}
+
+void InGameSystem::handleCardValid(QString cardID, int *valid)
+{
+    auto info = CardSystem::getCardInfo(cardID);
+    int res = this->_actionDisabled & info.actType;
+    *valid = !res;
 }
