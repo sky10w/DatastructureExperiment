@@ -103,7 +103,12 @@ gameboard::gameboard(MyOpenGLWidget *parent) : MyOpenGLWidget{parent} {
       view.setScene(drawpile);
     }
   });
-  connect(&EnergyButton, &QPushButton::pressed, this, [=]() { shuffle(); });
+  connect(&EnergyButton, &QPushButton::pressed, this, [=]() {
+    // shuffle();
+    // QString x("6 6 6");
+    // QString y = x.split(" ");
+    // cout << y << Endl;
+  });
   connect(&SettingsButton, &QPushButton::pressed, [=]() {});
   connect(myhands, &HandsView::discardcard, this, &gameboard::discardcard);
   connect(drawpile, &DrawPileView::shuffle, this, &gameboard::shuffle);
@@ -272,8 +277,14 @@ void CardView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
   EntityView *itembelow;
   itembelow = dynamic_cast<EntityView *>(
       scene()->itemAt(event->scenePos(), QTransform()));
+
+  // cout << event->scenePos().x() << ' ' << event->scenePos().y() << endl;
   HandsView *hands = dynamic_cast<HandsView *>(this->parent());
   gameboard *w = dynamic_cast<gameboard *>(hands->parent());
+  cout << endl;
+  for (auto x : w->Enemy)
+    cout << x.first << ' ';
+  cout << endl;
   arrow.hide();
   int *valid = new int();
   emit w->request_valid(uuid, valid);
@@ -302,6 +313,7 @@ void CardView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
     // w->energy -= info.energy;
     // w->updateenergyview();
     inhands = false;
+    cout << itembelow->id << endl;
     emit playcard(itembelow->id);
   }
   hands = nullptr;
@@ -455,7 +467,6 @@ void gameboard::initplayer(int id /*, QString name,*/, int HP_MAX) {
   newplayer->initasplayer(id);
   newplayer->setParent(this);
   newplayer->mybuff.buffview.setParent(this);
-  Enemy[id] = newplayer;
   Player = newplayer;
   Player->mybuff.update_buff("1", 1);
 }
