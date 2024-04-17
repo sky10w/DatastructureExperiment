@@ -62,18 +62,6 @@ void InGameSystem::run() {
         emit addCardToStack(i);
     }
 
-<<<<<<< HEAD
-  // Init handCard
-
-  for (int i = 0; i < 5; ++i) {
-    const auto cardID = this->_stack[DRAW]->getPopOne();
-    _handCard.push_front(cardID);
-    emit addCardToHand(cardID);
-  }
-  this->_actionDisabled = 0;
-  emit setEnergy(GlobalStatus::playerMaxEnergy);
-  emit roundBegin();
-=======
     // Init handCard
     for (int i = 0; i < 5; ++i) {
         const auto res = drawCard();
@@ -84,7 +72,6 @@ void InGameSystem::run() {
     _playerEnergy = GlobalStatus::playerMaxEnergy;
     emit setEnergy(GlobalStatus::playerMaxEnergy);
     emit roundBegin();
->>>>>>> 7b6497578d4904bddb291b06f75195468a00749c
 }
 
 // Round end for player's round
@@ -103,12 +90,6 @@ void InGameSystem::roundEnd() {
 
     _entities[i]->roundEnd();
 
-<<<<<<< HEAD
-    /// TODO
-    QThread::msleep(1000);
-  }
-  _curEntity = 0;
-=======
         /// TODO
         QThread::msleep(1000);
     }
@@ -128,7 +109,6 @@ void InGameSystem::roundEnd() {
     emit setEnergy(GlobalStatus::playerMaxEnergy);
     this->_actionDisabled = 0;
     emit roundBegin();
->>>>>>> 7b6497578d4904bddb291b06f75195468a00749c
 
   if (this->_stack[DRAW]->empty()) {
     shuffle();
@@ -221,18 +201,6 @@ void InGameSystem::handleContext(Context *ctx) {
   }
 }
 
-<<<<<<< HEAD
-void InGameSystem::playerUsingCard(int cardIndex, int targetIndex) {
-  const auto cardID = this->_handCard[cardIndex];
-  qDebug() << "Player using card - id:" << cardID << "index:" << cardIndex;
-  const auto info = CardSystem::getCardInfo(cardID);
-  if (this->_playerEnergy < info.energy) {
-    qFatal("In function %s: Unable to use card - cardID: %s - No energy",
-           __FUNCTION__, info.id.toLatin1().data());
-  }
-  this->_playerEnergy -= info.energy;
-  emit this->updateEnergy(-info.energy);
-=======
 void InGameSystem::playerUsingCard(int cardIndex,int targetIndex) {
     const auto cardID = this->_handCard[cardIndex];
     qDebug() << "Player using card - id:" << cardID << "index:" << cardIndex;
@@ -243,7 +211,6 @@ void InGameSystem::playerUsingCard(int cardIndex,int targetIndex) {
     }
     this->_playerEnergy -= info.energy;
     emit this->updateEnergy(-info.energy);
->>>>>>> 7b6497578d4904bddb291b06f75195468a00749c
 
   const auto actList = info.action;
   if (targetIndex >= _entities.size()) {

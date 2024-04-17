@@ -396,7 +396,6 @@ void HandsView::updatecard() {
 }
 void HandsView::consumecard(int id) {
 
-<<<<<<< HEAD
   CardView *trashcard = nullptr;
   int index;
   for (int i = 0; i < hands.size(); i++)
@@ -416,23 +415,6 @@ void HandsView::consumecard(int id) {
 
   emit playcard(index, id);
   updatecard();
-=======
-    CardView *trashcard = nullptr;
-    int index;
-    for (int i = 0; i < hands.size(); i++)
-        if (hands[i]->inhands == false) {
-            trashcard = hands[i];
-            index = i;
-            break;
-        }
-    if (trashcard == nullptr)
-        return;
-    hands.remove(index);
-    handsscene->removeItem(trashcard);
-    discardcard(trashcard);
-    emit playcard(index, id);
-    updatecard();
->>>>>>> 7b6497578d4904bddb291b06f75195468a00749c
 }
 void gameboard::discardcard(CardView *card) {
   discardpile->addcard(card);
