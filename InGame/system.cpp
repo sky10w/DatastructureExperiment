@@ -5,11 +5,12 @@ QVector<QString> GlobalStatus::allCardOwned = {
 };
 int GlobalStatus::playerMaxHp = 40;
 int GlobalStatus::playerMaxEnergy = 10;
+int GlobalStatus::playerMaxHandCard = 7;
 
 const int InGameSystem::_playerSlot = 0;
 
-InGameSystem::InGameSystem()
-    : _actionDisabled(0), _playerEnergy(GlobalStatus::playerMaxEnergy),
+InGameSystem::InGameSystem(bool isBossLevel)
+    : _actionDisabled(0),
       _view(new gameboard()), _handCard({})
 {
     // Init signals and slots
@@ -22,14 +23,23 @@ InGameSystem::InGameSystem()
     this->_view->initplayer(InGameSystem::_playerSlot, GlobalStatus::playerMaxHp);
 
     // Init enemies
-    std::default_random_engine e;
-    e.seed(std::time(nullptr));
-    this->_enemyNum = e() % 3 + 1;
+    if(isBossLevel == false)
+    {
+        std::default_random_engine e;
+        e.seed(std::time(nullptr));
+        this->_enemyNum = e() % 3 + 1;
 
-    for (int i = 0; i < this->_enemyNum; ++i) {
-        _entities.push_back(new Enemy(i + 1, 20));
-        connectSignalSlotForEntities(_entities[i + 1]);
-        this->_view->initenemy(i + 1, 20);
+        for (int i = 0; i < this->_enemyNum; ++i) {
+            _entities.push_back(new Enemy(i + 1, 20));
+            connectSignalSlotForEntities(_entities[i + 1]);
+            this->_view->initenemy(i + 1, 20);
+        }
+    }
+    else
+    {
+        _entities.push_back(new Boss(1, 30));
+        connectSignalSlotForEntities(_entities[1]);
+        this->_view->initenemy(1, 30);
     }
 }
 
@@ -60,6 +70,7 @@ void InGameSystem::run() {
     }
 
     this->_actionDisabled = 0;
+    _playerEnergy = GlobalStatus::playerMaxEnergy;
     emit setEnergy(GlobalStatus::playerMaxEnergy);
     emit roundBegin();
 }
@@ -95,6 +106,7 @@ void InGameSystem::roundEnd() {
         const auto res = drawCard();
         if(res == false) break;
     }
+    _playerEnergy = GlobalStatus::playerMaxEnergy;
     emit setEnergy(GlobalStatus::playerMaxEnergy);
     this->_actionDisabled = 0;
     emit roundBegin();
@@ -128,6 +140,7 @@ void InGameSystem::shuffle() {
 
 bool InGameSystem::drawCard()
 {
+    if(this->_handCard.size() >= 7) return false;
     const auto cardID = this->_stack[DRAW]->getPopOne();
     if(cardID == "-1") return false;
     _handCard.push_front(cardID);
@@ -176,7 +189,7 @@ void InGameSystem::playerUsingCard(int cardIndex,int targetIndex) {
     const auto info = CardSystem::getCardInfo(cardID);
     if (this->_playerEnergy < info.energy)
     {
-        qFatal("In function %s: Unable to use card - cardID: %s - No energy", __FUNCTION__, info.id.toLatin1().data());
+        qFatal("In function %s: Unable to use card - cardID: %s - No energy - current Energy: %d", __FUNCTION__, info.id.toLatin1().data(), this->_playerEnergy);
     }
     this->_playerEnergy -= info.energy;
     emit this->updateEnergy(-info.energy);

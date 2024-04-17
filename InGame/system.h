@@ -15,6 +15,7 @@ public:
     static QVector<QString> allCardOwned;
     static int playerMaxHp;
     static int playerMaxEnergy;
+    static int playerMaxHandCard;
 };
 
 
@@ -26,7 +27,7 @@ public:
         DROP = false,
         DRAW = true
     };
-    InGameSystem();
+    InGameSystem(bool isBossLevel);
     void run();
     void connectSignalSlotForEntities(Entity* entity);
     void connectSignalSlotForView();
@@ -48,7 +49,7 @@ signals:
     void armorChanged(int id, int delta);
 public slots:
     virtual void handleContext(Context* ctx); // from Entity
-    virtual void playerUsingCard(int targetIndex, int cardIndex);
+    virtual void playerUsingCard(int cardIndex, int targetIndex);
     /// Round end for player's round
     virtual void roundEnd();
 

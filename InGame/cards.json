@@ -1,53 +1,53 @@
 [
-  {
-    "uuid": "0001",
-    "name": "一般攻击",
-    "description": "造成6点伤害",
-    "path": ":/json/res/cards/attack.png" ,
-    "target_type": "ONE",
-    "energy": 1,
-    "act_type": "attack",
-    "action": "attack 6"
-  },
-  {
-    "uuid": "0002",
-    "name": "万箭齐发",
-    "description": "对全体敌人造成7点伤害",
-    "path": ":/json/res/cards/range_attack.png",
-    "target_type": "ALL",
-    "energy": 2,
-    "act_type": "attack",
-    "action": "attack 7"
-  },
-  {
-    "uuid": "0003",
-    "name": "防御",
-    "description": "获得5点护甲值",
-    "path": ":/json/res/cards/defend.png",
-    "target_type": "SELF",
-    "energy": 1,
-    "act_type": "defend",
-    "action": "defend 5"
-  },
-  {
-      "uuid": "0004",
-      "name": "蓄势",
-      "description": "当前回合无法使用攻击牌，但下回合伤害翻倍",
-      "path": ":/json/res/cards/gain_strength.png",
-      "target_type": "SELF",
-      "energy": 2,
-      "act_type": "buff",
-      "action": "restrict_action attack give_buff 0003"
-  },
-  {
-      "uuid": "0005",
-      "name": "火烧乌巢",
-      "description": "去除敌人的运粮效果，并给予它3层虚弱",
-      "path": ":/json/res/cards/fire.png",
-      "target_type": "ONE",
-      "energy": 2,
-      "act_type": "buff",
-      "action": "remove_buff 0006 give_buff 0005"
-  }
+    {
+        "uuid": "0001",
+        "name": "一般攻击",
+        "description": "造成6点伤害",
+        "path": ":/json/res/cards/attack.png" ,
+        "target_type": "ONE",
+        "energy": 1,
+        "act_type": "attack",
+        "action": "attack 6"
+    },
+    {
+        "uuid": "0002",
+        "name": "万箭齐发",
+        "description": "对全体敌人造成7点伤害",
+        "path": ":/json/res/cards/range_attack.png",
+        "target_type": "ALL",
+        "energy": 2,
+        "act_type": "attack",
+        "action": "attack 7"
+    },
+    {
+        "uuid": "0003",
+        "name": "防御",
+        "description": "获得5点护甲值",
+        "path": ":/json/res/cards/defend.png",
+        "target_type": "SELF",
+        "energy": 1,
+        "act_type": "defend",
+        "action": "defend 5"
+    },
+    {
+          "uuid": "0004",
+          "name": "蓄势",
+          "description": "当前回合无法使用攻击牌，但下回合伤害翻倍",
+          "path": ":/json/res/cards/gain_strength.png",
+          "target_type": "SELF",
+          "energy": 2,
+          "act_type": "buff",
+        "action": "restrict_action attack give_buff 0003"
+    },
+    {
+          "uuid": "0005",
+          "name": "火烧乌巢",
+          "description": "去除敌人的运粮效果，并给予它3层虚弱",
+          "path": ":/json/res/cards/fire.png",
+          "target_type": "ONE",
+          "energy": 2,
+          "act_type": "buff",
+          "action": "remove_buff 0006 give_buff 0005"
+    }
 ]
 

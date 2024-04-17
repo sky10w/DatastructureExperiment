@@ -373,18 +373,18 @@ void HandsView::init() {
   handsscene->setItemIndexMethod(QGraphicsScene::NoIndex);
 }
 void HandsView::carddraw(CardView *x) {
-  if (hands.size() >= HANDSLIMIT) {
-    emit discardcard(x);
-    return;
-  }
-  handsscene->addItem(x);
-  x->setParent(this);
-  x->inhands = true;
-  x->setFlag(QGraphicsItem::ItemIsMovable, true);
-  x->setAcceptHoverEvents(true);
-  connect(x, &CardView::playcard, this, &HandsView::consumecard);
-  hands.push_front(x);
-  updatecard();
+    if (hands.size() >= HANDSLIMIT) {
+        emit discardcard(x);
+        return;
+    }
+    handsscene->addItem(x);
+    x->setParent(this);
+    x->inhands = true;
+    x->setFlag(QGraphicsItem::ItemIsMovable, true);
+    x->setAcceptHoverEvents(true);
+    connect(x, &CardView::playcard, this, &HandsView::consumecard);
+    hands.push_front(x);
+    updatecard();
 }
 void HandsView::updatecard() {
   for (int i = 0; i < hands.size(); i++) {
@@ -395,21 +395,21 @@ void HandsView::updatecard() {
 }
 void HandsView::consumecard(int id) {
 
-  CardView *trashcard = nullptr;
-  int index;
-  for (int i = 0; i < hands.size(); i++)
-    if (hands[i]->inhands == false) {
-      trashcard = hands[i];
-      index = i;
-      break;
-    }
-  if (trashcard == nullptr)
-    return;
-  hands.remove(index);
-  handsscene->removeItem(trashcard);
-  discardcard(trashcard);
-  emit playcard(index, id);
-  updatecard();
+    CardView *trashcard = nullptr;
+    int index;
+    for (int i = 0; i < hands.size(); i++)
+        if (hands[i]->inhands == false) {
+            trashcard = hands[i];
+            index = i;
+            break;
+        }
+    if (trashcard == nullptr)
+        return;
+    hands.remove(index);
+    handsscene->removeItem(trashcard);
+    discardcard(trashcard);
+    emit playcard(index, id);
+    updatecard();
 }
 void gameboard::discardcard(CardView *card) {
   discardpile->addcard(card);
@@ -544,14 +544,14 @@ void DrawPileView::init() {
   setSceneRect(0, 0, WIDGETW, WIDGETH);
 }
 void DrawPileView::drawcard(QString uuid) {
-  if (st.size() == 0)
-    emit shuffle(); //没牌就洗一下
-  if (st.size() == 0)
-    return; //还没牌就返回
-  CardView *x = st.find(uuid)->second;
-  removecard(uuid);
-  emit send_card_to_hands(x);
-  // x = nullptr;
+    if (st.size() == 0)
+        emit shuffle(); //没牌就洗一下
+    if (st.size() == 0)
+        return; //还没牌就返回
+    CardView *x = st.find(uuid)->second;
+    removecard(uuid);
+    emit send_card_to_hands(x);
+    // x = nullptr;
 }
 void DrawPileView::addcard(QString uuid) {
   CardView *newcard = new CardView();

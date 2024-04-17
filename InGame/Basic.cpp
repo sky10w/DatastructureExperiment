@@ -169,6 +169,8 @@ void Boss::enemyAct(Context *ctx)
 
         return;
     }
+
+
     int randRes = e() % 2;
     switch (randRes) {
     case 0:
