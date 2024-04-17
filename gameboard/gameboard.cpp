@@ -20,7 +20,7 @@ gameboard::gameboard(MyOpenGLWidget *parent) : MyOpenGLWidget{parent} {
   myhands->handsscene = &scene;
   myhands->setParent(this);
   myhands->init();
-
+  Player = nullptr;
   // initplayer(0, 100);
   // initenemy(1, 100);
 
@@ -63,7 +63,8 @@ gameboard::gameboard(MyOpenGLWidget *parent) : MyOpenGLWidget{parent} {
     if (view.scene() == discardpile) {
       for (auto x : buttons)
         x->show();
-      Player->mybuff.buffview.show();
+      if (Player != nullptr)
+        Player->mybuff.buffview.show();
       for (auto x : Enemy)
         x.second->mybuff.buffview.show();
       view.setScene(&scene);
@@ -73,7 +74,8 @@ gameboard::gameboard(MyOpenGLWidget *parent) : MyOpenGLWidget{parent} {
         if (x != &DiscardPileButton)
           x->hide();
       }
-      Player->mybuff.buffview.hide();
+      if (Player != nullptr)
+        Player->mybuff.buffview.hide();
       for (auto x : Enemy)
         x.second->mybuff.buffview.hide();
       view.setScene(discardpile);
@@ -83,7 +85,8 @@ gameboard::gameboard(MyOpenGLWidget *parent) : MyOpenGLWidget{parent} {
     if (view.scene() == drawpile) {
       for (auto x : buttons)
         x->show();
-      Player->mybuff.buffview.show();
+      if (Player != nullptr)
+        Player->mybuff.buffview.show();
       for (auto x : Enemy)
         x.second->mybuff.buffview.show();
       view.setScene(&scene);
@@ -93,7 +96,8 @@ gameboard::gameboard(MyOpenGLWidget *parent) : MyOpenGLWidget{parent} {
         if (x != &DrawPileButton)
           x->hide();
       }
-      Player->mybuff.buffview.hide();
+      if (Player != nullptr)
+        Player->mybuff.buffview.hide();
       for (auto x : Enemy)
         x.second->mybuff.buffview.hide();
       view.setScene(drawpile);
@@ -336,7 +340,8 @@ void CardView::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) {
 void CardView::init() {
   setPixmap(QPixmap(info.path));
   this->setFlag(QGraphicsItem::ItemIsMovable, false);
-  info = cards[uuid];
+  // info = cards[uuid];
+  info = CardSystem::getCardInfo(this->uuid);
   // valid = 1;
   arrow.setParentItem(this);
 }

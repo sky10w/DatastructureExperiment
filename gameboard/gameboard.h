@@ -1,6 +1,7 @@
 #ifndef GAMEBOARD_H
 #define GAMEBOARD_H
 
+#include "InGame/Card/CardSystem.h"
 #include "InGame/Card/GameCard.h"
 #include "myopenglwidget.h"
 #include <QApplication>
@@ -34,7 +35,6 @@
 #include <iostream>
 #include <map>
 #include <set>
-
 using namespace std;
 
 class HandsView;
