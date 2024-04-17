@@ -299,10 +299,9 @@ void CardView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
   else if (w->playerround == 0)
     deny();
   else {
-    w->energy -= info.energy;
-    w->updateenergyview();
     inhands = false;
     emit playcard(itembelow->id);
+    w->updateenergyview();
   }
   hands = nullptr;
   w = nullptr;
