@@ -67,6 +67,11 @@ bool CardStack::empty() const
 	return this->_list.empty();
 }
 
+int CardStack::size() const
+{
+    return this->_list.size();
+}
+
 QVector<int> CardStack::utilGetRandomNum(int n)
 {
 	QVector<int> tempList;

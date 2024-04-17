@@ -49,6 +49,7 @@ public:
     QVector<QString> getAll() const;
 	void push(const QVector<QString>& cards);
 	bool empty() const;
+    int size() const;
 
 
 private:

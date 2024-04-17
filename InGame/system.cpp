@@ -96,7 +96,7 @@ void InGameSystem::connectSignalSlotForView()
 
 void InGameSystem::shuffle()
 {
-    emit this->shuffle();
+    emit this->sendShuffle();
     auto list = this->_stack[DROP]->getPopAll();
     this->_stack[DRAW]->push(list);
 }
@@ -197,6 +197,10 @@ void InGameSystem::playerUsingCard(int targetIndex, const QString &cardID)
         }
     }
     this->_stack[DROP]->push({cardID});
+    if(this->_stack[DRAW]->size() == 0)
+    {
+        shuffle();
+    }
 }
 
 // Round end for player's round
