@@ -33,7 +33,7 @@
       "uuid": "0004",
       "name": "蓄势",
       "description": "当前回合无法使用攻击牌，但下回合伤害翻倍",
-      "path": ":/json/res/cards/card_1.png",
+      "path": ":/json/res/cards/gain_strength.png",
       "target_type": "SELF",
       "energy": 2,
       "act_type": "buff",

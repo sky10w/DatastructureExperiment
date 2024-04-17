@@ -64,6 +64,13 @@ public:
 
 };
 
+class Boss : public Enemy
+{
+    Q_OBJECT
+public:
+
+};
+
 class Player : public Entity
 {
 	Q_OBJECT

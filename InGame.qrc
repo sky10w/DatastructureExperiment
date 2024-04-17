@@ -4,8 +4,6 @@
         <file>InGame/cards.json</file>
         <file>res/card_1.png</file>
         <file>res/card_2.png</file>
-        <file>res/cards/card_1.png</file>
-        <file>res/cards/card_2.png</file>
         <file>res/image/1.jpg</file>
         <file>res/image/back1.png</file>
         <file>res/image/back2.png</file>
@@ -25,5 +23,6 @@
         <file>res/cards/defend.png</file>
         <file>res/cards/fire.png</file>
         <file>res/cards/range_attack.png</file>
+        <file>res/cards/gain_strength.png</file>
     </qresource>
 </RCC>
