@@ -36,6 +36,11 @@ ModifyDamageByNumberBuff::ModifyDamageByNumberBuff(BuffInfo::BuffType type, int 
     , _incDamage(incDamage)
 {}
 
+BasicBuff *ModifyDamageByNumberBuff::getCopy()
+{
+    return new ModifyDamageByNumberBuff(*this);
+}
+
 void ModifyDamageByNumberBuff::affect(Context *ctx)
 {
     ctx->damageDone += this->_incDamage;
@@ -53,6 +58,11 @@ ModifyDamageByPercentBuff::ModifyDamageByPercentBuff(BuffInfo::BuffType type, in
     this->_degree = 2;
 }
 
+BasicBuff *ModifyDamageByPercentBuff::getCopy()
+{
+    return new ModifyDamageByPercentBuff(*this);
+}
+
 void ModifyDamageByPercentBuff::affect(Context *ctx)
 {
     ctx->damageDone = (double)ctx->damageDone * (1.0 + (double)this->_percent * 0.01);
@@ -67,6 +77,11 @@ ReadyToAttackBuff::ReadyToAttackBuff(BuffInfo::BuffType type, int degradeLevel)
     : BasicBuff(type)
 {
     this->_degree = degradeLevel;
+}
+
+BasicBuff *ReadyToAttackBuff::getCopy()
+{
+    return new ReadyToAttackBuff(*this);
 }
 
 void ReadyToAttackBuff::affect(Context *ctx)

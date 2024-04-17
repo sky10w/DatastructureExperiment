@@ -18,7 +18,7 @@ class Entity : public QObject
 {
 	Q_OBJECT
 public:
-    explicit Entity(bool isPlayer, int index);
+    explicit Entity(bool isPlayer, int index, int hp);
 
     virtual bool isPlayer() const;
     virtual int getHp() const;
@@ -60,7 +60,7 @@ class Enemy : public Entity
 {
 	Q_OBJECT
 public:
-    Enemy(int index);
+    Enemy(int index, int hp);
 
 };
 
@@ -68,7 +68,7 @@ class Player : public Entity
 {
 	Q_OBJECT
 public:
-    Player(int index);
+    Player(int index, int hp);
 };
 
 
