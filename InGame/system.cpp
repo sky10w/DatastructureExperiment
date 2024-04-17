@@ -70,6 +70,7 @@ void InGameSystem::run()
         emit addCardToHand(cardID);
     }
 
+    this->_actionDisabled = 0;
     emit setEnergy(GlobalStatus::playerMaxHp);
     emit roundBegin();
 }
@@ -233,6 +234,7 @@ void InGameSystem::roundEnd()
         emit addCardToHand(cardID);
     }
     emit setEnergy(GlobalStatus::playerMaxHp);
+    this->_actionDisabled = 0;
     emit roundBegin();
 }
 

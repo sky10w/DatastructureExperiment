@@ -74,7 +74,7 @@ void ReadyToAttackBuff::affect(Context *ctx)
     degrade();
     if(this->_degree == 0)
     {
-        ctx->actAltered = (-1) * Action::ATTACK;
+        ctx->buffGiven = "0004";
         // emit degreeToZero();
     }
 }
