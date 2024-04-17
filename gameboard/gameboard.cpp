@@ -18,8 +18,8 @@ gameboard::gameboard(MyOpenGLWidget *parent) : MyOpenGLWidget{parent} {
   myhands = new HandsView();
   buttons = {&DiscardPileButton, &DrawPileButton, &EndButton, &SettingsButton,
              &EnergyButton};
-  initplayer(0, "曹操", 100);
-  initenemy(1, "enemy", 100);
+  initplayer(0, 100);
+  initenemy(1, 100);
   drawpile = new DrawPileView();
   discardpile = new DiscardPileView();
   discardpile->init();
@@ -139,19 +139,19 @@ void EntityView::init(int hp) {
   armornumber.setText(QString::number(armor));
   armornumber.setFont(QFont("Arial", 15, 0, true));
 }
-void EntityView::initasplayer(int id, QString name) {
+void EntityView::initasplayer(int id) {
   setPos(100, 200);
   setPixmap(QPixmap("://res/player.png"));
   mybuff.init(100, 200);
   id = id;
-  name = name;
+  // name = name;
 }
-void EntityView::initasenemy(int id, QString name) {
+void EntityView::initasenemy(int id) {
   setPos(500 + 200 * id, 200);
   setPixmap(QPixmap("://res/enemy.jpg"));
   mybuff.init(500 + 200 * id, 200);
   id = id;
-  name = name;
+  // name = name;
 }
 
 void EntityView::updatehpview() {
@@ -307,7 +307,7 @@ void CardView::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) {
   this->setPos(curposx, curposy);
 }
 void CardView::init() {
-  setPixmap(QPixmap("://res/card.jpg"));
+  setPixmap(QPixmap(info.path));
   this->setFlag(QGraphicsItem::ItemIsMovable, false);
   info = cards[uuid];
   // valid = 1;
@@ -371,48 +371,45 @@ void gameboard::setenergy(int x) {
   updateenergyview();
 }
 
-void gameboard::updatebuff(QString buffuuid, int strength, QString name) {
-  if (name != "曹操")
-    Enemy[name]->update_buff(buffuuid, strength);
+void gameboard::updatebuff(QString buffuuid, int strength, int id) {
+  if (id != 0)
+    Enemy[id]->update_buff(buffuuid, strength);
   else
     Player->update_buff(buffuuid, strength);
 }
 
-void gameboard::updatehp(QString name, int delta) {
-  if (name != "曹操")
-    Enemy[name]->update_HP(delta);
+void gameboard::updatehp(int id, int delta) {
+  if (id != 0)
+    Enemy[id]->update_HP(delta);
   else
     Player->update_HP(delta);
 }
 
-void gameboard::updatearmor(QString name, int delta) {
-  if (name != "曹操")
-    Enemy[name]->update_armor(delta);
+void gameboard::updatearmor(int id, int delta) {
+  if (id != 0)
+    Enemy[id]->update_armor(delta);
   else
     Player->update_armor(delta);
 }
 
-void gameboard::initenemy(int id, QString name, int HP_MAX) {
+void gameboard::initenemy(int id /*QString name,*/, int HP_MAX) {
   EntityView *newenemy = new EntityView();
   scene.addItem(newenemy);
   newenemy->init(HP_MAX);
-  newenemy->initasenemy(id, name);
-
+  newenemy->initasenemy(id);
   newenemy->setParent(this);
   newenemy->mybuff.buffview.setParent(this);
-
-  Enemy[name] = newenemy;
+  Enemy[id] = newenemy;
 }
-void gameboard::initplayer(int id, QString name, int HP_MAX) {
+void gameboard::initplayer(int id /*, QString name,*/, int HP_MAX) {
   // Player->HP_MAX = HP_MAX;
   EntityView *newplayer = new EntityView();
   scene.addItem(newplayer);
   newplayer->init(HP_MAX);
-  newplayer->initasplayer(id, name);
-
+  newplayer->initasplayer(id);
   newplayer->setParent(this);
   newplayer->mybuff.buffview.setParent(this);
-  Enemy[name] = newplayer;
+  Enemy[id] = newplayer;
   Player = newplayer;
   Player->mybuff.update_buff("1", 1);
 }
