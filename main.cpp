@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
   w.setFixedSize(1280, 720);
   w.show();
   */
-  InGameSystem x;
+  InGameSystem x(false);
   x.run();
 
   return a.exec();
