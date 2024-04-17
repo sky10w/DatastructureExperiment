@@ -202,11 +202,17 @@ void gameboard::updateenergyview() {
 
 void gameboard::roundbegin() {
   playerround = 1;
+  QGraphicsPixmapItem msg(QString("://res/roundbegin.png"));
+
+  setanimation(QString("://res/roundbegin.png"), 3000,
+               WIDGETW - msg.pixmap().width() >> 1,
+               WIDGETH - msg.pixmap().height() >> 1);
+}
+void gameboard::setanimation(QString path, int time, int posx, int posy) {
   QGraphicsPixmapItem *msg = new QGraphicsPixmapItem();
-  msg->setPixmap(QString("://res/roundbegin.png"));
+  msg->setPixmap(QString(path));
   scene.addItem(msg);
-  msg->setPos(WIDGETW - msg->pixmap().width() >> 1,
-              WIDGETH - msg->pixmap().height() >> 1);
+  msg->setPos(posx, posy);
   // 创建一个定时器
   QTimer *timer = new QTimer();
   timer->setSingleShot(true); // 设置定时器只触发一次
@@ -216,7 +222,7 @@ void gameboard::roundbegin() {
     scene.removeItem(msg);
     delete msg;
   });
-  timer->start(3000);
+  timer->start(time);
 }
 void BuffView::init(int posx, int posy) {
   buffview.setScene(&buffscene);
@@ -296,7 +302,7 @@ void CardView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
     w->energy -= info.energy;
     w->updateenergyview();
     inhands = false;
-    emit playcard(itembelow->name);
+    emit playcard(itembelow->id);
   }
   hands = nullptr;
   w = nullptr;
@@ -375,7 +381,7 @@ void HandsView::updatecard() {
     hands[i]->setPos(hands[i]->curposx, hands[i]->curposy);
   }
 }
-void HandsView::consumecard(QString name) {
+void HandsView::consumecard(int id) {
 
   CardView *trashcard = nullptr;
   int index;
@@ -390,7 +396,7 @@ void HandsView::consumecard(QString name) {
   hands.remove(index);
   handsscene->removeItem(trashcard);
   discardcard(trashcard);
-  emit playcard(index, name);
+  emit playcard(index, id);
   updatecard();
 }
 void gameboard::discardcard(CardView *card) {
@@ -417,10 +423,12 @@ void gameboard::updatebuff(QString buffuuid, int strength, int id) {
 }
 
 void gameboard::updatehp(int id, int delta) {
-  if (id != 0)
+  if (id != 0) {
+    // if (delta < 0)
     Enemy[id]->update_HP(delta);
-  else
+  } else {
     Player->update_HP(delta);
+  }
 }
 
 void gameboard::updatearmor(int id, int delta) {
