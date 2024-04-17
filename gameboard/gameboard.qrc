@@ -17,4 +17,5 @@
         <file>res/enemy.jpg</file>
         <file>res/roundbegin.png</file>
     </qresource>
+    <qresource prefix="/MainGame"/>
 </RCC>
