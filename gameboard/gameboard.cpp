@@ -281,10 +281,10 @@ void CardView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
   // cout << event->scenePos().x() << ' ' << event->scenePos().y() << endl;
   HandsView *hands = dynamic_cast<HandsView *>(this->parent());
   gameboard *w = dynamic_cast<gameboard *>(hands->parent());
-  cout << endl;
-  for (auto x : w->Enemy)
-    cout << x.first << ' ';
-  cout << endl;
+  // cout << endl;
+  // for (auto x : w->Enemy)
+  //  cout << x.first << ' ';
+  // cout << endl;
   arrow.hide();
   int *valid = new int();
   emit w->request_valid(uuid, valid);
@@ -310,10 +310,11 @@ void CardView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
   else if (w->playerround == 0)
     deny();
   else {
+    cout << this->info.name.toStdString() << endl;
     // w->energy -= info.energy;
     // w->updateenergyview();
     inhands = false;
-    cout << itembelow->id << endl;
+    // cout << itembelow->id << endl;
     emit playcard(itembelow->id);
   }
   hands = nullptr;
@@ -388,7 +389,7 @@ void HandsView::carddraw(CardView *x) {
 }
 void HandsView::updatecard() {
   for (int i = 0; i < hands.size(); i++) {
-    hands[i]->curposx = 1000 - 150 * i;
+    hands[i]->curposx = 1200 - 150 * (hands.size() - i);
     hands[i]->curposy = 550;
     hands[i]->setPos(hands[i]->curposx, hands[i]->curposy);
   }
@@ -400,14 +401,18 @@ void HandsView::consumecard(int id) {
   for (int i = 0; i < hands.size(); i++)
     if (hands[i]->inhands == false) {
       trashcard = hands[i];
+      // cout << i << endl;
       index = i;
       break;
     }
+  // cout << hands.size() << endl;
+  cout << index << endl;
   if (trashcard == nullptr)
     return;
   hands.remove(index);
   handsscene->removeItem(trashcard);
   discardcard(trashcard);
+
   emit playcard(index, id);
   updatecard();
 }
