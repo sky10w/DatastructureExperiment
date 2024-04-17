@@ -74,22 +74,28 @@ void Entity::attack(Context *ctx, bool triggerBuff) {
 }
 
 void Entity::gainArmor(Context *ctx, bool triggerBuff) {
-  if (triggerBuff) {
-    this->handleBuffList(ctx, BuffInfo::ON_GAINARMOR);
-  }
+    if (triggerBuff) {
+        this->handleBuffList(ctx, BuffInfo::ON_GAINARMOR);
+    }
 
-  this->_armor += ctx->armorGained;
-  emit this->armorChanged(this->_id, ctx->armorGained);
+    this->_armor += ctx->armorGained;
+    emit this->armorChanged(this->_id, ctx->armorGained);
 }
 
 void Entity::hurt(Context *ctx, bool triggerBuff) {
-  if (triggerBuff) {
-    this->handleBuffList(ctx, BuffInfo::ON_HURT);
-  }
+    if (triggerBuff) {
+        this->handleBuffList(ctx, BuffInfo::ON_HURT);
+    }
 
-  int dealDamage = std::min(ctx->damageDone, this->_armor);
-  ctx->damageDone -= dealDamage;
-  emit this->hpChanged(this->_id, -dealDamage);
+    int dealToArmorDamage = std::min(ctx->damageDone, this->_armor);
+    this->_armor -= dealToArmorDamage;
+    ctx->damageDone -= dealToArmorDamage;
+    qDebug() << this->_id << "Hurt on armor! Damage:" << dealToArmorDamage;
+    emit this->armorChanged(this->_id, -dealToArmorDamage);
+
+    if(ctx->damageDone <= 0) return;
+    qDebug() << this->_id << "Hurt! Damage:" << ctx->damageDone;
+    emit this->hpChanged(this->_id, -ctx->damageDone);
 }
 
 void Entity::giveBuff(Context *ctx, bool triggerBuff) {

@@ -47,7 +47,7 @@ signals:
     void armorChanged(int id, int delta);
 public slots:
     virtual void handleContext(Context* ctx); // from Entity
-    virtual void playerUsingCard(int targetIndex, const QString& cardID);
+    virtual void playerUsingCard(int targetIndex, int cardIndex);
     /// Round end for player's round
     virtual void roundEnd();
 

@@ -293,10 +293,10 @@ void CardView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
   else if (w->playerround == 0)
     deny();
   else {
-    w->energy -= info.energy;
-    w->updateenergyview();
+    // w->energy -= info.energy;
+    // w->updateenergyview();
     inhands = false;
-    emit playcard(itembelow->name);
+    emit playcard(itembelow->id);
   }
   hands = nullptr;
   w = nullptr;
@@ -375,7 +375,7 @@ void HandsView::updatecard() {
     hands[i]->setPos(hands[i]->curposx, hands[i]->curposy);
   }
 }
-void HandsView::consumecard(QString name) {
+void HandsView::consumecard(int id) {
 
   CardView *trashcard = nullptr;
   int index;
@@ -390,7 +390,7 @@ void HandsView::consumecard(QString name) {
   hands.remove(index);
   handsscene->removeItem(trashcard);
   discardcard(trashcard);
-  emit playcard(index, name);
+  emit playcard(index, id);
   updatecard();
 }
 void gameboard::discardcard(CardView *card) {

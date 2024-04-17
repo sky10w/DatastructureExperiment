@@ -67,7 +67,7 @@ QHash<QString, BuffInfo> BuffSystem::initBuff()
             return {};
         }
 
-        // qDebug() << className;
+        qDebug() << className;
         auto res = BuffParser::parse(className);
         if(res == nullptr)
         {

@@ -73,13 +73,13 @@ const QHash<QString, std::function<BuffParser::res_t(BuffParser::iter_t, BuffPar
 BasicBuff* BuffParser::parse(const QString &str)
 {
     auto temp = str.split(" ");
-    // qDebug() << "The string list:" << temp;
+    qDebug() << "The string list:" << temp;
 
     auto iter = temp.begin();
     const QString cur = *iter;
     if(!Functions.contains(cur))
     {
-        qWarning() << "Invalid expression: keyword missing \"" << cur << "\"";
+        qWarning() << "Invalid expression: keyword missing " << cur;
         return nullptr;
     }
     const auto res = BuffParser::Functions[cur](iter, temp.end());

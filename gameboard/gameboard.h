@@ -127,7 +127,7 @@ public:
   void init();
 
 signals:
-  void playcard(QString id); //这是前端内部的
+  void playcard(int id); //这是前端内部的
 
 public slots:
   // void get_valid(bool isvalid); // valid
@@ -151,11 +151,11 @@ public:
 
 public slots:
   void updatecard();              //更新手牌排布//这是前端内部的
-  void consumecard(QString name); //对name打出卡牌//这是前端内部的
+  void consumecard(int name); //对name打出卡牌//这是前端内部的
   void carddraw(CardView *);      //抽卡//这是前端内部的
 signals:
   void discardcard(CardView *card);
-  void playcard(int index, QString name); //对name打出第index张牌
+  void playcard(int index, int id); //对name打出第index张牌
 };
 
 class DiscardPileView : public QGraphicsScene {
