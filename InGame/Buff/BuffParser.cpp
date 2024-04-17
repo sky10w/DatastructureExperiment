@@ -91,7 +91,7 @@ const QHash<QString, std::function<BuffParser::res_t(BuffParser::iter_t, BuffPar
 BasicBuff* BuffParser::parse(const QString &str)
 {
     auto temp = str.split(" ");
-    qDebug() << "The string list:" << temp;
+    // qDebug() << "The string list:" << temp;
 
     auto iter = temp.begin();
     const QString cur = *iter;
