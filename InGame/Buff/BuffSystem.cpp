@@ -6,10 +6,10 @@ QHash<QString, BuffInfo> BuffSystem::_buff;
 BuffInfo BuffSystem::getBuffInfo(const QString &buffID)
 {
     qDebug() << "Getting buffInfo" << buffID;
-    for(auto& i : BuffSystem::_buff)
-    {
-        qDebug() << i.id << i.buffName;
-    }
+    // for(auto& i : BuffSystem::_buff)
+    // {
+    //     qDebug() << i.id << i.buffName;
+    // }
     if(!BuffSystem::_buff.contains(buffID))
     {
         qFatal("Error: no existing buff - id: %s", buffID.toLatin1().data());

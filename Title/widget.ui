@@ -26,7 +26,7 @@
     <string notr="true">background-image: url(:/img/Image/start1.png);</string>
    </property>
    <property name="text">
-    <string> </string>
+    <string/>
    </property>
   </widget>
   <widget class="QPushButton" name="pushButton_2">
@@ -42,7 +42,7 @@
     <string notr="true">background-image: url(:/img/Image/sett.png);</string>
    </property>
    <property name="text">
-    <string> </string>
+    <string/>
    </property>
   </widget>
   <widget class="QPushButton" name="pushButton_3">
@@ -58,20 +58,8 @@
     <string notr="true">background-image: url(:/img/Image/back.png);</string>
    </property>
    <property name="text">
-    <string> </string>
+    <string/>
    </property>
-  </widget>
-  <widget class="QStackedWidget" name="stackedWidget">
-   <property name="geometry">
-    <rect>
-     <x>380</x>
-     <y>200</y>
-     <width>401</width>
-     <height>191</height>
-    </rect>
-   </property>
-   <widget class="QWidget" name="page"/>
-   <widget class="QWidget" name="page_2"/>
   </widget>
  </widget>
  <resources/>

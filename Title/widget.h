@@ -8,16 +8,8 @@
 #include <QPushButton>
 #include <QToolButton>
 
-#include "ui_widget.h"
 #include "login1.h"
 #include "setting.h"
-
-QT_BEGIN_NAMESPACE
-namespace Ui {
-class widget;
-}
-QT_END_NAMESPACE
-
 
 
 class widget : public QWidget
@@ -27,8 +19,12 @@ class widget : public QWidget
 public:
     widget(QWidget *parent = nullptr);
     ~widget();
+    QGraphicsScene *getScene() const;
+    void showView();
+    void closeView();
 
-
+signals:
+    void changeScene(int scene);
 
 private slots:
     void on_pushButton_clicked();
@@ -38,11 +34,9 @@ private slots:
     void on_pushButton_3_clicked();
 
 private:
-    Ui::widget *ui;
-
-    QGraphicsView mGameView;
+    QGraphicsView *mGameView;
     QGraphicsScene mScene;
-    QGraphicsScene mStartScene;//开始菜单
+    QGraphicsScene *mStartScene;//开始菜单
     QGraphicsScene mSetScene;//设置菜单
     QGraphicsPixmapItem mStart;
     QGraphicsPixmapItem mBackGround1;

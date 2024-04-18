@@ -7,7 +7,7 @@ const int HANDSLIMIT = 7;
 const int WIDGETW = 1280;
 const int WIDGETH = 720;
 int mysignbit(const qreal &x) { return (x > 0) - (x < 0); }
-gameboard::gameboard(MyOpenGLWidget *parent) : MyOpenGLWidget{parent} {
+gameboard::gameboard(QWidget *parent) : MyOpenGLWidget(parent) {
 
   // QGraphicsScene scene(this);
   // QGraphicsView view(this);
@@ -16,12 +16,12 @@ gameboard::gameboard(MyOpenGLWidget *parent) : MyOpenGLWidget{parent} {
 
   // energy = 15;
   // updateenergyview();
-  myhands = new HandsView();
-  myhands->handsview = &view;
-  myhands->handsscene = &scene;
-  myhands->setParent(this);
-  myhands->init();
-  Player = nullptr;
+  this->myhands = new HandsView();
+  this->myhands->handsview = &view;
+  this->myhands->handsscene = &scene;
+  this->myhands->setParent(this);
+  this->myhands->init();
+  this->Player = nullptr;
   // initplayer(0, 100);
   // initenemy(1, 100);
 
@@ -162,7 +162,7 @@ void EntityView::initasplayer(int id) {
 }
 void EntityView::initasenemy(int id) {
   setPos(500 + 200 * id, 200);
-  setPixmap(QPixmap("://res/enemy.jpg"));
+  setPixmap(QPixmap(this->name));
   mybuff.init(500 + 200 * id, 200);
   this->id = id;
 
@@ -290,11 +290,13 @@ void BuffView::update_buff(QString id, int delta) {
                 "</div>"));
 
     buffscene.addItem(newbufficon);
+
     // cout << Buffs.size() << endl;
     Buffs[id] = newbuff;
     bufficon[id] = newbufficon;
     // cout << Buffs.size() << endl;
   }
+
   updateview();
 }
 
@@ -369,9 +371,7 @@ void CardView::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
   qreal distance = QLineF(curposx + 75, curposy + 125, event->scenePos().x(),
                           event->scenePos().y())
                        .length();
-  EntityView *itembelow;
-  itembelow = dynamic_cast<EntityView *>(
-      scene()->itemAt(event->scenePos(), QTransform()));
+  EntityView *itembelow = dynamic_cast<EntityView *>(scene()->itemAt(event->scenePos(), QTransform()));
   if (distance > 200) {
     setFlag(QGraphicsItem::ItemIsMovable, false);
     //更新现有箭头的位置
@@ -501,16 +501,18 @@ void gameboard::updatearmor(int id, int delta) {
     Player->update_armor(delta);
 }
 
-void gameboard::initenemy(int id /*QString name,*/, int HP_MAX) {
-  EntityView *newenemy = new EntityView();
-  scene.addItem(newenemy);
-  newenemy->init(HP_MAX);
-  newenemy->initasenemy(id);
-  newenemy->setParent(this);
-  newenemy->mybuff.buffview.setParent(this);
-  Enemy[id] = newenemy;
+void gameboard::initenemy(int id, QString name, int HP_MAX) {
+    EntityView *newenemy = new EntityView();
+    scene.addItem(newenemy);
+    newenemy->name = name;
+    newenemy->init(HP_MAX);
+    newenemy->initasenemy(id);
+    newenemy->setParent(this);
+    newenemy->mybuff.buffview.setParent(this);
+    Enemy[id] = newenemy;
 }
 void gameboard::initplayer(int id /*, QString name,*/, int HP_MAX) {
+
   // Player->HP_MAX = HP_MAX;
   EntityView *newplayer = new EntityView();
   scene.addItem(newplayer);
@@ -521,38 +523,38 @@ void gameboard::initplayer(int id /*, QString name,*/, int HP_MAX) {
   Player = newplayer;
 }
 void gameboard::shuffle() {
-  // drawpile->st.insert(discardpile->st.begin(), discardpile->st.end());
-  for (auto x : discardpile->st) {
-    discardpile->removeItem(x.second);
-    drawpile->st.insert(x);
-  }
+    // drawpile->st.insert(discardpile->st.begin(), discardpile->st.end());
+    for (auto x : discardpile->st) {
+        discardpile->removeItem(x.second);
+        drawpile->st.insert(x);
+    }
 
-  discardpile->clean();
-  for (auto &[x, y] : drawpile->st) {
-    drawpile->addItem(y);
-  }
-  drawpile->update();
+    discardpile->clean();
+    for (auto &[x, y] : drawpile->st) {
+        drawpile->addItem(y);
+    }
+    drawpile->update();
 }
 void DiscardPileView::addcard(CardView *card) {
-  addItem(card);
-  card->inhands = 0;
-  card->setFlag(QGraphicsItem::ItemIsMovable, false);
-  auto it = card->uuid;
-  st.insert({it, card});
-  // card = nullptr;
-  update();
+    addItem(card);
+    card->inhands = 0;
+    card->setFlag(QGraphicsItem::ItemIsMovable, false);
+    auto it = card->uuid;
+    st.insert({it, card});
+    // card = nullptr;
+    update();
 }
 void DiscardPileView::init() {
-  setItemIndexMethod(NoIndex);
-  description.setPixmap(QPixmap("://res/1713154927636415.png"));
-  description.setZValue(1);
-  description.setPos(475, 0);
-  background.setPixmap(QPixmap("://res/background.png"));
-  background.setZValue(0);
-  background.setPos(0, 0);
-  addItem(&description);
-  addItem(&background);
-  setSceneRect(0, 0, WIDGETW, WIDGETH);
+    setItemIndexMethod(NoIndex);
+    description.setPixmap(QPixmap("://res/1713154927636415.png"));
+    description.setZValue(1);
+    description.setPos(475, 0);
+    background.setPixmap(QPixmap("://res/background.png"));
+    background.setZValue(0);
+    background.setPos(0, 0);
+    addItem(&description);
+    addItem(&background);
+    setSceneRect(0, 0, WIDGETW, WIDGETH);
 }
 void DiscardPileView::clean() {
   for (auto &x : st)

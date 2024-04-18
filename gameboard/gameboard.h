@@ -193,7 +193,7 @@ public slots:
 class gameboard : public MyOpenGLWidget {
   Q_OBJECT
 public:
-  explicit gameboard(MyOpenGLWidget *parent = nullptr);
+  explicit gameboard(QWidget *parent = nullptr);
   QGraphicsScene scene;
   QGraphicsView view;
   QPushButton DiscardPileButton;
@@ -231,7 +231,7 @@ public slots:
                   int id); //对name施加一个强度为strength的uuidbuff
   void updatehp(int id, int delta);    // name的hp+=delta
   void updatearmor(int id, int delta); // name的armor+=delta
-  void initenemy(int id, int HP_MAX);  //初始化一个敌人
+  void initenemy(int id, QString name, int HP_MAX);  //初始化一个敌人
   void initplayer(int id, int HP_MAX); //初始化一个玩家
 
   // int get

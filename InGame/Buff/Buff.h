@@ -7,6 +7,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonParseError>
+#include <QDebug>
 
 #include "InGame/globalOptions.h"
 #include "InGame/Context.h"
@@ -87,7 +88,7 @@ class ModifyDamageByPercentBuff : public ModifyDamageBasicBuff
 {
 public:
     ModifyDamageByPercentBuff(BuffInfo::BuffType type, int percent);
-    virtual BasicBuff* getCopy()override;
+    virtual BasicBuff* getCopy() override;
     virtual void affect(Context *ctx) override;
     virtual void degrade() override;
 

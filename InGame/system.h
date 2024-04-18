@@ -19,7 +19,7 @@ public:
 };
 
 
-class InGameSystem : public QObject
+class InGameSystem : public QWidget
 {
     Q_OBJECT
 public:
@@ -27,12 +27,15 @@ public:
         DROP = false,
         DRAW = true
     };
-    InGameSystem(bool isBossLevel);
+    InGameSystem(QWidget* parent = nullptr);
+    void initSystem(bool isBoss);
     void run();
     void connectSignalSlotForEntities(Entity* entity);
     void connectSignalSlotForView();
     void shuffle();
     bool drawCard();
+    void gameend(bool isWin);
+    int checkGameover();
 
 private:
     static const int _playerSlot;
@@ -47,6 +50,8 @@ signals:
     void roundBegin();
     void hpChanged(int id, int delta);
     void armorChanged(int id, int delta);
+    void gameover(bool isWin);
+    void changeScene(int scene);
 public slots:
     virtual void handleContext(Context* ctx); // from Entity
     virtual void playerUsingCard(int cardIndex, int targetIndex);
@@ -73,6 +78,8 @@ private:
     int _curEntity;
     int _playerEnergy;
     CardStack* _stack[2];
+    QGraphicsView* _gView;
+    QGraphicsScene* _scene;
     gameboard* _view;
     QVector<QString> _handCard;
 };

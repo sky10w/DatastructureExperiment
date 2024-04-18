@@ -19,21 +19,21 @@ int Entity::getArmor() const { return this->_armor; }
 bool Entity::isDead() const { return this->_hp <= 0; }
 
 void Entity::roundBegin() {
-  Context *ctx = new Context{};
-  ctx->from = this;
-  ctx->to = {this};
-  this->handleBuffList(ctx, BuffInfo::ON_ROUNDBEGIN);
-  emit requestHandleContext(ctx);
-  delete ctx;
+    Context *ctx = new Context{};
+    ctx->from = this;
+    ctx->to = {this};
+    this->handleBuffList(ctx, BuffInfo::ON_ROUNDBEGIN);
+    emit requestHandleContext(ctx);
+    delete ctx;
 }
 
 void Entity::roundEnd() {
-  Context *ctx = new Context{};
-  ctx->from = this;
-  ctx->to = {this};
-  this->handleBuffList(ctx, BuffInfo::ON_ROUNDEND);
-  emit requestHandleContext(ctx);
-  delete ctx;
+    Context *ctx = new Context{};
+    ctx->from = this;
+    ctx->to = {this};
+    this->handleBuffList(ctx, BuffInfo::ON_ROUNDEND);
+    emit requestHandleContext(ctx);
+    delete ctx;
 }
 
 void Entity::heal(Context *ctx) {
@@ -48,30 +48,31 @@ void Entity::removeBuff(Context *ctx) {
 }
 
 void Entity::buffRemoved(Context *ctx) {
-  auto type = BuffSystem::getBuffInfo(ctx->buffGiven).type;
-  auto &tarList = this->_buffList[type];
-  // find the corresponding buff
-  const auto buffInfo = BuffSystem::getBuffInfo(ctx->buffGiven);
-  for (auto i = tarList.begin(); i != tarList.end();) {
-    auto cur = *i;
-    if (cur->getID() == ctx->buffGiven) {
-      i = tarList.erase(i);
-      continue;
+    auto type = BuffSystem::getBuffInfo(ctx->buffGiven).type;
+    auto &tarList = this->_buffList[type];
+    // find the corresponding buff
+    const auto buffInfo = BuffSystem::getBuffInfo(ctx->buffGiven);
+    for (auto i = tarList.begin(); i != tarList.end();) {
+        auto cur = *i;
+        if (cur->getID() == ctx->buffGiven) {
+            i = tarList.erase(i);
+            continue;
+        }
+        ++i;
     }
-    ++i;
-  }
-  /// TODO
-  emit buffChanged(ctx->buffGiven, -99999, this->_id);
+    /// TODO
+    emit buffChanged(ctx->buffGiven, -99999, this->_id);
 }
 
 void Entity::attack(Context *ctx, bool triggerBuff) {
-  if (triggerBuff) {
-    this->handleBuffList(ctx, BuffInfo::ON_ATTACK);
-  }
+    qDebug() << "Entity Attack - buffList" << this->_buffList[BuffInfo::ON_ATTACK];
+    if (triggerBuff) {
+        this->handleBuffList(ctx, BuffInfo::ON_ATTACK);
+    }
 
-  for (auto &tar : ctx->to) {
-    tar->hurt(ctx, triggerBuff);
-  }
+    for (auto &tar : ctx->to) {
+        tar->hurt(ctx, triggerBuff);
+    }
 }
 
 void Entity::gainArmor(Context *ctx, bool triggerBuff) {
@@ -96,16 +97,18 @@ void Entity::hurt(Context *ctx, bool triggerBuff) {
 
     if(ctx->damageDone <= 0) return;
     qDebug() << this->_id << "Hurt! Damage:" << ctx->damageDone;
+    this->_hp -= ctx->damageDone;
     emit this->hpChanged(this->_id, -ctx->damageDone);
 }
 
 void Entity::giveBuff(Context *ctx, bool triggerBuff) {
-  if (triggerBuff) {
-    this->handleBuffList(ctx, BuffInfo::ON_GIVEBUFF);
-  }
-  for (auto &tar : ctx->to) {
-    tar->getBuffed(ctx, triggerBuff);
-  }
+    if (triggerBuff) {
+        this->handleBuffList(ctx, BuffInfo::ON_GIVEBUFF);
+    }
+    for (auto &tar : ctx->to) {
+        qDebug() << "Entity giving Buff - id:" << ctx->buffGiven;
+        tar->getBuffed(ctx, triggerBuff);
+    }
 }
 
 
@@ -116,10 +119,10 @@ void Entity::getBuffed(Context *ctx, bool triggerBuff)
         this->handleBuffList(ctx, BuffInfo::ON_GETBUFFED);
     }
     const auto buffInfo = BuffSystem::getBuffInfo(ctx->buffGiven);
-    /// TODO
     auto buffCopy = buffInfo.buff->getCopy();
+    qDebug() << "Entity got Buff - id:" << ctx->buffGiven << "- type:" << buffCopy->getType();
     this->_buffList[buffInfo.type].push_back(buffCopy);
-    emit buffChanged(ctx->buffGiven, -99999, this->_id);
+    emit buffChanged(ctx->buffGiven, buffCopy->isValid(), this->_id);
 }
 
 void Entity::handleBuffList(Context *ctx, BuffInfo::BuffType type)
@@ -127,9 +130,17 @@ void Entity::handleBuffList(Context *ctx, BuffInfo::BuffType type)
     auto &tarBuffList = this->_buffList[type];
     for (auto eff = tarBuffList.begin(); eff != tarBuffList.end();)
     {
+        qDebug() << (*eff)->getID() << "affecting";
         (*eff)->affect(ctx);
-        (*eff)->degrade();
-        if(!(*eff)->isValid()) eff = tarBuffList.erase(eff);
+        if(!(*eff)->isValid())
+        {
+            qDebug() << (*eff)->getID() << "degrade and has been removed";
+            eff = tarBuffList.erase(eff);
+        }
+        else
+        {
+            ++eff;
+        }
     }
 }
 

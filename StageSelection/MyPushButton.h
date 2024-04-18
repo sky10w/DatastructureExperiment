@@ -11,9 +11,9 @@ class MyPushButton : public QPushButton
 {
     Q_OBJECT
 public:
-    //    explicit MyPushButton(QWidget *parent = nullptr);
-        //构造函数,参数:正常的图片路径,按下后的图片路径
-    MyPushButton(int btnno,QString normal, QString press = "");
+    //  explicit MyPushButton(QWidget *parent = nullptr);
+    //构造函数,参数:正常的图片路径,按下后的图片路径
+    MyPushButton(int btnno, QString normal, QString press = "");
     int btnid;
     QString normal_img;//正常路径
     QString press_img;//按下后的路径
