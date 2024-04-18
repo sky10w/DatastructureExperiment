@@ -27,7 +27,6 @@ void InGameSystem::initSystem(bool isBossLevel) {
         return;
     // Init view
     this->_view = new gameboard();
-    _view->init();
     connectSignalSlotForView();
 
     // Init scene
