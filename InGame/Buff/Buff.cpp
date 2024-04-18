@@ -7,7 +7,7 @@ BasicBuff::BasicBuff(BuffInfo::BuffType type)
 
 bool BasicBuff::isValid() const
 {
-    return this->_degree <= 0;
+    return this->_degree >= 0;
 }
 
 BuffInfo::BuffType BasicBuff::getType() const

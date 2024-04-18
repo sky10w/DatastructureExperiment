@@ -24,6 +24,7 @@ InGameSystem::InGameSystem(QWidget *parent) : QWidget(parent) {
 
 void InGameSystem::initSystem(bool isBossLevel) {
     // Initialize
+    _inited = true;
     _actionDisabled = 0;
     _handCard = {};
 
@@ -67,6 +68,7 @@ void InGameSystem::initSystem(bool isBossLevel) {
 
 void InGameSystem::gameend(bool isWin)
 {
+    _inited = false;
     _actionDisabled = 0;
     for (auto &i : _entities) {
         i->deleteLater();
