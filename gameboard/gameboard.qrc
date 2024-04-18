@@ -18,5 +18,6 @@
         <file>res/2.png</file>
         <file>res/enemy.png</file>
         <file>res/armor.png</file>
+        <file>res/background.jpg</file>
     </qresource>
 </RCC>

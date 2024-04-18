@@ -110,6 +110,10 @@ void gameboard::init() {
   scene.setSceneRect(0, 0, WIDGETW, WIDGETH);
   scene.setItemIndexMethod(QGraphicsScene::NoIndex);
 
+  this->background.setPixmap(QString("://res/background.jpg"));
+  scene.addItem(&background);
+  background.setPos(0, 0);
+
   buttons = {&DiscardPileButton, &DrawPileButton, &EndButton, &SettingsButton,
              &EnergyButton};
   DiscardPileButton.setParent(this);
@@ -244,15 +248,20 @@ void gameboard::setanimation(QString path, int time, int posx, int posy) {
   scene.addItem(msg);
   msg->setPos(posx, posy);
   // 创建一个定时器
-  QTimer *timer = new QTimer();
-  timer->setSingleShot(true); // 设置定时器只触发一次
-  // 连接定时器的timeout信号到一个lambda函数，该函数将删除item
+
+  //---
+  QTimer *timer = new QTimer(); //新建一个
+  timer->setSingleShot(true);   //一次性
   QObject::connect(timer, &QTimer::timeout, this, [=] {
-    // 在场景中删除item
+    /*
+     * --------
+     */
     scene.removeItem(msg);
+    // 在场景中删除item
     delete msg;
   });
   timer->start(time);
+  //---
 }
 void BuffView::init(int posx, int posy) {
   buffview.setScene(&buffscene);
