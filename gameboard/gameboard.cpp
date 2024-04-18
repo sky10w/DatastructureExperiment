@@ -1,5 +1,6 @@
 #include "gameboard.h"
-QMap<QString, QString> MP_description = {{"1", "这是易伤BUFF"}};
+// QMap<QString, QString> MP_description = {{"1", "这是易伤BUFF"},
+//                                         {"2", "111111S"}};
 QMap<QString, QPixmap> CardIcon;
 // QMap<QString, CardInfo> cards = {{"1", {"1", "name", "1", "1", 1, 1}}};
 const int HANDSLIMIT = 7;
@@ -104,7 +105,9 @@ gameboard::gameboard(MyOpenGLWidget *parent) : MyOpenGLWidget{parent} {
     }
   });
   connect(&EnergyButton, &QPushButton::pressed, this, [=]() {
-    // shuffle();
+    // for (QString x : {"0001", "0002"})
+    //  updatebuff(x, 2, Enemy[1]->id);
+    // shuffle();//
     // QString x("6 6 6");
     // QString y = x.split(" ");
     // cout << y << Endl;
@@ -177,7 +180,10 @@ void EntityView::updatehpview() {
 
 void EntityView::update_HP(int delta) {
   HP += delta;
-  if (HP > HP_MAX)
+  if (HP < 0) {
+    HP = 0;
+    this->hide();
+  } else if (HP > HP_MAX)
     HP = HP_MAX;
   updatehpview();
 }
@@ -245,32 +251,65 @@ void BuffView::update_buff(QString id, int delta) {
   auto it2 = bufficon.find(id);
   if (it != Buffs.end()) {
     it->second->strength += delta;
+
+    it2->second->setToolTip(
+        QString("<div style='background-color: #87CEEB; color: white; padding: "
+                "0px; border: none;'>"
+                "<p style='font-family: \"微软雅黑\", sans-serif; font-size: "
+                "12px;'>" +
+                it->second->description +
+                "持续回合数:" + QString::number(it->second->strength) +
+                "</p>"
+                "</div>"));
+
     if (delta <= 0) {
       buffscene.removeItem(it2->second);
       bufficon.erase(id);
       Buffs.erase(id);
     }
   } else {
+    // cout << id.toStdString() << endl;
     Buff *newbuff = new Buff(id, delta);
     BuffIcon *newbufficon = new BuffIcon();
+
+    // newbufficon->setPixmap("://res/" + id + ".png");
+    newbufficon->setPixmap(newbuff->iconpath);
+    // cout << newbuff->iconpath.toStdString() << endl;
+    newbufficon->description = newbuff->description;
+
+    newbufficon->setToolTip(
+        QString("<div style='background-color: #87CEEB; color: white; padding: "
+                "0px; border: none;'>"
+                "<p style='font-family: \"微软雅黑\", sans-serif; font-size: "
+                "12px;'>" +
+                newbufficon->description +
+                "持续回合数:" + QString::number(newbuff->strength) +
+                "</p>"
+                "</div>"));
+
     buffscene.addItem(newbufficon);
-    newbufficon->setPixmap("://res/" + id + ".png");
-    newbufficon->description = MP_description[id];
-    newbufficon->setToolTip(newbufficon->description);
+    // cout << Buffs.size() << endl;
     Buffs[id] = newbuff;
     bufficon[id] = newbufficon;
+    // cout << Buffs.size() << endl;
   }
-  int k = 0;
-  for (auto x : bufficon) {
-    x.second->setPos(50 * (k++), 0);
-  }
+  updateview();
 }
+
 Buff::Buff(QString uuid, int strength) {
+  auto it = BuffSystem::getBuffInfo(uuid);
+  this->description = it.description;
+  this->iconpath = it.iconPath;
   this->uuid = uuid;
   this->strength = strength;
 }
-BuffView::BuffView() {}
-void BuffView::updateview() {}
+BuffView::BuffView() { buffview.setSceneRect(0, 0, 260, 60); }
+void BuffView::updateview() {
+  int k = 0;
+  for (auto x : bufficon)
+    x.second->setPos(50 * (k++), 0);
+  buffview.show();
+}
 void CardView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
 
   QGraphicsItem::mouseReleaseEvent(event);
@@ -278,7 +317,6 @@ void CardView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
   itembelow = dynamic_cast<EntityView *>(
       scene()->itemAt(event->scenePos(), QTransform()));
 
-  // cout << event->scenePos().x() << ' ' << event->scenePos().y() << endl;
   HandsView *hands = dynamic_cast<HandsView *>(this->parent());
   gameboard *w = dynamic_cast<gameboard *>(hands->parent());
   // cout << endl;
@@ -310,7 +348,7 @@ void CardView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
   else if (w->playerround == 0)
     deny();
   else {
-    cout << this->info.name.toStdString() << endl;
+    // cout << this->info.name.toStdString() << endl;
     // w->energy -= info.energy;
     // w->updateenergyview();
     inhands = false;
@@ -374,18 +412,18 @@ void HandsView::init() {
   handsscene->setItemIndexMethod(QGraphicsScene::NoIndex);
 }
 void HandsView::carddraw(CardView *x) {
-    if (hands.size() >= HANDSLIMIT) {
-        emit discardcard(x);
-        return;
-    }
-    handsscene->addItem(x);
-    x->setParent(this);
-    x->inhands = true;
-    x->setFlag(QGraphicsItem::ItemIsMovable, true);
-    x->setAcceptHoverEvents(true);
-    connect(x, &CardView::playcard, this, &HandsView::consumecard);
-    hands.push_front(x);
-    updatecard();
+  if (hands.size() >= HANDSLIMIT) {
+    emit discardcard(x);
+    return;
+  }
+  handsscene->addItem(x);
+  x->setParent(this);
+  x->inhands = true;
+  x->setFlag(QGraphicsItem::ItemIsMovable, true);
+  x->setAcceptHoverEvents(true);
+  connect(x, &CardView::playcard, this, &HandsView::consumecard);
+  hands.push_front(x);
+  updatecard();
 }
 void HandsView::updatecard() {
   for (int i = 0; i < hands.size(); i++) {
@@ -406,7 +444,7 @@ void HandsView::consumecard(int id) {
       break;
     }
   // cout << hands.size() << endl;
-  cout << index << endl;
+  // cout << index << endl;
   if (trashcard == nullptr)
     return;
   hands.remove(index);
@@ -441,10 +479,13 @@ void gameboard::updatebuff(QString buffuuid, int strength, int id) {
 
 void gameboard::updatehp(int id, int delta) {
   if (id != 0) {
-    // if (delta < 0)
     Enemy[id]->update_HP(delta);
+    if (Enemy[id]->HP == 0)
+      delete Enemy[id], Enemy.erase(id);
   } else {
     Player->update_HP(delta);
+    if (Player->HP == 0)
+      delete Player, Player = nullptr;
   }
 }
 
@@ -473,7 +514,6 @@ void gameboard::initplayer(int id /*, QString name,*/, int HP_MAX) {
   newplayer->setParent(this);
   newplayer->mybuff.buffview.setParent(this);
   Player = newplayer;
-  Player->mybuff.update_buff("1", 1);
 }
 void gameboard::shuffle() {
   // drawpile->st.insert(discardpile->st.begin(), discardpile->st.end());
@@ -549,14 +589,14 @@ void DrawPileView::init() {
   setSceneRect(0, 0, WIDGETW, WIDGETH);
 }
 void DrawPileView::drawcard(QString uuid) {
-    if (st.size() == 0)
-        emit shuffle(); //没牌就洗一下
-    if (st.size() == 0)
-        return; //还没牌就返回
-    CardView *x = st.find(uuid)->second;
-    removecard(uuid);
-    emit send_card_to_hands(x);
-    // x = nullptr;
+  if (st.size() == 0)
+    emit shuffle(); //没牌就洗一下
+  if (st.size() == 0)
+    return; //还没牌就返回
+  CardView *x = st.find(uuid)->second;
+  removecard(uuid);
+  emit send_card_to_hands(x);
+  // x = nullptr;
 }
 void DrawPileView::addcard(QString uuid) {
   CardView *newcard = new CardView();
