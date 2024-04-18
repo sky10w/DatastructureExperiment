@@ -13,8 +13,8 @@ Stagechoice1::Stagechoice1(QWidget *parent) : QWidget(parent) {
     connect(btn[i], &MyPushButton::clicked, btn[i], &MyPushButton::nosend);
     connect(btn[i], SIGNAL(nosended(int)), this, SLOT(levelChoose(int)));
 
-    connect(btn[i], &MyPushButton::clicked, btn[i], &MyPushButton::nosend);
-    connect(btn[i], SIGNAL(nosended(int)), this, SLOT(levelClear(int)));
+    // connect(btn[i], &MyPushButton::clicked, btn[i], &MyPushButton::nosend);
+    // connect(btn[i], SIGNAL(nosended(int)), this, SLOT(levelClear(int)));
     //目前上面两个都是点击触发（点关和通关）
   }
 
