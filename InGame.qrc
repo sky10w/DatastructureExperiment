@@ -24,5 +24,6 @@
         <file>res/cards/fire.png</file>
         <file>res/cards/range_attack.png</file>
         <file>res/cards/gain_strength.png</file>
+        <file>gameboard/res/1.png</file>
     </qresource>
 </RCC>

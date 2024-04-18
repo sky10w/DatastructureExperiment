@@ -3,6 +3,7 @@
 
 #include "InGame/Card/CardSystem.h"
 #include "InGame/Card/GameCard.h"
+#include "ingame/Buff/BuffSystem.h"
 #include "myopenglwidget.h"
 #include <QApplication>
 #include <QDebug>
@@ -50,7 +51,9 @@ protected:
 
 class Buff {
 public:
-  Buff(QString uuid, int strength);
+  Buff(QString id, int strength);
+  QString iconpath;
+  QString description;
   QString uuid;
   int strength; // buff strength
 };
@@ -63,7 +66,7 @@ public:
   map<QString, Buff *> Buffs;
   map<QString, BuffIcon *> bufficon;
   QGraphicsScene buffscene;
-  int MAXBUFFSUM;
+  int MAXBUFFSUM = 10;
   BuffView();
   //~BuffView();
 
