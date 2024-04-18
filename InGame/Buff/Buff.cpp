@@ -88,7 +88,7 @@ BasicBuff *ReadyToAttackBuff::getCopy()
 
 void ReadyToAttackBuff::affect(Context *ctx)
 {
-    qWarning() << "Warning";
+    qWarning() << "ReadyToAttackBuff affecting";
     this->degrade();
     if(this->_degree <= 0)
     {

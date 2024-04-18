@@ -36,6 +36,7 @@ private:
     InGameSystem* _ingame;
     QGraphicsScene* _scene[3];
     QGraphicsView* _view;
+    int _nowScene;
     bool _isBoss;
 
 };

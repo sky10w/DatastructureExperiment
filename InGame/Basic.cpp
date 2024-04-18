@@ -2,11 +2,11 @@
 
 // Entity ---
 Entity::Entity(bool isPlayer, int index, int hp)
-    : _isPlayer(isPlayer)
-    , _id(index)
+    : _maxHp(hp)
     , _hp(hp)
-    , _maxHp(hp)
     , _armor(0)
+    , _isPlayer(isPlayer)
+    , _id(index)
 {
 }
 
@@ -114,8 +114,7 @@ void Entity::giveBuff(Context *ctx, bool triggerBuff) {
 
 void Entity::getBuffed(Context *ctx, bool triggerBuff)
 {
-    if(triggerBuff)
-    {
+    if (triggerBuff) {
         this->handleBuffList(ctx, BuffInfo::ON_GETBUFFED);
     }
     const auto buffInfo = BuffSystem::getBuffInfo(ctx->buffGiven);
