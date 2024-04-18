@@ -77,6 +77,7 @@ private:
     int _enemyNum;
     int _curEntity;
     int _playerEnergy;
+    bool _inited;
     CardStack* _stack[2];
     QGraphicsView* _gView;
     QGraphicsScene* _scene;

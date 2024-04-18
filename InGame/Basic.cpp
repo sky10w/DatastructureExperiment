@@ -135,10 +135,9 @@ void Entity::handleBuffList(Context *ctx, BuffInfo::BuffType type)
         if(!(*eff)->isValid())
         {
             qDebug() << (*eff)->getID() << "degrade and has been removed";
+            emit this->buffChanged((*eff)->getID(), -99999, this->_id);
             eff = tarBuffList.erase(eff);
-        }
-        else
-        {
+        } else {
             ++eff;
         }
     }
@@ -180,7 +179,6 @@ void Boss::enemyAct(Context *ctx)
 
         return;
     }
-
 
     int randRes = e() % 2;
     switch (randRes) {

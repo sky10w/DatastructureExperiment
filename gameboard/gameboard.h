@@ -173,22 +173,23 @@ public:
   void clean();
   void update();
 };
-class DrawPileView : public QGraphicsScene {
-  Q_OBJECT
+class DrawPileView : public QGraphicsScene
+{
+    Q_OBJECT
 public:
-  QGraphicsPixmapItem description;
-  QGraphicsPixmapItem background;
-  multimap<QString, CardView *> st;
-  void init();
-  void removecard(QString uuid);
+    QGraphicsPixmapItem description;
+    QGraphicsPixmapItem background;
+    multimap<QString, CardView *> st;
+    void init();
+    void removecard(QString uuid);
 
-  void update();
+    void update();
 signals:
-  void shuffle();
-  void send_card_to_hands(CardView *card);
+    void shuffle();
+    void send_card_to_hands(CardView *card);
 public slots:
-  void drawcard(QString uuid); //抽到一张uuid的牌
-  void addcard(QString uuid);
+    void drawcard(QString uuid); //抽到一张uuid的牌
+    void addcard(QString uuid);
 };
 class gameboard : public MyOpenGLWidget {
   Q_OBJECT

@@ -9,28 +9,36 @@ int GlobalStatus::playerMaxHandCard = 7;
 const int InGameSystem::_playerSlot = 0;
 
 InGameSystem::InGameSystem(QWidget *parent) : QWidget(parent) {
-  this->setFixedSize(1280, 720);
-  this->_stack[0] = this->_stack[1] = nullptr;
+    this->_inited = false;
+    this->setFixedSize(1280, 720);
+    this->_stack[0] = this->_stack[1] = nullptr;
 
-    this->_view = new gameboard();
-    // Init signals and slots
-    connectSignalSlotForView();
-
-    this->_scene = new QGraphicsScene();
+    this->_scene = nullptr;
     _scene->addWidget(_view);
 
+    _actionDisabled = 0;
+    _handCard = {};
+
+    _gView = nullptr;
+}
+
+void InGameSystem::initSystem(bool isBossLevel) {
+    // Initialize
+    _actionDisabled = 0;
+    _handCard = {};
+
+    // Init view
+    this->_view = new gameboard();
+    connectSignalSlotForView();
+
+    // Init scene
+    this->_scene = new QGraphicsScene();
+    _scene->addWidget(_view);
     _gView = new QGraphicsView(this);
     _gView->setFrameShape(QFrame::NoFrame);
     _gView->setFrameRect({0, 0, 0, 0});
     _gView->setScene(_scene);
     _gView->hide();
-    // _gView->show();
-}
-
-void InGameSystem::initSystem(bool isBossLevel) {
-  // Initialize
-  _actionDisabled = 0;
-  _handCard = {};
 
     // Init player
     auto player = new Player(InGameSystem::_playerSlot, 40);
@@ -55,6 +63,28 @@ void InGameSystem::initSystem(bool isBossLevel) {
         this->_view->initenemy(1, "://res/enemy.jpg", 30);
     }
     _gView->show();
+}
+
+void InGameSystem::gameend(bool isWin)
+{
+    _actionDisabled = 0;
+    for (auto &i : _entities) {
+        i->deleteLater();
+    }
+    _entities.clear();
+    _enemyNum = 0;
+    _curEntity = 0;
+    _playerEnergy = 0;
+    for (auto &i : this->_stack) {
+        i->clear();
+    }
+    _view->deleteLater();
+    _view = nullptr;
+    _scene->deleteLater();
+    _scene = nullptr;
+    _handCard.clear();
+
+    emit gameover(isWin);
 }
 
 void InGameSystem::run() {
@@ -184,26 +214,6 @@ bool InGameSystem::drawCard()
     return true;
 }
 
-void InGameSystem::gameend(bool isWin)
-{
-    _actionDisabled = 0;
-    for (auto &i : _entities) {
-        delete i;
-    }
-    _entities.clear();
-    _enemyNum = 0;
-    _curEntity = 0;
-    _playerEnergy = 0;
-    for (auto &i : this->_stack) {
-        i->clear();
-    }
-    delete _view;
-    _view = nullptr;
-    _handCard.clear();
-
-    emit gameover(isWin);
-}
-
 int InGameSystem::checkGameover()
 {
     bool flag = true;
@@ -213,7 +223,6 @@ int InGameSystem::checkGameover()
             break;
         }
     }
-
     if (flag == true)
         return 1;
     if (this->_entities[0]->isDead())
@@ -231,20 +240,6 @@ void InGameSystem::handleContext(Context *ctx) {
         }
     }
     if (ctx->buffGiven != "") {
-        if (ctx->buffGiven[0] == '+') {
-            auto &str = ctx->buffGiven;
-            const auto iter = next(str.begin());
-            str.erase(str.begin(), iter);
-            ctx->from->giveBuff(ctx, true);
-        } else if (ctx->buffGiven[0] == '-') {
-            auto &str = ctx->buffGiven;
-            const auto iter = next(str.begin());
-            str.erase(str.begin(), iter);
-            ctx->from->removeBuff(ctx);
-        }
-    }
-    if (ctx->buffGiven != "") {
-        qDebug() << "Buff Handled - id" << ctx->buffGiven;
         if (ctx->buffGiven[0] == '+') {
             auto &str = ctx->buffGiven;
             const auto iter = next(str.begin());
