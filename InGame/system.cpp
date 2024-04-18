@@ -8,28 +8,26 @@ int GlobalStatus::playerMaxHandCard = 7;
 
 const int InGameSystem::_playerSlot = 0;
 
-InGameSystem::InGameSystem(QWidget *parent) : QWidget(parent) {
+InGameSystem::InGameSystem(QWidget *parent)
+    : QWidget(parent)
+    , _scene(nullptr)
+    , _gView(nullptr)
+    , _view(nullptr)
+{
     this->_inited = false;
     this->setFixedSize(1280, 720);
     this->_stack[0] = this->_stack[1] = nullptr;
 
-    this->_scene = nullptr;
-    _scene->addWidget(_view);
-
     _actionDisabled = 0;
     _handCard = {};
-
-    _gView = nullptr;
 }
 
 void InGameSystem::initSystem(bool isBossLevel) {
-    // Initialize
-    _inited = true;
-    _actionDisabled = 0;
-    _handCard = {};
-
+    if (_inited)
+        return;
     // Init view
     this->_view = new gameboard();
+    _view->init();
     connectSignalSlotForView();
 
     // Init scene
@@ -40,6 +38,11 @@ void InGameSystem::initSystem(bool isBossLevel) {
     _gView->setFrameRect({0, 0, 0, 0});
     _gView->setScene(_scene);
     _gView->hide();
+
+    // Initialize
+    _inited = true;
+    _actionDisabled = 0;
+    _handCard = {};
 
     // Init player
     auto player = new Player(InGameSystem::_playerSlot, 40);
@@ -84,66 +87,70 @@ void InGameSystem::gameend(bool isWin)
     _view = nullptr;
     _scene->deleteLater();
     _scene = nullptr;
+    _gView->deleteLater();
+    _gView = nullptr;
     _handCard.clear();
 
     emit gameover(isWin);
 }
 
 void InGameSystem::run() {
-  // Init cardStack
-  auto list = GlobalStatus::allCardOwned;
-  int len = list.size();
-  std::default_random_engine e;
-  for (int i = len - 1; i >= 0; --i) {
-    int ind = e() % (i + 1);
-    swap(list[ind], list[i]);
-  }
-  if (this->_stack[0] == nullptr) {
-    this->_stack[0] = new CardStack();
-  }
-  if (this->_stack[1] == nullptr) {
-    this->_stack[1] = new CardStack();
-  }
-  this->_stack[DRAW]->push(list);
-  for (auto &i : list) {
-    emit addCardToStack(i);
-  }
+    // Init cardStack
+    auto list = GlobalStatus::allCardOwned;
+    int len = list.size();
+    std::default_random_engine e;
+    for (int i = len - 1; i >= 0; --i) {
+        int ind = e() % (i + 1);
+        swap(list[ind], list[i]);
+    }
+    if (this->_stack[0] == nullptr) {
+        this->_stack[0] = new CardStack();
+    }
+    if (this->_stack[1] == nullptr) {
+        this->_stack[1] = new CardStack();
+    }
+    this->_stack[DRAW]->push(list);
+    for (auto &i : list) {
+        emit addCardToStack(i);
+    }
 
-  // Init handCard
-  for (int i = 0; i < 5; ++i) {
-    const auto res = drawCard();
-    if (res == false)
-      break;
-  }
+    // Init handCard
+    for (int i = 0; i < 5; ++i) {
+        const auto res = drawCard();
+        if (res == false)
+            break;
+    }
 
-  this->_actionDisabled = 0;
-  _playerEnergy = GlobalStatus::playerMaxEnergy;
-  emit setEnergy(GlobalStatus::playerMaxEnergy);
+    this->_actionDisabled = 0;
+    _playerEnergy = GlobalStatus::playerMaxEnergy;
+    emit setEnergy(GlobalStatus::playerMaxEnergy);
 
-  this->_entities[0]->roundBegin();
-  emit roundBegin();
+    this->_entities[0]->roundBegin();
+    emit roundBegin();
 }
 
 // Round end for player's round
 // Need to execute the following enemies' action
 void InGameSystem::roundEnd() {
-  this->_entities[0]->roundEnd();
-  for (int i = 1; i <= _enemyNum; ++i) {
-    _curEntity = i;
-    _entities[i]->roundBegin();
+    qDebug() << "Round End: enemyNum:" << this->_enemyNum;
+    for (int i = 1; i <= _enemyNum; ++i) {
+        if (_entities[i]->isDead())
+            continue;
+        _curEntity = i;
+        _entities[i]->roundBegin();
 
-    /// Test
-    auto ctx = new Context{};
-    ctx->from = _entities[i];
-    ctx->to = {_entities[0]};
-    ctx->damageDone = 5;
-    this->handleContext(ctx);
+        /// Test
+        auto ctx = new Context{};
+        ctx->from = _entities[i];
+        ctx->to = {_entities[0]};
+        dynamic_cast<Enemy *>(_entities[i])->enemyAct(ctx);
+        this->handleContext(ctx);
 
-    _entities[i]->roundEnd();
+        _entities[i]->roundEnd();
 
-    /// TODO
-    QThread::msleep(1000);
-  }
+        /// TODO
+        QThread::msleep(1000);
+    }
 
   /// Player round
   _curEntity = 0;
