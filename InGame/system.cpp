@@ -132,7 +132,8 @@ void InGameSystem::roundEnd() {
   emit roundBegin();
 }
 
-void InGameSystem::connectSignalSlotForEntities(Entity *entity) {
+void InGameSystem::connectSignalSlotForEntities(Entity *entity)
+{
     QObject::connect(entity,
                      SIGNAL(requestHandleContext(Context *)),
                      this,
@@ -145,7 +146,8 @@ void InGameSystem::connectSignalSlotForEntities(Entity *entity) {
                      SLOT(updatebuff(QString, int, int)));
 }
 
-void InGameSystem::connectSignalSlotForView() {
+void InGameSystem::connectSignalSlotForView()
+{
     QObject::connect(_view, SIGNAL(roundover()), this, SLOT(roundEnd()));
     QObject::connect(_view,
                      SIGNAL(request_valid(QString, int *)),
@@ -163,56 +165,60 @@ void InGameSystem::connectSignalSlotForView() {
                      SLOT(playerUsingCard(int, int)));
 }
 
-void InGameSystem::shuffle() {
-  emit this->sendShuffle();
-  const auto list = this->_stack[DROP]->getPopAll();
-  this->_stack[DRAW]->push(list);
+void InGameSystem::shuffle()
+{
+    emit this->sendShuffle();
+    const auto list = this->_stack[DROP]->getPopAll();
+    this->_stack[DRAW]->push(list);
 }
 
-bool InGameSystem::drawCard() {
-  if (this->_handCard.size() >= 7)
-    return false;
-  const auto cardID = this->_stack[DRAW]->getPopOne();
-  if (cardID == "-1")
-    return false;
-  _handCard.push_front(cardID);
-  emit addCardToHand(cardID);
-  return true;
+bool InGameSystem::drawCard()
+{
+    if (this->_handCard.size() >= 7)
+        return false;
+    const auto cardID = this->_stack[DRAW]->getPopOne();
+    if (cardID == "-1")
+        return false;
+    _handCard.push_front(cardID);
+    emit addCardToHand(cardID);
+    return true;
 }
 
-void InGameSystem::gameend(bool isWin) {
-  _actionDisabled = 0;
-  for (auto &i : _entities) {
-    delete i;
-  }
-  _entities.clear();
-  _enemyNum = 0;
-  _curEntity = 0;
-  _playerEnergy = 0;
-  for (auto &i : this->_stack) {
-    i->clear();
-  }
-  delete _view;
-  _view = nullptr;
-  _handCard.clear();
-
-  emit gameover(isWin);
-}
-
-int InGameSystem::checkGameover() {
-  bool flag = true;
-  for (int i = 1; i < this->_entities.size(); ++i) {
-    if (!this->_entities[i]->isDead()) {
-      flag = false;
-      break;
+void InGameSystem::gameend(bool isWin)
+{
+    _actionDisabled = 0;
+    for (auto &i : _entities) {
+        delete i;
     }
-  }
+    _entities.clear();
+    _enemyNum = 0;
+    _curEntity = 0;
+    _playerEnergy = 0;
+    for (auto &i : this->_stack) {
+        i->clear();
+    }
+    delete _view;
+    _view = nullptr;
+    _handCard.clear();
 
-  if (flag == true)
-    return 1;
-  if (this->_entities[0]->isDead())
-    return 2;
-  return 0;
+    emit gameover(isWin);
+}
+
+int InGameSystem::checkGameover()
+{
+    bool flag = true;
+    for (int i = 1; i < this->_entities.size(); ++i) {
+        if (!this->_entities[i]->isDead()) {
+            flag = false;
+            break;
+        }
+    }
+
+    if (flag == true)
+        return 1;
+    if (this->_entities[0]->isDead())
+        return 2;
+    return 0;
 }
 
 void InGameSystem::handleContext(Context *ctx) {
@@ -238,18 +244,18 @@ void InGameSystem::handleContext(Context *ctx) {
         }
     }
     if (ctx->buffGiven != "") {
-      qDebug() << "Buff Handled - id" << ctx->buffGiven;
-      if (ctx->buffGiven[0] == '+') {
-        auto &str = ctx->buffGiven;
-        const auto iter = next(str.begin());
-        str.erase(str.begin(), iter);
-        ctx->from->giveBuff(ctx, true);
-      } else if (ctx->buffGiven[0] == '-') {
-        auto &str = ctx->buffGiven;
-        const auto iter = next(str.begin());
-        str.erase(str.begin(), iter);
-        ctx->from->removeBuff(ctx);
-      }
+        qDebug() << "Buff Handled - id" << ctx->buffGiven;
+        if (ctx->buffGiven[0] == '+') {
+            auto &str = ctx->buffGiven;
+            const auto iter = next(str.begin());
+            str.erase(str.begin(), iter);
+            ctx->from->giveBuff(ctx, true);
+        } else if (ctx->buffGiven[0] == '-') {
+            auto &str = ctx->buffGiven;
+            const auto iter = next(str.begin());
+            str.erase(str.begin(), iter);
+            ctx->from->removeBuff(ctx);
+        }
     }
     if (ctx->actAltered != 0) {
       this->_actionDisabled ^= ctx->actAltered;
@@ -262,13 +268,13 @@ void InGameSystem::handleContext(Context *ctx) {
 
     const int gameoverStatus = checkGameover();
     if (gameoverStatus != 0) {
-      qDebug() << "Gameover";
-      gameend(gameoverStatus == 1);
+        qDebug() << "Gameover";
+        gameend(gameoverStatus == 1);
     }
-  }
-  }
+}
 
-void InGameSystem::playerUsingCard(int cardIndex,int targetIndex) {
+void InGameSystem::playerUsingCard(int cardIndex, int targetIndex)
+{
     qDebug() << "Player using card - index:" << cardIndex;
     const auto cardID = this->_handCard[cardIndex];
     qDebug() << "                  - id:" << cardID;
