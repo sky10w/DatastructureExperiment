@@ -19,6 +19,7 @@ gameboard::gameboard(QWidget *parent)
     , discardpile(nullptr)
 
 {
+    MyDebug;
     init();
 }
 void EntityView::initasplayer(int id)
@@ -91,6 +92,7 @@ void gameboard::updateenergyview()
 
 void gameboard::init()
 {
+    MyDebug;
     scene.clear();
     view.setScene(nullptr);
     if (Player != nullptr)
@@ -216,6 +218,7 @@ void gameboard::init()
 }
 void EntityView::init(int hp)
 {
+    MyDebug;
     HP = hp;
     HP_MAX = hp;
     hpbar.setParentItem(this);
@@ -243,6 +246,7 @@ void EntityView::init(int hp)
 
 void gameboard::roundbegin()
 {
+    MyDebug << "Round begin";
     playerround = 1;
     QGraphicsPixmapItem msg(QString("://res/roundbegin.png"));
 
@@ -489,6 +493,7 @@ void HandsView::updatecard()
 }
 void HandsView::consumecard(int id)
 {
+    MyDebug << "Consume a card - index" << id;
     CardView *trashcard = nullptr;
     int index;
     for (int i = 0; i < hands.size(); i++)
@@ -511,6 +516,7 @@ void HandsView::consumecard(int id)
 }
 void gameboard::discardcard(CardView *card)
 {
+    MyDebug << "Discard a card - id" << card->uuid;
     discardpile->addcard(card);
 
     /// card = nullptr;
@@ -559,6 +565,7 @@ void gameboard::updatearmor(int id, int delta)
 
 void gameboard::initenemy(int id, QString name, int HP_MAX)
 {
+    MyDebug << "Init enemy - id" << id;
     EntityView *newenemy = new EntityView();
     scene.addItem(newenemy);
     newenemy->name = name;
@@ -570,6 +577,7 @@ void gameboard::initenemy(int id, QString name, int HP_MAX)
 }
 void gameboard::initplayer(int id /*, QString name,*/, int HP_MAX)
 {
+    MyDebug << "Init player";
     // Player->HP_MAX = HP_MAX;
     EntityView *newplayer = new EntityView();
     scene.addItem(newplayer);
@@ -581,20 +589,29 @@ void gameboard::initplayer(int id /*, QString name,*/, int HP_MAX)
 }
 void gameboard::shuffle()
 {
+    MyDebug << "Shuffle once";
     // drawpile->st.insert(discardpile->st.begin(), discardpile->st.end());
-    for (auto x : discardpile->st) {
+    for (std::pair<QString, CardView *> x : discardpile->st) {
+        /// *Test code*
+        if (x.second->scene() == nullptr)
+            continue;
         discardpile->removeItem(x.second);
         drawpile->st.insert(x);
+        // drawpile->st.insert(x.first, x.second);
     }
 
     discardpile->clean();
     for (auto &[x, y] : drawpile->st) {
         drawpile->addItem(y);
     }
+    // for (auto &p : drawpile->st) {
+    // drawpile->addItem(p);
+    // }
     drawpile->update();
 }
 void DiscardPileView::addcard(CardView *card)
 {
+    MyDebug << "add card - id" << card->uuid;
     addItem(card);
     card->inhands = 0;
     card->setFlag(QGraphicsItem::ItemIsMovable, false);
@@ -618,12 +635,14 @@ void DiscardPileView::init()
 }
 void DiscardPileView::clean()
 {
+    MyDebug << "Discardpile clean";
     for (auto &x : st)
         removeItem(x.second);
     st.clear();
 }
 void DiscardPileView::update()
 {
+    MyDebug << "Discardpile update - size" << st.size();
     int i = 0, j = 0;
     for (auto &x : st) {
         x.second->setPos(265 + i * 150, 100 + j * 250);
@@ -636,11 +655,15 @@ void DiscardPileView::update()
 }
 void DrawPileView::update()
 {
+    MyDebug << "Drawpile update - size" << st.size();
     int i = 0, j = 0;
     for (auto &x : st) {
         x.second->setPos(265 + i * 150, 100 + j * 250);
         x.second->curposx = 265 + i * 150;
         x.second->curposy = 100 + j * 250;
+        // x->setPos(265 + i * 150, 100 + j * 250);
+        // x->curposx = 265 + i * 150;
+        // x->curposy = 100 + j * 250;
         i++;
         if (i == 5)
             i = 0, j++;
@@ -648,6 +671,7 @@ void DrawPileView::update()
 }
 void DrawPileView::init()
 {
+    MyDebug << "Init";
     setItemIndexMethod(NoIndex);
     description.setPixmap(QPixmap("://res/1713155278729455.png"));
     description.setZValue(1);
@@ -658,13 +682,28 @@ void DrawPileView::init()
     addItem(&description);
     addItem(&background);
     setSceneRect(0, 0, WIDGETW, WIDGETH);
+    /// *Test code*
+    MyDebug << "Clear stack";
+    st.clear();
+
+    MyDebug << "now st contains:";
+    for (auto &i : st) {
+        qDebug() << "               " << i.first;
+    }
+    qDebug();
 }
 void DrawPileView::drawcard(QString uuid)
 {
+    MyDebug << "Draw a card - id" << uuid;
     if (st.size() == 0)
         emit shuffle(); //没牌就洗一下
     if (st.size() == 0)
         return; //还没牌就返回
+
+    if (st.find(uuid) == st.end()) {
+        qFatal("No Card Found in Drawpile - uuid: %s", uuid.toLatin1().data());
+    }
+    // CardView *x = *st.find(uuid);
     CardView *x = st.find(uuid)->second;
     removecard(uuid);
     emit send_card_to_hands(x);
@@ -674,6 +713,12 @@ void DrawPileView::addcard(QString uuid)
 {
     CardView *newcard = new CardView();
     st.insert({uuid, newcard});
+    // st.insert(uuid, newcard);
+    MyDebug << "now st contains:";
+    for (auto &i : st) {
+        qDebug() << "               " << i.first;
+    }
+    qDebug();
     newcard->uuid = uuid;
     newcard->init();
     // std::cout << newcard->info.path.toStdString() << endl;
@@ -684,6 +729,7 @@ void DrawPileView::addcard(QString uuid)
 void DrawPileView::removecard(QString uuid)
 {
     auto it = st.find(uuid);
+    // removeItem(*it);
     removeItem(it->second);
     st.erase(it);
     update();

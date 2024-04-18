@@ -38,6 +38,8 @@
 #include <set>
 using namespace std;
 
+#define MyDebug qDebug() << "[In function" << (__FUNCTION__ + QString("]:")).toLatin1().data()
+
 class HandsView;
 class CardView;
 class BuffIcon : public QObject, public QGraphicsPixmapItem
@@ -182,6 +184,7 @@ class DrawPileView : public QGraphicsScene
 public:
     QGraphicsPixmapItem description;
     QGraphicsPixmapItem background;
+    // QMultiHash<QString, CardView *> st;
     multimap<QString, CardView *> st;
     void init();
     void removecard(QString uuid);

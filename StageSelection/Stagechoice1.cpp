@@ -79,6 +79,6 @@ void Stagechoice1::levelClear(int node) {
   update();
 }
 void Stagechoice1::levelChoose(int node) {
-  bool isBoss = node == 0;
-  emit enterStage(isBoss);
+    bool isBoss = node == 10;
+    emit enterStage(isBoss);
 }

@@ -23,10 +23,7 @@ class InGameSystem : public QWidget
 {
     Q_OBJECT
 public:
-    enum cardstack_t : bool {
-        DROP = false,
-        DRAW = true
-    };
+    enum cardstack_t : int { DROP = 0, DRAW = 1 };
     InGameSystem(QWidget* parent = nullptr);
     void initSystem(bool isBoss);
     void run();
@@ -78,6 +75,7 @@ private:
     int _curEntity;
     int _playerEnergy;
     bool _inited;
+    int _gameover;
     CardStack* _stack[2];
     QGraphicsView* _gView;
     QGraphicsScene* _scene;

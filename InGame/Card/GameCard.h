@@ -51,6 +51,7 @@ public:
     void clear();
 	bool empty() const;
     int size() const;
+    void print() const;
 
 private:
 	QVector<int> utilGetRandomNum(int n);

@@ -8,6 +8,8 @@
 #include "Card/CardSystem.h"
 #include "Buff/BuffSystem.h"
 
+#define MyDebug qDebug() << "[In function" << (__FUNCTION__ + QString("]:")).toLatin1().data()
+
 struct Context;
 // using Context = QMap<QString, QVariant>;
 class BasicBuff;
