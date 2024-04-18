@@ -26,4 +26,12 @@
         <file>res/cards/gain_strength.png</file>
         <file>gameboard/res/1.png</file>
     </qresource>
+    <qresource prefix="/buff">
+        <file>gameboard/res/buff1.png</file>
+        <file>gameboard/res/buff2.png</file>
+        <file>gameboard/res/buff3.png</file>
+        <file>gameboard/res/buff4.png</file>
+        <file>gameboard/res/buff5.png</file>
+        <file>gameboard/res/buff6.png</file>
+    </qresource>
 </RCC>
