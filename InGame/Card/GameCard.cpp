@@ -65,15 +65,16 @@ bool CardStack::empty() const { return this->_list.empty(); }
 
 int CardStack::size() const { return this->_list.size(); }
 
-QVector<int> CardStack::utilGetRandomNum(int n) {
-  QVector<int> tempList;
-  for (int i = 0; i < n; ++i)
-    tempList.append(i);
-  QVector<int> resList;
-  for (size_t i = 0; i < n - 1; i++) {
-    const int randInd = std::rand() % (n - i - 1);
-    resList.push_back(tempList[randInd]);
-    tempList[randInd] = tempList[n - i - 1];
-  }
-  return resList;
+QVector<int> CardStack::utilGetRandomNum(int n)
+{
+    QVector<int> tempList;
+    for (int i = 0; i < n; ++i)
+        tempList.append(i);
+    QVector<int> resList;
+    for (size_t i = 0; i < n - 1; i++) {
+        const int randInd = std::rand() % (n - i - 1);
+        resList.push_back(tempList[randInd]);
+        tempList[randInd] = tempList[n - i - 1];
+    }
+    return resList;
 }

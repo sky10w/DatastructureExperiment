@@ -41,13 +41,15 @@ void Entity::heal(Context *ctx) {
   emit hpChanged(this->_id, ctx->hpHealed);
 }
 
-void Entity::removeBuff(Context *ctx) {
-  for (auto &tar : ctx->to) {
-    tar->buffRemoved(ctx);
-  }
+void Entity::removeBuff(Context *ctx)
+{
+    for (auto &tar : ctx->to) {
+        tar->buffRemoved(ctx);
+    }
 }
 
-void Entity::buffRemoved(Context *ctx) {
+void Entity::buffRemoved(Context *ctx)
+{
     auto type = BuffSystem::getBuffInfo(ctx->buffGiven).type;
     auto &tarList = this->_buffList[type];
     // find the corresponding buff
@@ -60,7 +62,6 @@ void Entity::buffRemoved(Context *ctx) {
         }
         ++i;
     }
-    /// TODO
     emit buffChanged(ctx->buffGiven, -99999, this->_id);
 }
 
