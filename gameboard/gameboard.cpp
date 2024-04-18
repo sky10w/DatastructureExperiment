@@ -6,7 +6,7 @@ const int HANDSLIMIT = 7;
 const int WIDGETW = 1280;
 const int WIDGETH = 720;
 int mysignbit(const qreal &x) { return (x > 0) - (x < 0); }
-gameboard::gameboard(MyOpenGLWidget *parent) : MyOpenGLWidget{parent} {
+gameboard::gameboard(QWidget *parent) : MyOpenGLWidget(parent) {
 
   // QGraphicsScene scene(this);
   // QGraphicsView view(this);
@@ -15,12 +15,12 @@ gameboard::gameboard(MyOpenGLWidget *parent) : MyOpenGLWidget{parent} {
 
   // energy = 15;
   // updateenergyview();
-  myhands = new HandsView();
-  myhands->handsview = &view;
-  myhands->handsscene = &scene;
-  myhands->setParent(this);
-  myhands->init();
-  Player = nullptr;
+  this->myhands = new HandsView();
+  this->myhands->handsview = &view;
+  this->myhands->handsscene = &scene;
+  this->myhands->setParent(this);
+  this->myhands->init();
+  this->Player = nullptr;
   // initplayer(0, 100);
   // initenemy(1, 100);
 
@@ -261,7 +261,7 @@ void BuffView::update_buff(QString id, int delta) {
     bufficon[id] = newbufficon;
   }
   int k = 0;
-  for (auto x : bufficon) {
+  for (auto &x : bufficon) {
     x.second->setPos(50 * (k++), 0);
   }
 }
@@ -325,9 +325,7 @@ void CardView::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
   qreal distance = QLineF(curposx + 75, curposy + 125, event->scenePos().x(),
                           event->scenePos().y())
                        .length();
-  EntityView *itembelow;
-  itembelow = dynamic_cast<EntityView *>(
-      scene()->itemAt(event->scenePos(), QTransform()));
+  EntityView *itembelow = dynamic_cast<EntityView *>(scene()->itemAt(event->scenePos(), QTransform()));
   if (distance > 200) {
     setFlag(QGraphicsItem::ItemIsMovable, false);
     //更新现有箭头的位置

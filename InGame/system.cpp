@@ -9,10 +9,30 @@ int GlobalStatus::playerMaxHandCard = 7;
 
 const int InGameSystem::_playerSlot = 0;
 
-InGameSystem::InGameSystem(bool isBossLevel)
-    : _actionDisabled(0),
-      _view(new gameboard()), _handCard({})
+InGameSystem::InGameSystem(QWidget* parent)
+    : QWidget(parent)
 {
+    this->setFixedSize(1280, 720);
+    this->_stack[0] = this->_stack[1] = nullptr;
+
+    this->_view = new gameboard();
+
+    this->_scene = new QGraphicsScene();
+    _scene->addWidget(_view);
+
+    _gView = new QGraphicsView(this);
+    _gView->setFrameShape(QFrame::NoFrame);
+    _gView->setFrameRect({0, 0, 0, 0});
+    _gView->setScene(_scene);
+    _gView->show();
+}
+
+void InGameSystem::initSystem(bool isBossLevel)
+{
+    // Initialize
+    _actionDisabled = 0;
+    _handCard = {};
+
     // Init signals and slots
     connectSignalSlotForView();
 
@@ -32,21 +52,21 @@ InGameSystem::InGameSystem(bool isBossLevel)
         for (int i = 0; i < this->_enemyNum; ++i) {
             _entities.push_back(new Enemy(i + 1, 20));
             connectSignalSlotForEntities(_entities[i + 1]);
-            this->_view->initenemy(i + 1, "", 20);
+            this->_view->initenemy(i + 1, "://res/enemy.jpg", 20);
         }
     }
     else
     {
         _entities.push_back(new Boss(1, 30));
         connectSignalSlotForEntities(_entities[1]);
-        this->_view->initenemy(1, "", 30);
+        this->_view->initenemy(1, "://res/enemy.jpg", 30);
     }
+    _view->setFixedSize(1280, 720);
+    _view->show();
+    this->show();
 }
 
 void InGameSystem::run() {
-    _view->resize(1280, 720);
-    _view->show();
-
     // Init cardStack
     auto list = GlobalStatus::allCardOwned;
     int len = list.size();
@@ -55,8 +75,13 @@ void InGameSystem::run() {
         int ind = e() % (i + 1);
         swap(list[ind], list[i]);
     }
-    for (auto &i : this->_stack) {
-        i = new CardStack();
+    if(this->_stack[0] == nullptr)
+    {
+        this->_stack[0] = new CardStack();
+    }
+    if(this->_stack[1] == nullptr)
+    {
+        this->_stack[1] = new CardStack();
     }
     this->_stack[DRAW]->push(list);
     for (auto &i : list) {
@@ -72,12 +97,15 @@ void InGameSystem::run() {
     this->_actionDisabled = 0;
     _playerEnergy = GlobalStatus::playerMaxEnergy;
     emit setEnergy(GlobalStatus::playerMaxEnergy);
+
+    this->_entities[0]->roundBegin();
     emit roundBegin();
 }
 
 // Round end for player's round
 // Need to execute the following enemies' action
 void InGameSystem::roundEnd() {
+    this->_entities[0]->roundEnd();
     for (int i = 1; i <= _enemyNum; ++i) {
         _curEntity = i;
         _entities[i]->roundBegin();
@@ -109,8 +137,9 @@ void InGameSystem::roundEnd() {
     _playerEnergy = GlobalStatus::playerMaxEnergy;
     emit setEnergy(GlobalStatus::playerMaxEnergy);
     this->_actionDisabled = 0;
-    emit roundBegin();
 
+    this->_entities[0]->roundBegin();
+    emit roundBegin();
 }
 
 void InGameSystem::connectSignalSlotForEntities(Entity *entity) {
@@ -148,6 +177,28 @@ bool InGameSystem::drawCard()
     return true;
 }
 
+void InGameSystem::gameend(bool isWin)
+{
+    _actionDisabled = 0;
+    for(auto& i : _entities)
+    {
+        delete i;
+    }
+    _entities.clear();
+    _enemyNum = 0;
+    _curEntity = 0;
+    _playerEnergy = 0;
+    for(auto& i : this->_stack)
+    {
+        i->clear();
+    }
+    delete _view;
+    _view = nullptr;
+    _handCard.clear();
+
+    emit gameover(isWin);
+}
+
 int InGameSystem::checkGameover()
 {
     bool flag = true;
@@ -175,6 +226,7 @@ void InGameSystem::handleContext(Context *ctx) {
         }
     }
     if (ctx->buffGiven != "") {
+        qDebug() << "Buff Handled - id" << ctx->buffGiven;
         if(ctx->buffGiven[0] == '+')
         {
             auto &str = ctx->buffGiven;
@@ -197,6 +249,13 @@ void InGameSystem::handleContext(Context *ctx) {
         for (auto i : ctx->to) {
             i->heal(ctx);
         }
+    }
+
+    const int gameoverStatus = checkGameover();
+    if(gameoverStatus != 0)
+    {
+        qDebug() << "Gameover";
+        gameend(gameoverStatus == 1);
     }
 }
 

@@ -8,10 +8,11 @@ class BuffSystem
 public:
     static BuffInfo getBuffInfo(const QString &buffID);
     static QHash<QString, BuffInfo> initBuff();
+    static BuffInfo::BuffType strToTargetType(const QString& type);
 private:
     BuffSystem() = delete;
     static const QHash<QString, BuffInfo::BuffType> _map;
-    static BuffInfo::BuffType strToTargetType(const QString& type);
+
     static QHash<QString, BuffInfo> _buff;
 };
 

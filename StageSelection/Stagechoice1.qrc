@@ -1,7 +1,7 @@
 <RCC>
     <qresource prefix="/Stagechoice1">
         <file>res/image/c9bc97f432.jpg</file>
-        <file>res/image/1.jpg</file>
+        <file>res/image/buff1.jpg</file>
         <file>res/image/back1.png</file>
         <file>res/image/back2.png</file>
         <file>res/image/map.png</file>

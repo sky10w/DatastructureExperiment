@@ -48,6 +48,7 @@ public:
 	QVector<QString> getPopAll();
     QVector<QString> getAll() const;
 	void push(const QVector<QString>& cards);
+    void clear();
 	bool empty() const;
     int size() const;
 

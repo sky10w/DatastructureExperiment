@@ -190,7 +190,7 @@ public slots:
 class gameboard : public MyOpenGLWidget {
   Q_OBJECT
 public:
-  explicit gameboard(MyOpenGLWidget *parent = nullptr);
+  explicit gameboard(QWidget *parent = nullptr);
   QGraphicsScene scene;
   QGraphicsView view;
   QPushButton DiscardPileButton;

@@ -65,7 +65,9 @@ BasicBuff *ModifyDamageByPercentBuff::getCopy()
 
 void ModifyDamageByPercentBuff::affect(Context *ctx)
 {
+    const int temp = ctx->damageDone;
     ctx->damageDone = (double)ctx->damageDone * (1.0 + (double)this->_percent * 0.01);
+    qDebug() << "ModifyDamageByPercent - initial damage:" << temp << "- after damage:" << ctx->damageDone;
 }
 
 void ModifyDamageByPercentBuff::degrade()
@@ -86,8 +88,9 @@ BasicBuff *ReadyToAttackBuff::getCopy()
 
 void ReadyToAttackBuff::affect(Context *ctx)
 {
-    degrade();
-    if(this->_degree == 0)
+    qWarning() << "Warning";
+    this->degrade();
+    if(this->_degree <= 0)
     {
         ctx->buffGiven = "+0004";
         // emit degreeToZero();
