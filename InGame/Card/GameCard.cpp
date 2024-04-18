@@ -59,10 +59,7 @@ void CardStack::push(const QVector<QString> &cards) {
   }
 }
 
-void CardStack::clear()
-{
-    this->_list.clear();
-}
+void CardStack::clear() { this->_list.clear(); }
 
 bool CardStack::empty() const { return this->_list.empty(); }
 

@@ -52,7 +52,6 @@ public:
 	bool empty() const;
     int size() const;
 
-
 private:
 	QVector<int> utilGetRandomNum(int n);
 	std::list<QString> _list;
