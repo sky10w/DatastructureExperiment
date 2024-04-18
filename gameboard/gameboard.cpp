@@ -183,6 +183,7 @@ void EntityView::update_HP(int delta) {
   if (HP < 0) {
     HP = 0;
     this->hide();
+    this->mybuff.buffview.hide();
   } else if (HP > HP_MAX)
     HP = HP_MAX;
   updatehpview();
@@ -251,7 +252,8 @@ void BuffView::update_buff(QString id, int delta) {
   auto it2 = bufficon.find(id);
   if (it != Buffs.end()) {
     it->second->strength += delta;
-
+    if (it->second->strength < 0)
+      it->second->strength = 0;
     it2->second->setToolTip(
         QString("<div style='background-color: #87CEEB; color: white; padding: "
                 "0px; border: none;'>"
@@ -341,19 +343,22 @@ void CardView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
     deny();
   else if (w->energy < info.energy)
     deny();
-  else if (itembelow == nullptr)
-    deny();
-  else if (cardtype == 1 && itembelow->type == "enemy")
+  else if (info.targetType == info.ONE &&
+           (itembelow == nullptr || itembelow->type != "enemy"))
     deny();
   else if (w->playerround == 0)
     deny();
   else {
-    // cout << this->info.name.toStdString() << endl;
+    cout << this->info.name.toStdString() << endl;
     // w->energy -= info.energy;
     // w->updateenergyview();
     inhands = false;
-    // cout << itembelow->id << endl;
-    emit playcard(itembelow->id);
+    if (info.targetType == info.SELF)
+      emit playcard(0);
+    else if (itembelow != nullptr)
+      emit playcard(itembelow->id);
+    else
+      emit playcard(-1);
   }
   hands = nullptr;
   w = nullptr;
@@ -480,12 +485,12 @@ void gameboard::updatebuff(QString buffuuid, int strength, int id) {
 void gameboard::updatehp(int id, int delta) {
   if (id != 0) {
     Enemy[id]->update_HP(delta);
-    if (Enemy[id]->HP == 0)
-      delete Enemy[id], Enemy.erase(id);
+    // if (Enemy[id]->HP == 0)
+    //  delete Enemy[id], Enemy.erase(id);
   } else {
     Player->update_HP(delta);
-    if (Player->HP == 0)
-      delete Player, Player = nullptr;
+    // if (Player->HP == 0)
+    //  delete Player, Player = nullptr;
   }
 }
 
