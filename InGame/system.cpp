@@ -10,6 +10,7 @@ const int InGameSystem::_playerSlot = 0;
 
 InGameSystem::InGameSystem(QWidget *parent)
     : QWidget(parent)
+    , _playerEnergy(0)
     , _gView(nullptr)
     , _scene(nullptr)
     , _view(nullptr)
@@ -141,34 +142,14 @@ void InGameSystem::run()
     emit setEnergy(GlobalStatus::playerMaxEnergy);
 
     this->_entities[0]->roundBegin();
-    emit roundBegin();
+    emit playerRoundBegin();
 }
 
 // Round end for player's round
 // Need to execute the following enemies' action
-void InGameSystem::roundEnd()
+void InGameSystem::playerRoundEnd()
 {
     this->_entities[0]->roundEnd();
-    MyDebug << "Round End: enemyNum:" << this->_enemyNum;
-    for (int i = 1; i <= _enemyNum; ++i) {
-        MyDebug << "Round End: now enemy:" << i;
-        if (_entities[i]->isDead())
-            continue;
-        _curEntity = i;
-        _entities[i]->roundBegin();
-
-        /// Test
-        auto ctx = new Context{};
-        ctx->from = _entities[i];
-        ctx->to = {_entities[0]};
-        dynamic_cast<Enemy *>(_entities[i])->enemyAct(ctx);
-        this->handleContext(ctx);
-
-        _entities[i]->roundEnd();
-
-        /// TODO
-        QThread::msleep(1000);
-    }
 
     /// Player round
     this->_curEntity = 0;
@@ -186,11 +167,12 @@ void InGameSystem::roundEnd()
     this->_actionDisabled = 0;
 
     this->_entities[0]->roundBegin();
-    emit roundBegin();
+    emit playerRoundBegin();
 }
 
 void InGameSystem::connectSignalSlotForEntities(Entity *entity)
 {
+    MyDebug << "Connect To Entity once";
     QObject::connect(entity,
                      SIGNAL(requestHandleContext(Context *)),
                      this,
@@ -204,6 +186,7 @@ void InGameSystem::connectSignalSlotForEntities(Entity *entity)
 }
 void InGameSystem::disconnectSignalSlotForEntities(Entity *entity)
 {
+    MyDebug << "Disconnect To Entity once";
     QObject::connect(entity,
                      SIGNAL(requestHandleContext(Context *)),
                      this,
@@ -238,6 +221,7 @@ void InGameSystem::connectSignalSlotForView()
 
 void InGameSystem::disconnectSignalSlotForView()
 {
+    MyDebug << "Disconnect To View once";
     QObject::disconnect(_view, SIGNAL(roundover()), this, SLOT(roundEnd()));
     QObject::disconnect(_view,
                         SIGNAL(request_valid(QString, int *)),
@@ -284,6 +268,30 @@ bool InGameSystem::drawCard()
     _handCard.push_front(cardID);
     emit addCardToHand(cardID);
     return true;
+}
+
+void InGameSystem::enemyRound()
+{
+    MyDebug << "Enemy Round: enemyNum:" << this->_enemyNum;
+    for (int i = 1; i <= _enemyNum; ++i) {
+        MyDebug << "Round End: now enemy:" << i;
+        if (_entities[i]->isDead())
+            continue;
+        _curEntity = i;
+        _entities[i]->roundBegin();
+
+        /// Test
+        auto ctx = new Context{};
+        ctx->from = _entities[i];
+        ctx->to = {_entities[0]};
+        dynamic_cast<Enemy *>(_entities[i])->enemyAct(ctx);
+        this->handleContext(ctx);
+
+        _entities[i]->roundEnd();
+
+        /// TODO
+        QThread::msleep(1000);
+    }
 }
 
 int InGameSystem::checkGameover()

@@ -31,6 +31,7 @@ public:
     void connectSignalSlotForView();
     void shuffle();
     bool drawCard();
+    void enemyRound();
     void gameend(bool isWin);
     int checkGameover();
 
@@ -41,13 +42,13 @@ private:
     static const int _playerSlot;
 
 signals:
-    void nextRoundHint(QVector<Action::Act_t> act);
+    void nextRoundHint(QMap<int, Action::Act_t> act);
     void entityAct(Action::Act_t act);
 
     void sendShuffle();
     void setEnergy(int energy);
     void updateEnergy(int delta);
-    void roundBegin();
+    void playerRoundBegin();
     void hpChanged(int id, int delta);
     void armorChanged(int id, int delta);
     void gameover(bool isWin);
@@ -56,7 +57,7 @@ public slots:
     virtual void handleContext(Context* ctx); // from Entity
     virtual void playerUsingCard(int cardIndex, int targetIndex);
     /// Round end for player's round
-    virtual void roundEnd();
+    virtual void playerRoundEnd();
 
 signals:
     void addCardToStack(QString cardID);
