@@ -56,7 +56,9 @@ protected:
     bool _isPlayer;
     int _id;
 
-    std::list<BasicBuff*> _buffList[7];
+    std::list<BasicBuff*> _buffList;
+
+    // std::list<BasicBuff*> _buffList[7];
     void handleBuffList(Context* ctx, BuffInfo::BuffType type);
 };
 

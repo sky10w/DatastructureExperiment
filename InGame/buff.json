@@ -33,9 +33,9 @@
     },
     {
         "id": "0005",
-        "class_name": "ModifyDamageByPercentBuff ON_ATTACK -75 2",
+        "class_name": "ModifyDamageByPercentBuff ON_ATTACK -50 2",
         "buff_name": "虚弱",
-        "description": "所有攻击牌伤害减75%",
+        "description": "所有攻击牌伤害减50%",
         "type": "ON_ATTACK",
         "iconPath": ":/buff/gameboard/res/buff5.png"
     },

@@ -50,23 +50,23 @@ void Entity::removeBuff(Context *ctx)
 
 void Entity::buffRemoved(Context *ctx)
 {
-    auto type = BuffSystem::getBuffInfo(ctx->buffGiven).type;
-    auto &tarList = this->_buffList[type];
+    // auto type = BuffSystem::getBuffInfo(ctx->buffGiven).type;
+    auto &tarList = this->_buffList;
     // find the corresponding buff
     const auto buffInfo = BuffSystem::getBuffInfo(ctx->buffGiven);
     for (auto i = tarList.begin(); i != tarList.end();) {
         auto cur = *i;
         if (cur->getID() == ctx->buffGiven) {
             i = tarList.erase(i);
-            continue;
+            emit buffChanged(ctx->buffGiven, -99999, this->_id);
+            break;
         }
         ++i;
     }
-    emit buffChanged(ctx->buffGiven, -99999, this->_id);
 }
 
 void Entity::attack(Context *ctx, bool triggerBuff) {
-    qDebug() << "Entity Attack - buffList" << this->_buffList[BuffInfo::ON_ATTACK];
+    qDebug() << "Entity Attack - buffList" << this->_buffList;
     if (triggerBuff) {
         this->handleBuffList(ctx, BuffInfo::ON_ATTACK);
     }
@@ -121,17 +121,18 @@ void Entity::getBuffed(Context *ctx, bool triggerBuff)
     const auto buffInfo = BuffSystem::getBuffInfo(ctx->buffGiven);
     auto buffCopy = buffInfo.buff->getCopy();
     qDebug() << "Entity got Buff - id:" << ctx->buffGiven << "- type:" << buffCopy->getType();
-    this->_buffList[buffInfo.type].push_back(buffCopy);
+    // this->_buffList[buffInfo.type].push_back(buffCopy);
+    this->_buffList.push_back(buffCopy);
     emit buffChanged(ctx->buffGiven, buffCopy->isValid(), this->_id);
 }
 
 void Entity::handleBuffList(Context *ctx, BuffInfo::BuffType type)
 {
-    auto &tarBuffList = this->_buffList[type];
+    auto &tarBuffList = this->_buffList;
     for (auto eff = tarBuffList.begin(); eff != tarBuffList.end();)
     {
         qDebug() << (*eff)->getID() << "affecting";
-        (*eff)->affect(ctx);
+        (*eff)->affect(ctx, type);
         if(!(*eff)->isValid())
         {
             qDebug() << (*eff)->getID() << "degrade and has been removed";
