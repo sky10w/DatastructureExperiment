@@ -78,146 +78,146 @@ void gameboard::updateenergyview() {
   EnergyButton.setText(QString(u8"当前能量为:") + QString::number(energy));
 }
 
-void gameboard::init() {
-  MyDebug;
-  scene.clear();
-  view.setScene(nullptr);
-  if (Player != nullptr)
-    delete Player;
-  for (auto x : Enemy)
-    if (x.second != nullptr) {
-      delete x.second;
-    }
-  Enemy.clear();
-  if (myhands != nullptr)
-    delete myhands;
-  if (drawpile != nullptr)
-    delete drawpile;
-  if (discardpile != nullptr)
-    delete discardpile;
-  this->myhands = new HandsView();
-  this->myhands->handsview = &view;
-  this->myhands->handsscene = &scene;
-  this->myhands->setParent(this);
-  this->myhands->init();
-  this->Player = nullptr;
+void gameboard::init()
+{
+    MyDebug << "Init";
+    scene.clear();
+    view.setScene(nullptr);
+    if (Player != nullptr)
+        delete Player;
+    for (auto x : Enemy)
+        if (x.second != nullptr) {
+            delete x.second;
+        }
+    Enemy.clear();
+    if (myhands != nullptr)
+        delete myhands;
+    if (drawpile != nullptr)
+        delete drawpile;
+    if (discardpile != nullptr)
+        delete discardpile;
+    this->myhands = new HandsView();
+    this->myhands->handsview = &view;
+    this->myhands->handsscene = &scene;
+    this->myhands->setParent(this);
+    this->myhands->init();
+    this->Player = nullptr;
 
-  drawpile = new DrawPileView();
-  discardpile = new DiscardPileView();
-  discardpile->init();
-  drawpile->init();
-  view.setParent(this);
-  view.setFixedSize(WIDGETW, WIDGETH);
-  view.setScene(&scene);
-  scene.setParent(this);
-  scene.setSceneRect(0, 0, WIDGETW, WIDGETH);
-  scene.setItemIndexMethod(QGraphicsScene::NoIndex);
+    drawpile = new DrawPileView();
+    discardpile = new DiscardPileView();
+    discardpile->init();
+    drawpile->init();
+    view.setParent(this);
+    view.setFixedSize(WIDGETW, WIDGETH);
+    view.setScene(&scene);
+    scene.setParent(this);
+    scene.setSceneRect(0, 0, WIDGETW, WIDGETH);
+    scene.setItemIndexMethod(QGraphicsScene::NoIndex);
 
-  this->background.setPixmap(QString("://res/background.jpg"));
-  scene.addItem(&background);
-  background.setPos(0, 0);
+    this->background.setPixmap(QString("://res/background.jpg"));
+    scene.addItem(&background);
+    background.setPos(0, 0);
 
-  buttons = {&DiscardPileButton, &DrawPileButton, &EndButton, &SettingsButton,
-             &EnergyButton};
-  DiscardPileButton.setParent(this);
-  DrawPileButton.setParent(this);
-  SettingsButton.setParent(this);
-  EnergyButton.setParent(this);
-  EndButton.setParent(this);
-  DiscardPileButton.resize(80, 80);
-  DrawPileButton.resize(80, 80);
-  SettingsButton.resize(50, 50);
-  EnergyButton.resize(80, 80);
-  EndButton.resize(100, 50);
+    buttons = {&DiscardPileButton, &DrawPileButton, &EndButton, &SettingsButton, &EnergyButton};
+    DiscardPileButton.setParent(this);
+    DrawPileButton.setParent(this);
+    SettingsButton.setParent(this);
+    EnergyButton.setParent(this);
+    EndButton.setParent(this);
+    DiscardPileButton.resize(80, 80);
+    DrawPileButton.resize(80, 80);
+    SettingsButton.resize(50, 50);
+    EnergyButton.resize(80, 80);
+    EndButton.resize(100, 50);
 
-  DiscardPileButton.move(1200, 640);
-  DrawPileButton.move(0, 640);
-  SettingsButton.move(1200, 50);
-  EnergyButton.move(130, 550);
-  EndButton.move(1000, 500);
-  connect(drawpile, &DrawPileView::send_card_to_hands, myhands,
-          &HandsView::carddraw);
-  connect(&EndButton, &QPushButton::pressed, [=]() {
-    playerround = 0;
-    emit roundover();
-  });
-  connect(&DiscardPileButton, &QPushButton::pressed, [=]() {
-    if (view.scene() == discardpile) {
-      for (auto x : buttons)
-        x->show();
-      if (Player != nullptr)
-        Player->mybuff.buffview.show();
-      for (auto x : Enemy)
-        x.second->mybuff.buffview.show();
-      view.setScene(&scene);
+    DiscardPileButton.move(1200, 640);
+    DrawPileButton.move(0, 640);
+    SettingsButton.move(1200, 50);
+    EnergyButton.move(130, 550);
+    EndButton.move(1000, 500);
+    connect(drawpile, &DrawPileView::send_card_to_hands, myhands, &HandsView::carddraw);
+    connect(&EndButton, &QPushButton::pressed, [=]() {
+        playerround = 0;
+        emit roundover();
+    });
+    connect(&DiscardPileButton, &QPushButton::pressed, [=]() {
+        if (view.scene() == discardpile) {
+            for (auto x : buttons)
+                x->show();
+            if (Player != nullptr)
+                Player->mybuff.buffview.show();
+            for (auto x : Enemy)
+                x.second->mybuff.buffview.show();
+            view.setScene(&scene);
 
-    } else {
-      for (auto x : buttons) {
-        if (x != &DiscardPileButton)
-          x->hide();
-      }
-      if (Player != nullptr)
-        Player->mybuff.buffview.hide();
-      for (auto x : Enemy)
-        x.second->mybuff.buffview.hide();
-      view.setScene(discardpile);
-    }
-  });
-  connect(&DrawPileButton, &QPushButton::pressed, [=]() {
-    if (view.scene() == drawpile) {
-      for (auto x : buttons)
-        x->show();
-      if (Player != nullptr)
-        Player->mybuff.buffview.show();
-      for (auto x : Enemy)
-        x.second->mybuff.buffview.show();
-      view.setScene(&scene);
+        } else {
+            for (auto x : buttons) {
+                if (x != &DiscardPileButton)
+                    x->hide();
+            }
+            if (Player != nullptr)
+                Player->mybuff.buffview.hide();
+            for (auto x : Enemy)
+                x.second->mybuff.buffview.hide();
+            view.setScene(discardpile);
+        }
+    });
+    connect(&DrawPileButton, &QPushButton::pressed, [=]() {
+        if (view.scene() == drawpile) {
+            for (auto x : buttons)
+                x->show();
+            if (Player != nullptr)
+                Player->mybuff.buffview.show();
+            for (auto x : Enemy)
+                x.second->mybuff.buffview.show();
+            view.setScene(&scene);
 
-    } else {
-      for (auto x : buttons) {
-        if (x != &DrawPileButton)
-          x->hide();
-      }
-      if (Player != nullptr)
-        Player->mybuff.buffview.hide();
-      for (auto x : Enemy)
-        x.second->mybuff.buffview.hide();
-      view.setScene(drawpile);
-    }
-  });
-  connect(&EnergyButton, &QPushButton::pressed, this, [=]() {
-    // for (QString x : {"0001", "0002"})
-    //  updatebuff(x, 2, Enemy[1]->id);
-    // shuffle();//
-    // QString x("6 6 6");
-    // QString y = x.split(" ");
-    // cout << y << Endl;
-  });
-  connect(&SettingsButton, &QPushButton::pressed, [=]() {});
-  connect(myhands, &HandsView::discardcard, this, &gameboard::discardcard);
-  connect(drawpile, &DrawPileView::shuffle, this, &gameboard::shuffle);
+        } else {
+            for (auto x : buttons) {
+                if (x != &DrawPileButton)
+                    x->hide();
+            }
+            if (Player != nullptr)
+                Player->mybuff.buffview.hide();
+            for (auto x : Enemy)
+                x.second->mybuff.buffview.hide();
+            view.setScene(drawpile);
+        }
+    });
+    connect(&EnergyButton, &QPushButton::pressed, this, [=]() {
+        // for (QString x : {"0001", "0002"})
+        //  updatebuff(x, 2, Enemy[1]->id);
+        // shuffle();//
+        // QString x("6 6 6");
+        // QString y = x.split(" ");
+        // cout << y << Endl;
+    });
+    connect(&SettingsButton, &QPushButton::pressed, [=]() {});
+    connect(myhands, &HandsView::discardcard, this, &gameboard::discardcard);
+    connect(drawpile, &DrawPileView::shuffle, this, &gameboard::shuffle);
 
-  view.setStyleSheet("background: transparent;border:0px");
+    view.setStyleSheet("background: transparent;border:0px");
 
-  DiscardPileButton.setText("弃牌堆");
-  DrawPileButton.setText("摸牌堆");
-  EndButton.setText("结束回合");
-  EnergyButton.setText("当前能量为:?");
-  SettingsButton.setText("设置");
+    DiscardPileButton.setText("弃牌堆");
+    DrawPileButton.setText("摸牌堆");
+    EndButton.setText("结束回合");
+    EnergyButton.setText("当前能量为:?");
+    SettingsButton.setText("设置");
 
-  // for (int i = 0; i < 5; i++)
-  //  drawpile->addcard("1");
-  view.show();
+    // for (int i = 0; i < 5; i++)
+    //  drawpile->addcard("1");
+    view.show();
 }
-void EntityView::init(int hp) {
-  MyDebug;
-  HP = hp;
-  HP_MAX = hp;
-  hpbar.setParentItem(this);
-  hpbar.setPen(QPen(Qt::red, 10 /*线宽*/));
-  hpbar.setLine(0, 0, width * 0.9, 0);
-  hpbar.setZValue(0);
-  hpbar.setPos(0, width);
+void EntityView::init(int hp)
+{
+    MyDebug;
+    HP = hp;
+    HP_MAX = hp;
+    hpbar.setParentItem(this);
+    hpbar.setPen(QPen(Qt::red, 10 /*线宽*/));
+    hpbar.setLine(0, 0, width * 0.9, 0);
+    hpbar.setZValue(0);
+    hpbar.setPos(0, width);
 
   hpnumber.setText(QString::number(hp));
   hpnumber.setParentItem(&hpbar);
@@ -226,15 +226,15 @@ void EntityView::init(int hp) {
   hpnumber.setFont(QFont("Arial", 15, 0, true));
   hpnumber.setBrush(Qt::white);
 
-  armoricon.setParentItem(this);
-  armoricon.setPos(0.8 * width, 0.8 * width);
-  armoricon.setPixmap(QPixmap("://res/armor.png"));
+    armoricon.setParentItem(this);
+    armoricon.setPos(0.8 * width, 0.8 * width);
+    armoricon.setPixmap(QPixmap("://res/armor.png"));
 
-  armornumber.setParentItem(&armoricon);
-  armornumber.setBrush(Qt::white);
-  armornumber.setPos(25, 20);
-  armornumber.setText(QString::number(armor));
-  armornumber.setFont(QFont("Arial", 15, 0, true));
+    armornumber.setParentItem(&armoricon);
+    armornumber.setBrush(Qt::white);
+    armornumber.setPos(25, 20);
+    armornumber.setText(QString::number(armor));
+    armornumber.setFont(QFont("Arial", 15, 0, true));
 }
 
 void gameboard::roundbegin() {
@@ -642,20 +642,26 @@ void DiscardPileView::update() {
       i = 0, j++;
   }
 }
-void DrawPileView::update() {
-  MyDebug << "Drawpile update - size" << st.size();
-  int i = 0, j = 0;
-  for (auto &x : st) {
-    x.second->setPos(265 + i * 150, 100 + j * 250);
-    x.second->curposx = 265 + i * 150;
-    x.second->curposy = 100 + j * 250;
-    // x->setPos(265 + i * 150, 100 + j * 250);
-    // x->curposx = 265 + i * 150;
-    // x->curposy = 100 + j * 250;
-    i++;
-    if (i == 5)
-      i = 0, j++;
-  }
+void DrawPileView::update()
+{
+    MyDebug << "Drawpile update - size" << st.size();
+    MyDebug << "now st contains:";
+    for (auto &i : st) {
+        qDebug() << "               " << i.first;
+    }
+    qDebug();
+    int i = 0, j = 0;
+    for (auto &x : st) {
+        x.second->setPos(265 + i * 150, 100 + j * 250);
+        x.second->curposx = 265 + i * 150;
+        x.second->curposy = 100 + j * 250;
+        // x->setPos(265 + i * 150, 100 + j * 250);
+        // x->curposx = 265 + i * 150;
+        // x->curposy = 100 + j * 250;
+        i++;
+        if (i == 5)
+            i = 0, j++;
+    }
 }
 void DrawPileView::init() {
   MyDebug << "Init";

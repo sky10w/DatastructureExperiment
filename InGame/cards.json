@@ -11,7 +11,7 @@
     },
     {
         "uuid": "0002",
-        "name": "万箭齐发",
+        "name": "围攻",
         "description": "对全体敌人造成7点伤害",
         "path": ":/json/res/cards/range_attack.png",
         "target_type": "ALL",

@@ -7,7 +7,7 @@ BasicBuff::BasicBuff(BuffInfo::BuffType type)
 
 bool BasicBuff::isValid() const
 {
-    return this->_degree >= 0;
+    return this->_degree > 0;
 }
 
 BuffInfo::BuffType BasicBuff::getType() const
@@ -41,8 +41,11 @@ BasicBuff *ModifyDamageByNumberBuff::getCopy()
     return new ModifyDamageByNumberBuff(*this);
 }
 
-void ModifyDamageByNumberBuff::affect(Context *ctx)
+void ModifyDamageByNumberBuff::affect(Context *ctx, BuffInfo::BuffType situation)
 {
+    if (this->_type != situation) {
+        return;
+    }
     ctx->damageDone += this->_incDamage;
 }
 
@@ -51,11 +54,13 @@ void ModifyDamageByNumberBuff::degrade()
     // Do nothing here
 }
 
-ModifyDamageByPercentBuff::ModifyDamageByPercentBuff(BuffInfo::BuffType type, int percent)
+ModifyDamageByPercentBuff::ModifyDamageByPercentBuff(BuffInfo::BuffType type,
+                                                     int percent,
+                                                     int degradeLevel)
     : ModifyDamageBasicBuff(type)
     , _percent(percent)
 {
-    this->_degree = 2;
+    this->_degree = degradeLevel;
 }
 
 BasicBuff *ModifyDamageByPercentBuff::getCopy()
@@ -63,8 +68,13 @@ BasicBuff *ModifyDamageByPercentBuff::getCopy()
     return new ModifyDamageByPercentBuff(*this);
 }
 
-void ModifyDamageByPercentBuff::affect(Context *ctx)
+void ModifyDamageByPercentBuff::affect(Context *ctx, BuffInfo::BuffType situation)
 {
+    if (situation == BuffInfo::ON_ROUNDEND)
+        degrade();
+    if (this->_type != situation) {
+        return;
+    }
     const int temp = ctx->damageDone;
     ctx->damageDone = (double)ctx->damageDone * (1.0 + (double)this->_percent * 0.01);
     qDebug() << "ModifyDamageByPercent - initial damage:" << temp << "- after damage:" << ctx->damageDone;
@@ -86,14 +96,15 @@ BasicBuff *ReadyToAttackBuff::getCopy()
     return new ReadyToAttackBuff(*this);
 }
 
-void ReadyToAttackBuff::affect(Context *ctx)
+void ReadyToAttackBuff::affect(Context *ctx, BuffInfo::BuffType situation)
 {
-    qWarning() << "ReadyToAttackBuff affecting";
+    qDebug() << "ReadyToAttackBuff affecting";
+    if (this->_type != situation) {
+        return;
+    }
     this->degrade();
-    if(this->_degree <= 0)
-    {
+    if (!this->isValid()) {
         ctx->buffGiven = "+0004";
-        // emit degreeToZero();
     }
 }
 
@@ -112,8 +123,10 @@ BasicBuff *HealBuff::getCopy()
     return new HealBuff(*this);
 }
 
-void HealBuff::affect(Context *ctx)
+void HealBuff::affect(Context *ctx, BuffInfo::BuffType situation)
 {
+    if (this->_type != situation)
+        return;
     ctx->hpHealed = this->_healAmount;
 }
 
