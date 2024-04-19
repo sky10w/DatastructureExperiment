@@ -57,7 +57,16 @@ const QHash<QString, std::function<BuffParser::res_t(BuffParser::iter_t,
            if (!ok)
              return {false, nullptr};
 
-           auto buff = new ModifyDamageByPercentBuff(type, percent);
+           ++iter;
+           if (iter == end)
+               return {false, nullptr};
+           const QString degradeLevelStr = *iter;
+           ok = false;
+           const int degradeLevel = degradeLevelStr.toInt(&ok);
+           if (!ok)
+               return {false, nullptr};
+
+           auto buff = new ModifyDamageByPercentBuff(type, percent, degradeLevel);
            return {true, buff};
          }},
         {"ReadyToAttackBuff", [](iter_t iter, end_t end) -> res_t {

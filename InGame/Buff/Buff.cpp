@@ -51,11 +51,13 @@ void ModifyDamageByNumberBuff::degrade()
     // Do nothing here
 }
 
-ModifyDamageByPercentBuff::ModifyDamageByPercentBuff(BuffInfo::BuffType type, int percent)
+ModifyDamageByPercentBuff::ModifyDamageByPercentBuff(BuffInfo::BuffType type,
+                                                     int percent,
+                                                     int degradeLevel)
     : ModifyDamageBasicBuff(type)
     , _percent(percent)
 {
-    this->_degree = 2;
+    this->_degree = degradeLevel;
 }
 
 BasicBuff *ModifyDamageByPercentBuff::getCopy()

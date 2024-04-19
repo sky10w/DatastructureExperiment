@@ -34,6 +34,9 @@ public:
     void gameend(bool isWin);
     int checkGameover();
 
+    void disconnectSignalSlotForView();
+    void disconnectSignalSlotForEntities(Entity* entity);
+
 private:
     static const int _playerSlot;
 

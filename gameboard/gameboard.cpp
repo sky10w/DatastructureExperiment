@@ -624,20 +624,26 @@ void DiscardPileView::update() {
       i = 0, j++;
   }
 }
-void DrawPileView::update() {
-  MyDebug << "Drawpile update - size" << st.size();
-  int i = 0, j = 0;
-  for (auto &x : st) {
-    x.second->setPos(265 + i * 150, 100 + j * 250);
-    x.second->curposx = 265 + i * 150;
-    x.second->curposy = 100 + j * 250;
-    // x->setPos(265 + i * 150, 100 + j * 250);
-    // x->curposx = 265 + i * 150;
-    // x->curposy = 100 + j * 250;
-    i++;
-    if (i == 5)
-      i = 0, j++;
-  }
+void DrawPileView::update()
+{
+    MyDebug << "Drawpile update - size" << st.size();
+    MyDebug << "now st contains:";
+    for (auto &i : st) {
+        qDebug() << "               " << i.first;
+    }
+    qDebug();
+    int i = 0, j = 0;
+    for (auto &x : st) {
+        x.second->setPos(265 + i * 150, 100 + j * 250);
+        x.second->curposx = 265 + i * 150;
+        x.second->curposy = 100 + j * 250;
+        // x->setPos(265 + i * 150, 100 + j * 250);
+        // x->curposx = 265 + i * 150;
+        // x->curposy = 100 + j * 250;
+        i++;
+        if (i == 5)
+            i = 0, j++;
+    }
 }
 void DrawPileView::init() {
   MyDebug << "Init";

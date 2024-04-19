@@ -23,170 +23,193 @@ InGameSystem::InGameSystem(QWidget *parent)
     _handCard = {};
 }
 
-void InGameSystem::initSystem(bool isBossLevel) {
-  if (_inited)
-    return;
+void InGameSystem::initSystem(bool isBossLevel)
+{
+    if (_inited)
+        return;
 
-  MyDebug << "executing init InGameSystem";
-  // Init view
-  this->_view = new gameboard();
-  connectSignalSlotForView();
+    MyDebug << "executing init InGameSystem";
+    // Init view
+    this->_view = new gameboard();
+    connectSignalSlotForView();
 
-  // Init scene
-  this->_scene = new QGraphicsScene();
-  _scene->addWidget(_view);
-  _gView = new QGraphicsView(this);
-  _gView->setFrameShape(QFrame::NoFrame);
-  _gView->setFrameRect({0, 0, 0, 0});
-  _gView->setScene(_scene);
-  _gView->hide();
+    // Init scene
+    this->_scene = new QGraphicsScene();
+    _scene->addWidget(_view);
+    _gView = new QGraphicsView(this);
+    _gView->setFrameShape(QFrame::NoFrame);
+    _gView->setFrameRect({0, 0, 0, 0});
+    _gView->setScene(_scene);
+    // _gView->hide();
 
-  // Initialize
-  _inited = true;
-  _actionDisabled = 0;
-  _handCard = {};
-  _playerEnergy = GlobalStatus::playerMaxEnergy;
+    // Initialize
+    _inited = true;
+    _actionDisabled = 0;
+    _handCard = {};
+    _gameover = 0;
+    _playerEnergy = GlobalStatus::playerMaxEnergy;
 
-  // Init CardStack
-  for (auto &i : _stack) {
-    i->clear();
-  }
-
-  // Init player
-  auto player = new Player(InGameSystem::_playerSlot, 40);
-  _entities.push_back(player);
-  connectSignalSlotForEntities(player);
-  _view->initplayer(InGameSystem::_playerSlot, GlobalStatus::playerMaxHp);
-
-  // Init enemies
-  if (isBossLevel == false) {
-    std::default_random_engine e;
-    e.seed(std::time(nullptr));
-    this->_enemyNum = e() % 3 + 1;
-
-    for (int i = 1; i <= this->_enemyNum; ++i) {
-      _entities.push_back(new Enemy(i, 20));
-      connectSignalSlotForEntities(_entities[i]);
-      this->_view->initenemy(i, "://res/enemy.jpg", 20);
+    // Init CardStack
+    for (auto &i : _stack) {
+        i->clear();
     }
-  } else {
-    this->_enemyNum = 1;
-    _entities.push_back(new Boss(1, 30));
-    connectSignalSlotForEntities(_entities[1]);
-    this->_view->initenemy(1, "://res/enemy.jpg", 30);
-  }
-  _gView->show();
+
+    // Init player
+    auto player = new Player(InGameSystem::_playerSlot, 40);
+    _entities.push_back(player);
+    connectSignalSlotForEntities(player);
+    _view->initplayer(InGameSystem::_playerSlot, GlobalStatus::playerMaxHp);
+
+    // Init enemies
+    if (isBossLevel == false) {
+        std::default_random_engine e;
+        e.seed(std::time(nullptr));
+        this->_enemyNum = e() % 3 + 1;
+
+        for (int i = 1; i <= this->_enemyNum; ++i) {
+            _entities.push_back(new Enemy(i, 20));
+            connectSignalSlotForEntities(_entities[i]);
+            this->_view->initenemy(i, "://res/enemy.jpg", 20);
+        }
+    } else {
+        this->_enemyNum = 1;
+        _entities.push_back(new Boss(1, 30));
+        connectSignalSlotForEntities(_entities[1]);
+        this->_view->initenemy(1, "://res/enemy.jpg", 30);
+    }
+    _gView->show();
 }
 
-void InGameSystem::gameend(bool isWin) {
-  MyDebug << "Gameend";
-  _inited = false;
-  _actionDisabled = 0;
-  for (auto &i : _entities) {
-    i->deleteLater();
-  }
-  _entities.clear();
-  _enemyNum = 0;
-  _curEntity = 0;
-  _playerEnergy = 0;
-  for (auto &i : this->_stack) {
-    i->clear();
-  }
-  _view->deleteLater();
-  _view = nullptr;
-  _scene->deleteLater();
-  _scene = nullptr;
-  _gView->deleteLater();
-  _gView = nullptr;
-  _handCard.clear();
+void InGameSystem::gameend(bool isWin)
+{
+    MyDebug << "Gameend";
+    _inited = false;
+    _actionDisabled = 0;
+    for (auto &i : _entities) {
+        disconnectSignalSlotForEntities(i);
+        i->deleteLater();
+    }
+    _entities.clear();
+    _enemyNum = 0;
+    _curEntity = 0;
+    _playerEnergy = 0;
+    for (auto &i : this->_stack) {
+        i->clear();
+    }
+    disconnectSignalSlotForView();
+    _view->deleteLater();
+    _view = nullptr;
+    _scene->deleteLater();
+    _scene = nullptr;
+    _gView->deleteLater();
+    _gView = nullptr;
+    _handCard.clear();
 
-  emit gameover(isWin);
+    emit gameover(isWin);
 }
 
-void InGameSystem::run() {
-  MyDebug << "Run the game";
-  // Init cardStack
-  auto list = GlobalStatus::allCardOwned;
-  int len = list.size();
-  std::default_random_engine e;
-  for (int i = len - 1; i >= 0; --i) {
-    int ind = e() % (i + 1);
-    swap(list[ind], list[i]);
-  }
-  this->_stack[DROP]->clear();
-  this->_stack[DRAW]->push(list);
-  for (auto &i : list) {
-    MyDebug << "Add Card To Stack - id:" << i;
-    emit addCardToStack(i);
-  }
+void InGameSystem::run()
+{
+    MyDebug << "Run the game";
+    // Init cardStack
+    auto list = GlobalStatus::allCardOwned;
+    int len = list.size();
+    std::default_random_engine e;
+    for (int i = len - 1; i >= 0; --i) {
+        int ind = e() % (i + 1);
+        swap(list[ind], list[i]);
+    }
+    this->_stack[DROP]->clear();
+    this->_stack[DRAW]->push(list);
+    for (auto &i : list) {
+        MyDebug << "Add Card To Stack - id:" << i;
+        emit addCardToStack(i);
+    }
 
-  // Init handCard
-  for (int i = 0; i < 5; ++i) {
-    const auto res = drawCard();
-    if (res == false)
-      break;
-  }
+    // Init handCard
+    for (int i = 0; i < 5; ++i) {
+        const auto res = drawCard();
+        if (res == false)
+            break;
+    }
 
-  this->_actionDisabled = 0;
-  _playerEnergy = GlobalStatus::playerMaxEnergy;
-  emit setEnergy(GlobalStatus::playerMaxEnergy);
+    this->_actionDisabled = 0;
+    _playerEnergy = GlobalStatus::playerMaxEnergy;
+    emit setEnergy(GlobalStatus::playerMaxEnergy);
 
-  this->_entities[0]->roundBegin();
-  emit roundBegin();
+    this->_entities[0]->roundBegin();
+    emit roundBegin();
 }
 
 // Round end for player's round
 // Need to execute the following enemies' action
-void InGameSystem::roundEnd() {
-  MyDebug << "Round End: enemyNum:" << this->_enemyNum;
-  for (int i = 1; i <= _enemyNum; ++i) {
-    MyDebug << "Round End: now enemy:" << i;
-    if (_entities[i]->isDead())
-      continue;
-    _curEntity = i;
-    _entities[i]->roundBegin();
+void InGameSystem::roundEnd()
+{
+    MyDebug << "Round End: enemyNum:" << this->_enemyNum;
+    for (int i = 1; i <= _enemyNum; ++i) {
+        MyDebug << "Round End: now enemy:" << i;
+        if (_entities[i]->isDead())
+            continue;
+        _curEntity = i;
+        _entities[i]->roundBegin();
 
-    /// Test
-    auto ctx = new Context{};
-    ctx->from = _entities[i];
-    ctx->to = {_entities[0]};
-    dynamic_cast<Enemy *>(_entities[i])->enemyAct(ctx);
-    this->handleContext(ctx);
+        /// Test
+        auto ctx = new Context{};
+        ctx->from = _entities[i];
+        ctx->to = {_entities[0]};
+        dynamic_cast<Enemy *>(_entities[i])->enemyAct(ctx);
+        this->handleContext(ctx);
 
-    _entities[i]->roundEnd();
+        _entities[i]->roundEnd();
 
-    /// TODO
-    QThread::msleep(1000);
-  }
+        /// TODO
+        QThread::msleep(1000);
+    }
 
-  /// Player round
-  this->_curEntity = 0;
+    /// Player round
+    this->_curEntity = 0;
 
-  if (this->_stack[DRAW]->empty()) {
-    this->shuffle();
-  }
-  for (int i = 0; i < 2; ++i) {
-    const auto res = drawCard();
-    if (res == false)
-      break;
-  }
-  _playerEnergy = GlobalStatus::playerMaxEnergy;
-  emit setEnergy(GlobalStatus::playerMaxEnergy);
-  this->_actionDisabled = 0;
+    if (this->_stack[DRAW]->empty()) {
+        this->shuffle();
+    }
+    for (int i = 0; i < 2; ++i) {
+        const auto res = drawCard();
+        if (res == false)
+            break;
+    }
+    _playerEnergy = GlobalStatus::playerMaxEnergy;
+    emit setEnergy(GlobalStatus::playerMaxEnergy);
+    this->_actionDisabled = 0;
 
-  this->_entities[0]->roundBegin();
-  emit roundBegin();
+    this->_entities[0]->roundBegin();
+    emit roundBegin();
 }
 
-void InGameSystem::connectSignalSlotForEntities(Entity *entity) {
-  QObject::connect(entity, SIGNAL(requestHandleContext(Context *)), this,
-                   SLOT(handleContext(Context *)));
-  QObject::connect(entity, SIGNAL(hpChanged(int, int)), _view,
-                   SLOT(updatehp(int, int)));
-  QObject::connect(entity, SIGNAL(armorChanged(int, int)), _view,
-                   SLOT(updatearmor(int, int)));
-  QObject::connect(entity, SIGNAL(buffChanged(QString, int, int)), _view,
-                   SLOT(updatebuff(QString, int, int)));
+void InGameSystem::connectSignalSlotForEntities(Entity *entity)
+{
+    QObject::connect(entity,
+                     SIGNAL(requestHandleContext(Context *)),
+                     this,
+                     SLOT(handleContext(Context *)));
+    QObject::connect(entity, SIGNAL(hpChanged(int, int)), _view, SLOT(updatehp(int, int)));
+    QObject::connect(entity, SIGNAL(armorChanged(int, int)), _view, SLOT(updatearmor(int, int)));
+    QObject::connect(entity,
+                     SIGNAL(buffChanged(QString, int, int)),
+                     _view,
+                     SLOT(updatebuff(QString, int, int)));
+}
+void InGameSystem::disconnectSignalSlotForEntities(Entity *entity)
+{
+    QObject::connect(entity,
+                     SIGNAL(requestHandleContext(Context *)),
+                     this,
+                     SLOT(handleContext(Context *)));
+    QObject::disconnect(entity, SIGNAL(hpChanged(int, int)), _view, SLOT(updatehp(int, int)));
+    QObject::disconnect(entity, SIGNAL(armorChanged(int, int)), _view, SLOT(updatearmor(int, int)));
+    QObject::disconnect(entity,
+                        SIGNAL(buffChanged(QString, int, int)),
+                        _view,
+                        SLOT(updatebuff(QString, int, int)));
 }
 
 void InGameSystem::connectSignalSlotForView()
@@ -207,6 +230,31 @@ void InGameSystem::connectSignalSlotForView()
                      SIGNAL(playcard(int, int)),
                      this,
                      SLOT(playerUsingCard(int, int)));
+}
+
+void InGameSystem::disconnectSignalSlotForView()
+{
+    QObject::disconnect(_view, SIGNAL(roundover()), this, SLOT(roundEnd()));
+    QObject::disconnect(_view,
+                        SIGNAL(request_valid(QString, int *)),
+                        this,
+                        SLOT(handleCardValid(QString, int *)));
+    QObject::disconnect(this, SIGNAL(updateEnergy(int)), _view, SLOT(updateenergy(int)));
+    QObject::disconnect(this,
+                        SIGNAL(addCardToStack(QString)),
+                        _view->drawpile,
+                        SLOT(addcard(QString)));
+    QObject::disconnect(this,
+                        SIGNAL(addCardToHand(QString)),
+                        _view->drawpile,
+                        SLOT(drawcard(QString)));
+    QObject::disconnect(this, SIGNAL(roundBegin()), _view, SLOT(roundbegin()));
+    QObject::disconnect(this, SIGNAL(sendShuffle()), _view, SLOT(shuffle()));
+    QObject::disconnect(this, SIGNAL(setEnergy(int)), _view, SLOT(setenergy(int)));
+    QObject::disconnect(_view->myhands,
+                        SIGNAL(playcard(int, int)),
+                        this,
+                        SLOT(playerUsingCard(int, int)));
 }
 
 void InGameSystem::shuffle()

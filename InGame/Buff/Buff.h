@@ -87,7 +87,7 @@ protected:
 class ModifyDamageByPercentBuff : public ModifyDamageBasicBuff
 {
 public:
-    ModifyDamageByPercentBuff(BuffInfo::BuffType type, int percent);
+    ModifyDamageByPercentBuff(BuffInfo::BuffType type, int percent, int degradeLevel);
     virtual BasicBuff* getCopy() override;
     virtual void affect(Context *ctx) override;
     virtual void degrade() override;
