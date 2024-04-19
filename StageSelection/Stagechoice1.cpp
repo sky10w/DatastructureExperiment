@@ -1,7 +1,7 @@
 ﻿#include "Stagechoice1.h"
 
 Stagechoice1::Stagechoice1(QWidget *parent) : QWidget(parent) {
-
+  this->setFixedSize(1280, 720);
   LevelGenerator generator;
   for (int i = 0; i < 9; i++) {
     btn.push_back(
@@ -79,6 +79,6 @@ void Stagechoice1::levelClear(int node) {
   update();
 }
 void Stagechoice1::levelChoose(int node) {
-    bool isBoss = node == 10;
-    emit enterStage(isBoss);
+  bool isBoss = node == 10;
+  emit enterStage(isBoss);
 }

@@ -5,7 +5,7 @@
         "buff_name": "强壮",
         "description": "将每次受到的伤害减2",
         "type": "ON_HURT",
-        "iconPath": ":/json/res/image/boss1.png"
+        "iconPath": ":/buff/gameboard/res/buff1.png"
     },
     {
         "id": "0002",
@@ -13,7 +13,7 @@
         "buff_name": "力量",
         "description": "将每次攻击的伤害加2",
         "type": "ON_ATTACK",
-        "iconPath": ":/json/res/image/boss1.png"
+        "iconPath": ":/buff/gameboard/res/buff2.png"
     },
     {
         "id": "0003",
@@ -21,7 +21,7 @@
         "buff_name": "蓄势",
         "description": "当前回合无法使用攻击牌，下个回合给予\"就绪\"增益",
         "type": "ON_ROUNDBEGIN",
-        "iconPath": ":/json/res/image/boss1.png"
+        "iconPath": ":/buff/gameboard/res/buff3.png"
     },
     {
         "id": "0004",
@@ -29,7 +29,7 @@
         "buff_name": "就绪",
         "description": "所有攻击牌伤害翻倍",
         "type": "ON_ATTACK",
-        "iconPath": ":/json/res/image/boss1.png"
+        "iconPath": ":/buff/gameboard/res/buff4.png"
     },
     {
         "id": "0005",
@@ -37,7 +37,7 @@
         "buff_name": "虚弱",
         "description": "所有攻击牌伤害减75%",
         "type": "ON_ATTACK",
-        "iconPath": ":/json/res/image/boss1.png"
+        "iconPath": ":/buff/gameboard/res/buff5.png"
     },
     {
         "id": "0006",
@@ -45,6 +45,6 @@
         "buff_name": "运粮",
         "description": "每回合恢复3点生命值",
         "type": "ON_ROUNDBEGIN",
-        "iconPath": ":/json/res/image/boss1.png"
+        "iconPath": ":/buff/gameboard/res/buff6.png"
     }
 ]
