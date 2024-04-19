@@ -10,8 +10,8 @@ const int InGameSystem::_playerSlot = 0;
 
 InGameSystem::InGameSystem(QWidget *parent)
     : QWidget(parent)
-    , _scene(nullptr)
     , _gView(nullptr)
+    , _scene(nullptr)
     , _view(nullptr)
 {
     this->_inited = false;
