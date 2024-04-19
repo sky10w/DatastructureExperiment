@@ -19,6 +19,9 @@ InGameSystem::InGameSystem(QWidget *parent)
     this->_stack[0] = new CardStack();
     this->_stack[1] = new CardStack();
 
+    // this->_view = new gameboard();
+    // connectSignalSlotForView();
+
     _actionDisabled = 0;
     _handCard = {};
 }
@@ -145,6 +148,7 @@ void InGameSystem::run()
 // Need to execute the following enemies' action
 void InGameSystem::roundEnd()
 {
+    this->_entities[0]->roundEnd();
     MyDebug << "Round End: enemyNum:" << this->_enemyNum;
     for (int i = 1; i <= _enemyNum; ++i) {
         MyDebug << "Round End: now enemy:" << i;

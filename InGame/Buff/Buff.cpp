@@ -125,6 +125,8 @@ BasicBuff *HealBuff::getCopy()
 
 void HealBuff::affect(Context *ctx, BuffInfo::BuffType situation)
 {
+    if (this->_type != situation)
+        return;
     ctx->hpHealed = this->_healAmount;
 }
 

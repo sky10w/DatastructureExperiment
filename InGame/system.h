@@ -41,7 +41,7 @@ private:
     static const int _playerSlot;
 
 signals:
-    void nextRoundHint(QHash<Entity*, Action::Act_t> act);
+    void nextRoundHint(QVector<Action::Act_t> act);
     void entityAct(Action::Act_t act);
 
     void sendShuffle();

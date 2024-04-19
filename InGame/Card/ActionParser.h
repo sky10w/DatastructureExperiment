@@ -14,8 +14,7 @@ class Action
 {
 public:
     using Act_t = int;
-    enum Act : Act_t
-    {
+    enum _Act : Act_t {
         ATTACK = (1 << 0),
         DEFEND = (1 << 1),
         BUFF = (1 << 2),
