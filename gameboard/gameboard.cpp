@@ -6,6 +6,8 @@ QMap<QString, QPixmap> CardIcon;
 const int HANDSLIMIT = 7;
 const int WIDGETW = 1280;
 const int WIDGETH = 720;
+const int FLASH_INTERVALS = 75;
+const int FLASH_TIMES = 10;
 int mysignbit(const qreal &x) { return (x > 0) - (x < 0); }
 gameboard::gameboard(QWidget *parent)
     : MyOpenGLWidget(parent), Player(nullptr), Enemy(), myhands(nullptr),
@@ -29,6 +31,7 @@ void EntityView::initasenemy(int id) {
   mybuff.init(300 + 250 * id, 200);
   this->id = id;
   this->type = "enemy";
+
   action.setParentItem(this);
   action.setPixmap(QString("://res/action.jpg") /*现在还没有action icon */);
   action.setPos((width - action.pixmap().width()) / 2,
@@ -43,7 +46,7 @@ void EntityView::updatehpview() {
 
 void EntityView::update_HP(int delta) {
   HP += delta;
-  if (HP < 0) {
+  if (HP <= 0) {
     HP = 0;
     this->hide();
     this->mybuff.buffview.hide();
@@ -67,8 +70,8 @@ void EntityView::update_armor(int delta) {
   updatearmorview();
 }
 
-void EntityView::update_action(int actionid) {
-  action.setPixmap(QString(";//"));
+void EntityView::update_action(int id, int actionid) {
+  action.setPixmap(QString("://"));
 }
 
 void gameboard::updateenergyview() {
@@ -221,6 +224,7 @@ void EntityView::init(int hp) {
   hpnumber.setZValue(1);
   hpnumber.setPos(0, -10);
   hpnumber.setFont(QFont("Arial", 15, 0, true));
+  hpnumber.setBrush(Qt::white);
 
   armoricon.setParentItem(this);
   armoricon.setPos(0.8 * width, 0.8 * width);
@@ -236,28 +240,18 @@ void EntityView::init(int hp) {
 void gameboard::roundbegin() {
   MyDebug << "Round begin";
   playerround = 1;
-  QGraphicsPixmapItem msg(QString("://res/roundbegin.png"));
-
-  setanimation(QString("://res/roundbegin.png"), 3000,
-               WIDGETW - msg.pixmap().width() >> 1,
-               WIDGETH - msg.pixmap().height() >> 1);
+  QPixmap msg(QString("://res/roundbegin.png"));
+  setanimation(msg, 3000, WIDGETW - msg.width() >> 1,
+               WIDGETH - msg.height() >> 1);
 }
-void gameboard::setanimation(QString path, int time, int posx, int posy) {
-  QGraphicsPixmapItem *msg = new QGraphicsPixmapItem();
-  msg->setPixmap(QString(path));
+void gameboard::setanimation(QPixmap pixmap, int time, qreal posx, qreal posy) {
+  QGraphicsPixmapItem *msg = new QGraphicsPixmapItem(pixmap);
   scene.addItem(msg);
   msg->setPos(posx, posy);
-  // 创建一个定时器
-
-  //---
   QTimer *timer = new QTimer(); //新建一个
   timer->setSingleShot(true);   //一次性
   QObject::connect(timer, &QTimer::timeout, this, [=] {
-    /*
-     * --------
-     */
     scene.removeItem(msg);
-    // 在场景中删除item
     delete msg;
   });
   timer->start(time);
@@ -525,14 +519,38 @@ void gameboard::updatebuff(QString buffuuid, int strength, int id) {
 void gameboard::updatehp(int id, int delta) {
   if (id != 0) {
     Enemy[id]->update_HP(delta);
-    // if (Enemy[id]->HP == 0)
-    //  delete Enemy[id], Enemy.erase(id);
+    if (delta < 0) {
+      AnimationHurt(Enemy[id]);
+    }
+
   } else {
     Player->update_HP(delta);
-    // if (Player->HP == 0)
-    //  delete Player, Player = nullptr;
+    if (delta < 0)
+      AnimationHurt(Player);
   }
 }
+void gameboard::AnimationHurt(EntityView *entity) {
+  for (int i = 0; i < FLASH_TIMES; i++) {
+    QTimer *timer = new QTimer();
+    timer->setSingleShot(true);
+    QObject::connect(timer, &QTimer::timeout, this, [=]() {
+      if (i % 2 == 0)
+        entity->hide();
+      else
+        entity->show();
+    });
+    timer->start(FLASH_INTERVALS * i);
+  }
+  QPixmap gethurt(QString("://res/gethurt.png"));
+  setanimation(gethurt, FLASH_INTERVALS * FLASH_TIMES,
+               entity->pos().x() +
+                   (entity->pixmap().size().width() - gethurt.width()) / 2,
+               entity->pos().y() +
+                   (entity->pixmap().size().height() - gethurt.height()) / 2);
+}
+// void gameboard::AnimationDefend(EntityView *entity) {}
+// void gameboard::AnimationFortify(EntityView *entity) {}
+// void gameboard::Animation()
 
 void gameboard::updatearmor(int id, int delta) {
   if (id != 0)
