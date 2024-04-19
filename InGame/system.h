@@ -85,6 +85,9 @@ private:
     QGraphicsScene* _scene;
     gameboard* _view;
     QVector<QString> _handCard;
+
+private:
+    static const int _animation_duration;
 };
 
 

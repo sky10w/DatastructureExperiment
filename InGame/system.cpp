@@ -7,7 +7,7 @@ int GlobalStatus::playerMaxEnergy = 10;
 int GlobalStatus::playerMaxHandCard = 7;
 
 const int InGameSystem::_playerSlot = 0;
-
+const int InGameSystem::_animation_duration = 1000;
 InGameSystem::InGameSystem(QWidget *parent)
     : QWidget(parent)
     , _playerEnergy(0)
@@ -150,24 +150,33 @@ void InGameSystem::run()
 void InGameSystem::playerRoundEnd()
 {
     this->_entities[0]->roundEnd();
+    this->enemyRound();
 
     /// Player round
-    this->_curEntity = 0;
+    for (int i = 1; i <= this->_enemyNum; ++i) {
+        QTimer *timer = new QTimer();
+        timer->setSingleShot(true);
+        connect(timer, &QTimer::timeout, [&] {
+            this->_curEntity = 0;
 
-    if (this->_stack[DRAW]->empty()) {
-        this->shuffle();
-    }
-    for (int i = 0; i < 2; ++i) {
-        const auto res = drawCard();
-        if (res == false)
-            break;
-    }
-    _playerEnergy = GlobalStatus::playerMaxEnergy;
-    emit setEnergy(GlobalStatus::playerMaxEnergy);
-    this->_actionDisabled = 0;
+            if (this->_stack[DRAW]->empty()) {
+                this->shuffle();
+            }
+            for (int i = 0; i < 2; ++i) {
+                const auto res = drawCard();
+                if (res == false)
+                    break;
+            }
+            _playerEnergy = GlobalStatus::playerMaxEnergy;
+            emit setEnergy(GlobalStatus::playerMaxEnergy);
+            this->_actionDisabled = 0;
 
-    this->_entities[0]->roundBegin();
-    emit playerRoundBegin();
+            this->_entities[0]->roundBegin();
+            emit playerRoundBegin();
+        });
+
+        timer->start((_enemyNum - 1) * _animation_duration);
+    }
 }
 
 void InGameSystem::connectSignalSlotForEntities(Entity *entity)
@@ -184,6 +193,7 @@ void InGameSystem::connectSignalSlotForEntities(Entity *entity)
                      _view,
                      SLOT(updatebuff(QString, int, int)));
 }
+
 void InGameSystem::disconnectSignalSlotForEntities(Entity *entity)
 {
     MyDebug << "Disconnect To Entity once";
@@ -199,30 +209,28 @@ void InGameSystem::disconnectSignalSlotForEntities(Entity *entity)
                         SLOT(updatebuff(QString, int, int)));
 }
 
-void InGameSystem::connectSignalSlotForView()
-{
-    MyDebug << "Connect To View once";
-    QObject::connect(_view, SIGNAL(roundover()), this, SLOT(roundEnd()));
-    QObject::connect(_view,
-                     SIGNAL(request_valid(QString, int *)),
-                     this,
-                     SLOT(handleCardValid(QString, int *)));
-    QObject::connect(this, SIGNAL(updateEnergy(int)), _view, SLOT(updateenergy(int)));
-    QObject::connect(this, SIGNAL(addCardToStack(QString)), _view->drawpile, SLOT(addcard(QString)));
-    QObject::connect(this, SIGNAL(addCardToHand(QString)), _view->drawpile, SLOT(drawcard(QString)));
-    QObject::connect(this, SIGNAL(roundBegin()), _view, SLOT(roundbegin()));
-    QObject::connect(this, SIGNAL(sendShuffle()), _view, SLOT(shuffle()));
-    QObject::connect(this, SIGNAL(setEnergy(int)), _view, SLOT(setenergy(int)));
-    QObject::connect(_view->myhands,
-                     SIGNAL(playcard(int, int)),
-                     this,
-                     SLOT(playerUsingCard(int, int)));
+void InGameSystem::connectSignalSlotForView() {
+  MyDebug << "Connect To View once";
+  QObject::connect(_view, SIGNAL(roundover()), this, SLOT(playerRoundEnd()));
+  QObject::connect(_view, SIGNAL(request_valid(QString, int *)), this,
+                   SLOT(handleCardValid(QString, int *)));
+  QObject::connect(this, SIGNAL(updateEnergy(int)), _view,
+                   SLOT(updateenergy(int)));
+  QObject::connect(this, SIGNAL(addCardToStack(QString)), _view->drawpile,
+                   SLOT(addcard(QString)));
+  QObject::connect(this, SIGNAL(addCardToHand(QString)), _view->drawpile,
+                   SLOT(drawcard(QString)));
+  QObject::connect(this, SIGNAL(playerRoundBegin()), _view, SLOT(roundbegin()));
+  QObject::connect(this, SIGNAL(sendShuffle()), _view, SLOT(shuffle()));
+  QObject::connect(this, SIGNAL(setEnergy(int)), _view, SLOT(setenergy(int)));
+  QObject::connect(_view->myhands, SIGNAL(playcard(int, int)), this,
+                   SLOT(playerUsingCard(int, int)));
 }
 
 void InGameSystem::disconnectSignalSlotForView()
 {
     MyDebug << "Disconnect To View once";
-    QObject::disconnect(_view, SIGNAL(roundover()), this, SLOT(roundEnd()));
+    QObject::disconnect(_view, SIGNAL(roundover()), this, SLOT(playerRoundEnd()));
     QObject::disconnect(_view,
                         SIGNAL(request_valid(QString, int *)),
                         this,
@@ -236,7 +244,7 @@ void InGameSystem::disconnectSignalSlotForView()
                         SIGNAL(addCardToHand(QString)),
                         _view->drawpile,
                         SLOT(drawcard(QString)));
-    QObject::disconnect(this, SIGNAL(roundBegin()), _view, SLOT(roundbegin()));
+    QObject::disconnect(this, SIGNAL(playerRoundBegin()), _view, SLOT(roundbegin()));
     QObject::disconnect(this, SIGNAL(sendShuffle()), _view, SLOT(shuffle()));
     QObject::disconnect(this, SIGNAL(setEnergy(int)), _view, SLOT(setenergy(int)));
     QObject::disconnect(_view->myhands,
@@ -273,24 +281,28 @@ bool InGameSystem::drawCard()
 void InGameSystem::enemyRound()
 {
     MyDebug << "Enemy Round: enemyNum:" << this->_enemyNum;
+
     for (int i = 1; i <= _enemyNum; ++i) {
         MyDebug << "Round End: now enemy:" << i;
         if (_entities[i]->isDead())
             continue;
-        _curEntity = i;
-        _entities[i]->roundBegin();
 
-        /// Test
-        auto ctx = new Context{};
-        ctx->from = _entities[i];
-        ctx->to = {_entities[0]};
-        dynamic_cast<Enemy *>(_entities[i])->enemyAct(ctx);
-        this->handleContext(ctx);
+        QTimer *timer = new QTimer();
+        timer->setSingleShot(true);
+        connect(timer, &QTimer::timeout, [=] {
+            _curEntity = i;
+            _entities[i]->roundBegin();
 
-        _entities[i]->roundEnd();
+            /// Test
+            auto ctx = new Context{};
+            ctx->from = _entities[i];
+            ctx->to = {_entities[0]};
+            dynamic_cast<Enemy *>(_entities[i])->enemyAct(ctx);
+            this->handleContext(ctx);
 
-        /// TODO
-        QThread::msleep(1000);
+            _entities[i]->roundEnd();
+        });
+        timer->start((i - 1) * _animation_duration);
     }
 }
 

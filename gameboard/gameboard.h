@@ -113,7 +113,7 @@ public:
 
   void update_HP(int delta);
   void update_armor(int delta);
-  void update_action(int actionid);
+  void update_action(Action::Act_t id);
   // QRectF boundingRect() const override;
 };
 
@@ -222,7 +222,9 @@ public:
   void EndButton_clicke();
   void updateenergyview();
 
-  void setanimation(QString path, int time, int posx, int posy);
+  void setanimation(QPixmap pixmap, int time, qreal posx, qreal posy);
+
+  void AnimationHurt(EntityView *entity);
 signals:
   void roundover();
   void request_valid(QString uuid, int *valid); //请求valid值
@@ -238,7 +240,10 @@ public slots:
   void updatehp(int id, int delta);                 // name的hp+=delta
   void updatearmor(int id, int delta);              // name的armor+=delta
   void initenemy(int id, QString name, int HP_MAX); //初始化一个敌人
-  void initplayer(int id, int HP_MAX);              //初始化一个玩家
+  void initplayer(int id, int HP_MAX);
+  void updateaction(map<int /*enemy_id*/, Action::Act_t> mp);
+  void act(int id, Action::Act_t action);
+  // void animation //初始化一个玩家
 
   // int get
 };
