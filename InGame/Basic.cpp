@@ -10,15 +10,33 @@ Entity::Entity(bool isPlayer, int index, int hp)
 {
 }
 
-bool Entity::isPlayer() const { return this->_isPlayer; }
+bool Entity::isPlayer() const
+{
+    return this->_isPlayer;
+}
 
-int Entity::getHp() const { return this->_hp; }
+int Entity::getMaxHp() const
+{
+    return this->_maxHp;
+}
 
-int Entity::getArmor() const { return this->_armor; }
+int Entity::getHp() const
+{
+    return this->_hp;
+}
 
-bool Entity::isDead() const { return this->_hp <= 0; }
+int Entity::getArmor() const
+{
+    return this->_armor;
+}
 
-void Entity::roundBegin() {
+bool Entity::isDead() const
+{
+    return this->_hp <= 0;
+}
+
+void Entity::roundBegin()
+{
     Context *ctx = new Context{};
     ctx->from = this;
     ctx->to = {this};
@@ -34,6 +52,11 @@ void Entity::roundEnd() {
     this->handleBuffList(ctx, BuffInfo::ON_ROUNDEND);
     emit requestHandleContext(ctx);
     delete ctx;
+}
+
+void Enemy::setNextAction(QPair<Action::Act_t, Context *> _next)
+{
+    this->_nextAction = _next;
 }
 
 void Entity::heal(Context *ctx) {
@@ -152,44 +175,11 @@ Enemy::Enemy(int index, int hp)
     : Entity(false, index, hp)
 {}
 
-void Enemy::enemyAct(Context *ctx)
+QPair<Action::Act_t, Context *> Enemy::getNextAction()
 {
-    ctx->damageDone = 5;
+    return this->_nextAction;
 }
 
 Boss::Boss(int index, int hp)
     : Enemy(index, hp)
 {}
-
-void Boss::enemyAct(Context *ctx)
-{
-    std::default_random_engine e;
-    if(this->_hp > this->_maxHp)
-    {
-        int randRes = e() % 2;
-        switch (randRes) {
-        case 0:
-            ctx->damageDone = 6;
-            break;
-        case 1:
-            ctx->armorGained = 4;
-            break;
-        default:
-            break;
-        }
-
-        return;
-    }
-
-    int randRes = e() % 2;
-    switch (randRes) {
-    case 0:
-        ctx->damageDone = 6;
-        break;
-    case 1:
-        ctx->buffGiven = "+0006";
-        break;
-    default:
-        break;
-    }
-}

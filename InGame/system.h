@@ -3,9 +3,10 @@
 
 #include <QObject>
 #include <QThread>
-#include "Card/CardSystem.h"
-#include "Buff/BuffSystem.h"
 #include "Basic.h"
+#include "Buff/BuffSystem.h"
+#include "Card/CardSystem.h"
+#include "Strategy.h"
 #include "gameboard/gameboard.h"
 #include <random>
 
@@ -31,6 +32,8 @@ public:
     void connectSignalSlotForView();
     void shuffle();
     bool drawCard();
+    void generateNextRoundHint();
+    void playerRound();
     void enemyRound();
     void gameend(bool isWin);
     int checkGameover();
@@ -42,8 +45,8 @@ private:
     static const int _playerSlot;
 
 signals:
-    void nextRoundHint(QMap<int, Action::Act_t> act);
-    void entityAct(Action::Act_t act);
+    void nextRoundHint(std::map<int, Action::Act_t> act);
+    void entityAct(int, Action::Act_t act);
 
     void sendShuffle();
     void setEnergy(int energy);
@@ -75,6 +78,7 @@ public slots:
 private:
     int _actionDisabled;
     QVector<Entity*> _entities;
+    QVector<Strategy*> _enemyStrategy;
     int _enemyNum;
     int _curEntity;
     int _playerEnergy;

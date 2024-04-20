@@ -63,6 +63,7 @@ void InGameSystem::initSystem(bool isBossLevel)
     _entities.push_back(player);
     connectSignalSlotForEntities(player);
     _view->initplayer(InGameSystem::_playerSlot, GlobalStatus::playerMaxHp);
+    _enemyStrategy.push_back(nullptr);
 
     // Init enemies
     if (isBossLevel == false) {
@@ -72,12 +73,14 @@ void InGameSystem::initSystem(bool isBossLevel)
 
         for (int i = 1; i <= this->_enemyNum; ++i) {
             _entities.push_back(new Enemy(i, 20));
+            _enemyStrategy.push_back(new NormalStrategy());
             connectSignalSlotForEntities(_entities[i]);
             this->_view->initenemy(i, "://res/enemy.jpg", 20);
         }
     } else {
         this->_enemyNum = 1;
         _entities.push_back(new Boss(1, 30));
+        _enemyStrategy.push_back(new BossStrategy());
         connectSignalSlotForEntities(_entities[1]);
         this->_view->initenemy(1, "://res/enemy.jpg", 30);
     }
@@ -141,6 +144,7 @@ void InGameSystem::run()
     _playerEnergy = GlobalStatus::playerMaxEnergy;
     emit setEnergy(GlobalStatus::playerMaxEnergy);
 
+    this->generateNextRoundHint();
     this->_entities[0]->roundBegin();
     emit playerRoundBegin();
 }
@@ -172,85 +176,13 @@ void InGameSystem::playerRoundEnd()
             this->_actionDisabled = 0;
 
             this->_entities[0]->roundBegin();
-            emit playerRoundBegin();
+            
         });
-
         timer->start((_enemyNum - 1) * _animation_duration);
     }
-}
 
-void InGameSystem::connectSignalSlotForEntities(Entity *entity)
-{
-    MyDebug << "Connect To Entity once";
-    QObject::connect(entity,
-                     SIGNAL(requestHandleContext(Context *)),
-                     this,
-                     SLOT(handleContext(Context *)));
-    QObject::connect(entity, SIGNAL(hpChanged(int, int)), _view, SLOT(updatehp(int, int)));
-    QObject::connect(entity, SIGNAL(armorChanged(int, int)), _view, SLOT(updatearmor(int, int)));
-    QObject::connect(entity,
-                     SIGNAL(buffChanged(QString, int, int)),
-                     _view,
-                     SLOT(updatebuff(QString, int, int)));
-}
-
-void InGameSystem::disconnectSignalSlotForEntities(Entity *entity)
-{
-    MyDebug << "Disconnect To Entity once";
-    QObject::connect(entity,
-                     SIGNAL(requestHandleContext(Context *)),
-                     this,
-                     SLOT(handleContext(Context *)));
-    QObject::disconnect(entity, SIGNAL(hpChanged(int, int)), _view, SLOT(updatehp(int, int)));
-    QObject::disconnect(entity, SIGNAL(armorChanged(int, int)), _view, SLOT(updatearmor(int, int)));
-    QObject::disconnect(entity,
-                        SIGNAL(buffChanged(QString, int, int)),
-                        _view,
-                        SLOT(updatebuff(QString, int, int)));
-}
-
-void InGameSystem::connectSignalSlotForView() {
-  MyDebug << "Connect To View once";
-  QObject::connect(_view, SIGNAL(roundover()), this, SLOT(playerRoundEnd()));
-  QObject::connect(_view, SIGNAL(request_valid(QString, int *)), this,
-                   SLOT(handleCardValid(QString, int *)));
-  QObject::connect(this, SIGNAL(updateEnergy(int)), _view,
-                   SLOT(updateenergy(int)));
-  QObject::connect(this, SIGNAL(addCardToStack(QString)), _view->drawpile,
-                   SLOT(addcard(QString)));
-  QObject::connect(this, SIGNAL(addCardToHand(QString)), _view->drawpile,
-                   SLOT(drawcard(QString)));
-  QObject::connect(this, SIGNAL(playerRoundBegin()), _view, SLOT(roundbegin()));
-  QObject::connect(this, SIGNAL(sendShuffle()), _view, SLOT(shuffle()));
-  QObject::connect(this, SIGNAL(setEnergy(int)), _view, SLOT(setenergy(int)));
-  QObject::connect(_view->myhands, SIGNAL(playcard(int, int)), this,
-                   SLOT(playerUsingCard(int, int)));
-}
-
-void InGameSystem::disconnectSignalSlotForView()
-{
-    MyDebug << "Disconnect To View once";
-    QObject::disconnect(_view, SIGNAL(roundover()), this, SLOT(playerRoundEnd()));
-    QObject::disconnect(_view,
-                        SIGNAL(request_valid(QString, int *)),
-                        this,
-                        SLOT(handleCardValid(QString, int *)));
-    QObject::disconnect(this, SIGNAL(updateEnergy(int)), _view, SLOT(updateenergy(int)));
-    QObject::disconnect(this,
-                        SIGNAL(addCardToStack(QString)),
-                        _view->drawpile,
-                        SLOT(addcard(QString)));
-    QObject::disconnect(this,
-                        SIGNAL(addCardToHand(QString)),
-                        _view->drawpile,
-                        SLOT(drawcard(QString)));
-    QObject::disconnect(this, SIGNAL(playerRoundBegin()), _view, SLOT(roundbegin()));
-    QObject::disconnect(this, SIGNAL(sendShuffle()), _view, SLOT(shuffle()));
-    QObject::disconnect(this, SIGNAL(setEnergy(int)), _view, SLOT(setenergy(int)));
-    QObject::disconnect(_view->myhands,
-                        SIGNAL(playcard(int, int)),
-                        this,
-                        SLOT(playerUsingCard(int, int)));
+    this->generateNextRoundHint();
+    emit playerRoundBegin();
 }
 
 void InGameSystem::shuffle()
@@ -278,6 +210,22 @@ bool InGameSystem::drawCard()
     return true;
 }
 
+void InGameSystem::generateNextRoundHint()
+{
+    // Generate next round hint
+    std::map<int, Action::Act_t> actMap;
+    for (int i = 1; i <= _enemyNum; ++i) {
+        Enemy *cur = dynamic_cast<Enemy *>(this->_entities[i]);
+        Context *ctx = new Context();
+        ctx->from = cur;
+        ctx->to = {this->_entities[_playerSlot]};
+        auto act = this->_enemyStrategy[i]->generateAction(ctx);
+        cur->setNextAction({act, ctx});
+        actMap.insert({i, act});
+    }
+    emit nextRoundHint(actMap);
+}
+
 void InGameSystem::enemyRound()
 {
     MyDebug << "Enemy Round: enemyNum:" << this->_enemyNum;
@@ -289,16 +237,15 @@ void InGameSystem::enemyRound()
 
         QTimer *timer = new QTimer();
         timer->setSingleShot(true);
-        connect(timer, &QTimer::timeout, [=] {
+        connect(timer, &QTimer::timeout, this, [=] {
             _curEntity = i;
             _entities[i]->roundBegin();
 
             /// Test
-            auto ctx = new Context{};
-            ctx->from = _entities[i];
-            ctx->to = {_entities[0]};
-            dynamic_cast<Enemy *>(_entities[i])->enemyAct(ctx);
-            this->handleContext(ctx);
+            auto cur = dynamic_cast<Enemy *>(this->_entities[i]);
+            auto actCtx = cur->getNextAction();
+            emit this->entityAct(i, actCtx.first);
+            this->handleContext(actCtx.second);
 
             _entities[i]->roundEnd();
         });
@@ -432,4 +379,90 @@ void InGameSystem::handleCardValid(QString cardID, int *valid)
 {
     const auto info = CardSystem::getCardInfo(cardID);
     *valid = !(info.actType & this->_actionDisabled);
+}
+
+void InGameSystem::connectSignalSlotForEntities(Entity *entity)
+{
+    MyDebug << "Connect To Entity once";
+    QObject::connect(entity,
+                     SIGNAL(requestHandleContext(Context *)),
+                     this,
+                     SLOT(handleContext(Context *)));
+    QObject::connect(entity, SIGNAL(hpChanged(int, int)), _view, SLOT(updatehp(int, int)));
+    QObject::connect(entity, SIGNAL(armorChanged(int, int)), _view, SLOT(updatearmor(int, int)));
+    QObject::connect(entity,
+                     SIGNAL(buffChanged(QString, int, int)),
+                     _view,
+                     SLOT(updatebuff(QString, int, int)));
+}
+
+void InGameSystem::disconnectSignalSlotForEntities(Entity *entity)
+{
+    MyDebug << "Disconnect To Entity once";
+    QObject::connect(entity,
+                     SIGNAL(requestHandleContext(Context *)),
+                     this,
+                     SLOT(handleContext(Context *)));
+    QObject::disconnect(entity, SIGNAL(hpChanged(int, int)), _view, SLOT(updatehp(int, int)));
+    QObject::disconnect(entity, SIGNAL(armorChanged(int, int)), _view, SLOT(updatearmor(int, int)));
+    QObject::disconnect(entity,
+                        SIGNAL(buffChanged(QString, int, int)),
+                        _view,
+                        SLOT(updatebuff(QString, int, int)));
+}
+
+void InGameSystem::connectSignalSlotForView()
+{
+    MyDebug << "Connect To View once";
+    QObject::connect(_view, SIGNAL(roundover()), this, SLOT(playerRoundEnd()));
+    QObject::connect(_view,
+                     SIGNAL(request_valid(QString, int *)),
+                     this,
+                     SLOT(handleCardValid(QString, int *)));
+    QObject::connect(this, SIGNAL(updateEnergy(int)), _view, SLOT(updateenergy(int)));
+    QObject::connect(this, SIGNAL(addCardToStack(QString)), _view->drawpile, SLOT(addcard(QString)));
+    QObject::connect(this, SIGNAL(addCardToHand(QString)), _view->drawpile, SLOT(drawcard(QString)));
+    QObject::connect(this, SIGNAL(playerRoundBegin()), _view, SLOT(roundbegin()));
+    QObject::connect(this, SIGNAL(sendShuffle()), _view, SLOT(shuffle()));
+    QObject::connect(this, SIGNAL(setEnergy(int)), _view, SLOT(setenergy(int)));
+    QObject::connect(_view->myhands,
+                     SIGNAL(playcard(int, int)),
+                     this,
+                     SLOT(playerUsingCard(int, int)));
+    QObject::connect(this, SIGNAL(nextRoundHint(map)), _view, SLOT(updateaction(map)));
+    QObject::connect(this,
+                     SIGNAL(entityAct(int, Action::Act_t)),
+                     _view,
+                     SLOT(act(int, Action::Act_t)));
+}
+
+void InGameSystem::disconnectSignalSlotForView()
+{
+    MyDebug << "Disconnect To View once";
+    QObject::disconnect(_view, SIGNAL(roundover()), this, SLOT(playerRoundEnd()));
+    QObject::disconnect(_view,
+                        SIGNAL(request_valid(QString, int *)),
+                        this,
+                        SLOT(handleCardValid(QString, int *)));
+    QObject::disconnect(this, SIGNAL(updateEnergy(int)), _view, SLOT(updateenergy(int)));
+    QObject::disconnect(this,
+                        SIGNAL(addCardToStack(QString)),
+                        _view->drawpile,
+                        SLOT(addcard(QString)));
+    QObject::disconnect(this,
+                        SIGNAL(addCardToHand(QString)),
+                        _view->drawpile,
+                        SLOT(drawcard(QString)));
+    QObject::disconnect(this, SIGNAL(playerRoundBegin()), _view, SLOT(roundbegin()));
+    QObject::disconnect(this, SIGNAL(sendShuffle()), _view, SLOT(shuffle()));
+    QObject::disconnect(this, SIGNAL(setEnergy(int)), _view, SLOT(setenergy(int)));
+    QObject::disconnect(_view->myhands,
+                        SIGNAL(playcard(int, int)),
+                        this,
+                        SLOT(playerUsingCard(int, int)));
+    QObject::disconnect(this, SIGNAL(nextRoundHint(map)), _view, SLOT(updateaction(map)));
+    QObject::disconnect(this,
+                        SIGNAL(entityAct(int, Action::Act_t)),
+                        _view,
+                        SLOT(act(int, Action::Act_t)));
 }

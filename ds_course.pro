@@ -17,6 +17,7 @@ SOURCES += \
     InGame/Buff/BuffSystem.cpp \
     InGame/Card/CardSystem.cpp \
     InGame/Card/GameCard.cpp \
+    InGame/Strategy.cpp \
     InGame/System.cpp \
     StageSelection/MyPushButton.cpp \
     StageSelection/Stagechoice1.cpp \
@@ -38,6 +39,7 @@ HEADERS += \
     InGame/Card/CardSystem.h \
     InGame/Context.h \
     InGame/Card/GameCard.h \
+    InGame/Strategy.h \
     InGame/globalOptions.h \
     InGame/System.h \
     StageSelection/MyPushButton.h \

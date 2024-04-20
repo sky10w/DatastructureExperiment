@@ -24,6 +24,7 @@ public:
     explicit Entity(bool isPlayer, int index, int hp);
 
     virtual bool isPlayer() const;
+    virtual int getMaxHp() const;
     virtual int getHp() const;
     virtual int getArmor() const;
     virtual bool isDead() const;
@@ -67,7 +68,11 @@ class Enemy : public Entity
 	Q_OBJECT
 public:
     Enemy(int index, int hp);
-    virtual void enemyAct(Context* ctx);
+    virtual void setNextAction(QPair<Action::Act_t, Context*> _next) final;
+    virtual QPair<Action::Act_t, Context*> getNextAction() final;
+
+protected:
+    QPair<Action::Act_t, Context*> _nextAction;
 };
 
 class Boss : public Enemy
@@ -75,7 +80,6 @@ class Boss : public Enemy
     Q_OBJECT
 public:
     Boss(int index, int hp);
-    virtual void enemyAct(Context* ctx) override;
 };
 
 class Player : public Entity
