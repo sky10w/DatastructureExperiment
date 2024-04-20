@@ -362,6 +362,9 @@ void InGameSystem::playerUsingCard(int cardIndex, int targetIndex)
 {
     MyDebug << "Player using card - index:" << cardIndex;
     const auto cardID = this->_handCard[cardIndex];
+    this->_handCard.erase(next(this->_handCard.begin(), cardIndex));
+    this->_stack[DROP]->push({cardID});
+
     MyDebug << "                  - id:" << cardID;
     const auto info = CardSystem::getCardInfo(cardID);
     if (this->_playerEnergy < info.energy) {
@@ -418,13 +421,11 @@ void InGameSystem::playerUsingCard(int cardIndex, int targetIndex)
         i->act(&ctx);
     }
     this->handleContext(&ctx);
+
     if (_gameover) {
         gameend(_gameover == 1);
         return;
     }
-
-    this->_handCard.erase(next(this->_handCard.begin(), cardIndex));
-    this->_stack[DROP]->push({cardID});
 }
 
 void InGameSystem::handleCardValid(QString cardID, int *valid)
