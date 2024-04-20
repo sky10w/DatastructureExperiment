@@ -423,12 +423,7 @@ void InGameSystem::playerUsingCard(int cardIndex, int targetIndex)
         return;
     }
 
-    for (auto iter = this->_handCard.begin(); iter != this->_handCard.end(); ++iter) {
-        if ((*iter) == cardID) {
-            iter = this->_handCard.erase(iter);
-            break;
-        }
-    }
+    this->_handCard.erase(next(this->_handCard.begin(), cardIndex));
     this->_stack[DROP]->push({cardID});
 }
 
