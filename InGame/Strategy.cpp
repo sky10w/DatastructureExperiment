@@ -2,12 +2,12 @@
 
 Action::Act_t NormalStrategy::generateAction(Context *ctx)
 {
-    std::default_random_engine e;
-    int res = e() % 2;
+    const int res = GlobalRandomEngine::getRandom() % 2;
     if (res == 1) {
         ctx->damageDone = 6;
         return Action::ATTACK;
     }
+    ctx->to = {ctx->from};
     ctx->armorGained = 3;
     return Action::DEFEND;
 }
@@ -20,8 +20,7 @@ Action::Act_t BossStrategy::generateAction(Context *ctx)
         ctx->damageDone = 7;
         return Action::ATTACK;
     }
-    std::default_random_engine e;
-    int res = e() % 2;
+    int res = GlobalRandomEngine::getRandom() % 2;
     if (res == 1) {
         ctx->to = {ctx->from};
         ctx->buffGiven = "0006";

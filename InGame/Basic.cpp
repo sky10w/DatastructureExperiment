@@ -1,5 +1,7 @@
 #include "Basic.h"
 
+std::default_random_engine GlobalRandomEngine::getRandom;
+
 // Entity ---
 Entity::Entity(bool isPlayer, int index, int hp)
     : _maxHp(hp)
@@ -54,11 +56,6 @@ void Entity::roundEnd() {
     delete ctx;
 }
 
-void Enemy::setNextAction(QPair<Action::Act_t, Context *> _next)
-{
-    this->_nextAction = _next;
-}
-
 void Entity::heal(Context *ctx) {
   this->_hp += ctx->hpHealed;
   emit hpChanged(this->_id, ctx->hpHealed);
@@ -76,12 +73,12 @@ void Entity::buffRemoved(Context *ctx)
     // auto type = BuffSystem::getBuffInfo(ctx->buffGiven).type;
     auto &tarList = this->_buffList;
     // find the corresponding buff
-    const auto buffInfo = BuffSystem::getBuffInfo(ctx->buffGiven);
+    const auto buffInfo = BuffSystem::getBuffInfo(ctx->buffRemoved);
     for (auto i = tarList.begin(); i != tarList.end();) {
         auto cur = *i;
-        if (cur->getID() == ctx->buffGiven) {
+        if (cur->getID() == ctx->buffRemoved) {
             i = tarList.erase(i);
-            emit buffChanged(ctx->buffGiven, -99999, this->_id);
+            emit buffChanged(ctx->buffRemoved, -99999, this->_id);
             break;
         }
         ++i;
@@ -89,7 +86,7 @@ void Entity::buffRemoved(Context *ctx)
 }
 
 void Entity::attack(Context *ctx, bool triggerBuff) {
-    qDebug() << "Entity Attack - buffList" << this->_buffList;
+    qDebug() << this->_id << "Attack - damage" << ctx->damageDone;
     if (triggerBuff) {
         this->handleBuffList(ctx, BuffInfo::ON_ATTACK);
     }
@@ -100,6 +97,7 @@ void Entity::attack(Context *ctx, bool triggerBuff) {
 }
 
 void Entity::gainArmor(Context *ctx, bool triggerBuff) {
+    MyDebug << this->_id << "Defend - defend" << ctx->armorGained;
     if (triggerBuff) {
         this->handleBuffList(ctx, BuffInfo::ON_GAINARMOR);
     }
@@ -171,15 +169,25 @@ Player::Player(int index, int hp)
     : Entity(true, index, hp)
 {}
 
-Enemy::Enemy(int index, int hp)
+NormalEnemy::NormalEnemy(int index, int hp)
     : Entity(false, index, hp)
 {}
 
-QPair<Action::Act_t, Context *> Enemy::getNextAction()
+QPair<Action::Act_t, Context *> NormalEnemy::getNextAction()
 {
     return this->_nextAction;
 }
 
+void NormalEnemy::setNextAction(QPair<Action::Act_t, Context *> _next)
+{
+    this->_nextAction = _next;
+}
+
 Boss::Boss(int index, int hp)
-    : Enemy(index, hp)
+    : NormalEnemy(index, hp)
 {}
+
+void GlobalRandomEngine::init()
+{
+    GlobalRandomEngine::getRandom.seed(std::time(NULL));
+}

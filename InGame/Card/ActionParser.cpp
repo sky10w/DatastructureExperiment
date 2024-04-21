@@ -140,7 +140,7 @@ void GiveBuffAction::debug()
 
 void GiveBuffAction::act(Context *ctx)
 {
-    ctx->buffGiven = "+" + this->_buffID;
+    ctx->buffGiven += this->_buffID;
 }
 
 RemoveBuffAction::RemoveBuffAction(const QString &buffID)
@@ -155,7 +155,7 @@ void RemoveBuffAction::debug()
 
 void RemoveBuffAction::act(Context *ctx)
 {
-    ctx->buffGiven = "-" + this->_buffID;
+    ctx->buffRemoved += this->_buffID;
 }
 
 RestrictAction::RestrictAction(Act_t type)

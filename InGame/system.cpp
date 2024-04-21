@@ -67,17 +67,17 @@ void InGameSystem::initSystem(bool isBossLevel)
 
     // Init enemies
     if (isBossLevel == false) {
-        std::default_random_engine e;
-        e.seed(std::time(nullptr));
-        this->_enemyNum = e() % 3 + 1;
+        MyDebug << "Normal Level";
+        this->_enemyNum = GlobalRandomEngine::getRandom() % 3 + 1;
 
         for (int i = 1; i <= this->_enemyNum; ++i) {
-            _entities.push_back(new Enemy(i, 20));
+            _entities.push_back(new NormalEnemy(i, 20));
             _enemyStrategy.push_back(new NormalStrategy());
             connectSignalSlotForEntities(_entities[i]);
             this->_view->initenemy(i, "://res/enemy.jpg", 20);
         }
     } else {
+        MyDebug << "Boss Level";
         this->_enemyNum = 1;
         _entities.push_back(new Boss(1, 30));
         _enemyStrategy.push_back(new BossStrategy());
@@ -121,9 +121,8 @@ void InGameSystem::run()
     // Init cardStack
     auto list = GlobalStatus::allCardOwned;
     int len = list.size();
-    std::default_random_engine e;
     for (int i = len - 1; i >= 0; --i) {
-        int ind = e() % (i + 1);
+        int ind = GlobalRandomEngine::getRandom() % (i + 1);
         swap(list[ind], list[i]);
     }
     this->_stack[DROP]->clear();
@@ -154,35 +153,64 @@ void InGameSystem::run()
 void InGameSystem::playerRoundEnd()
 {
     this->_entities[0]->roundEnd();
+
+    /// Enemy round
     this->enemyRound();
 
     /// Player round
-    for (int i = 1; i <= this->_enemyNum; ++i) {
+    QTimer *timer = new QTimer();
+    timer->setSingleShot(true);
+    connect(timer, &QTimer::timeout, [=] {
+        this->_curEntity = 0;
+
+        if (this->_stack[DRAW]->empty()) {
+            this->shuffle();
+        }
+        for (int i = 0; i < 2; ++i) {
+            const auto res = drawCard();
+            if (res == false)
+                break;
+        }
+        _playerEnergy = GlobalStatus::playerMaxEnergy;
+        emit setEnergy(GlobalStatus::playerMaxEnergy);
+        this->_actionDisabled = 0;
+
+        this->_entities[0]->roundBegin();
+
+        /// Generate Next Round
+        this->generateNextRoundHint();
+        emit playerRoundBegin();
+    });
+    timer->start((this->_enemyNum) * _animation_duration);
+    // timer->deleteLater();
+}
+
+void InGameSystem::enemyRound()
+{
+    MyDebug << "Enemy Round: enemyNum:" << this->_enemyNum;
+
+    for (int i = 1; i <= _enemyNum; ++i) {
+        MyDebug << "Round End: now enemy:" << i;
+        if (_entities[i]->isDead())
+            continue;
+
         QTimer *timer = new QTimer();
         timer->setSingleShot(true);
-        connect(timer, &QTimer::timeout, [&] {
-            this->_curEntity = 0;
+        connect(timer, &QTimer::timeout, this, [=] {
+            _curEntity = i;
+            _entities[i]->roundBegin();
 
-            if (this->_stack[DRAW]->empty()) {
-                this->shuffle();
-            }
-            for (int i = 0; i < 2; ++i) {
-                const auto res = drawCard();
-                if (res == false)
-                    break;
-            }
-            _playerEnergy = GlobalStatus::playerMaxEnergy;
-            emit setEnergy(GlobalStatus::playerMaxEnergy);
-            this->_actionDisabled = 0;
+            /// Test
+            auto cur = dynamic_cast<NormalEnemy *>(this->_entities[i]);
+            auto actCtx = cur->getNextAction();
+            emit this->entityAct(i, actCtx.first);
+            this->handleContext(actCtx.second);
 
-            this->_entities[0]->roundBegin();
-            
+            _entities[i]->roundEnd();
         });
-        timer->start((_enemyNum - 1) * _animation_duration);
+        timer->start((i - 1) * _animation_duration);
+        // timer->deleteLater();
     }
-
-    this->generateNextRoundHint();
-    emit playerRoundBegin();
 }
 
 void InGameSystem::shuffle()
@@ -215,42 +243,15 @@ void InGameSystem::generateNextRoundHint()
     // Generate next round hint
     std::map<int, Action::Act_t> actMap;
     for (int i = 1; i <= _enemyNum; ++i) {
-        Enemy *cur = dynamic_cast<Enemy *>(this->_entities[i]);
+        NormalEnemy *cur = dynamic_cast<NormalEnemy *>(this->_entities[i]);
         Context *ctx = new Context();
         ctx->from = cur;
         ctx->to = {this->_entities[_playerSlot]};
-        auto act = this->_enemyStrategy[i]->generateAction(ctx);
+        const auto act = this->_enemyStrategy[i]->generateAction(ctx);
         cur->setNextAction({act, ctx});
         actMap.insert({i, act});
     }
     emit nextRoundHint(actMap);
-}
-
-void InGameSystem::enemyRound()
-{
-    MyDebug << "Enemy Round: enemyNum:" << this->_enemyNum;
-
-    for (int i = 1; i <= _enemyNum; ++i) {
-        MyDebug << "Round End: now enemy:" << i;
-        if (_entities[i]->isDead())
-            continue;
-
-        QTimer *timer = new QTimer();
-        timer->setSingleShot(true);
-        connect(timer, &QTimer::timeout, this, [=] {
-            _curEntity = i;
-            _entities[i]->roundBegin();
-
-            /// Test
-            auto cur = dynamic_cast<Enemy *>(this->_entities[i]);
-            auto actCtx = cur->getNextAction();
-            emit this->entityAct(i, actCtx.first);
-            this->handleContext(actCtx.second);
-
-            _entities[i]->roundEnd();
-        });
-        timer->start((i - 1) * _animation_duration);
-    }
 }
 
 int InGameSystem::checkGameover()
@@ -280,17 +281,12 @@ void InGameSystem::handleContext(Context *ctx)
         }
     }
     if (ctx->buffGiven != "") {
-        if (ctx->buffGiven[0] == '+') {
-            auto &str = ctx->buffGiven;
-            const auto iter = next(str.begin());
-            str.erase(str.begin(), iter);
-            ctx->from->giveBuff(ctx, true);
-        } else if (ctx->buffGiven[0] == '-') {
-            auto &str = ctx->buffGiven;
-            const auto iter = next(str.begin());
-            str.erase(str.begin(), iter);
-            ctx->from->removeBuff(ctx);
-        }
+        // auto &str = ctx->buffGiven;
+        ctx->from->giveBuff(ctx, true);
+    }
+    if (ctx->buffRemoved != "") {
+        // auto &str = ctx->buffRemoved;
+        ctx->from->removeBuff(ctx);
     }
     if (ctx->actAltered != 0) {
         this->_actionDisabled ^= ctx->actAltered;
@@ -355,9 +351,8 @@ void InGameSystem::playerUsingCard(int cardIndex, int targetIndex)
         }
         break;
     case CardInfo::RANDOM:
-        default_random_engine *e = new default_random_engine();
-        targetList.push_back(_entities[(*e)() % (_entities.size() - 1) + 1]);
-        delete e;
+        targetList.push_back(
+            _entities[GlobalRandomEngine::getRandom() % (_entities.size() - 1) + 1]);
         break;
     }
 
@@ -429,7 +424,10 @@ void InGameSystem::connectSignalSlotForView()
                      SIGNAL(playcard(int, int)),
                      this,
                      SLOT(playerUsingCard(int, int)));
-    QObject::connect(this, SIGNAL(nextRoundHint(map)), _view, SLOT(updateaction(map)));
+    QObject::connect(this,
+                     SIGNAL(nextRoundHint(Action::ActMap_t)),
+                     _view,
+                     SLOT(updateaction(Action::ActMap_t)));
     QObject::connect(this,
                      SIGNAL(entityAct(int, Action::Act_t)),
                      _view,
@@ -460,7 +458,10 @@ void InGameSystem::disconnectSignalSlotForView()
                         SIGNAL(playcard(int, int)),
                         this,
                         SLOT(playerUsingCard(int, int)));
-    QObject::disconnect(this, SIGNAL(nextRoundHint(map)), _view, SLOT(updateaction(map)));
+    QObject::disconnect(this,
+                        SIGNAL(nextRoundHint(Action::ActMap_t)),
+                        _view,
+                        SLOT(updateaction(Action::ActMap_t)));
     QObject::disconnect(this,
                         SIGNAL(entityAct(int, Action::Act_t)),
                         _view,

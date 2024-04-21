@@ -14,6 +14,7 @@ class Action
 {
 public:
     using Act_t = int;
+    using ActMap_t = std::map<int, Action::Act_t>;
     enum _Act : Act_t {
         ATTACK = (1 << 0),
         DEFEND = (1 << 1),

@@ -45,7 +45,7 @@ private:
     static const int _playerSlot;
 
 signals:
-    void nextRoundHint(std::map<int, Action::Act_t> act);
+    void nextRoundHint(Action::ActMap_t act);
     void entityAct(int, Action::Act_t act);
 
     void sendShuffle();

@@ -10,6 +10,12 @@
 
 #define MyDebug qDebug() << "[In function" << (__FUNCTION__ + QString("]:")).toLatin1().data()
 
+struct GlobalRandomEngine
+{
+    static std::default_random_engine getRandom;
+    static void init();
+};
+
 struct Context;
 // using Context = QMap<QString, QVariant>;
 class BasicBuff;
@@ -65,9 +71,18 @@ protected:
 
 class Enemy : public Entity
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
     Enemy(int index, int hp);
+    virtual void setNextAction(QPair<Action::Act_t, Context*> _next) = 0;
+    virtual QPair<Action::Act_t, Context*> getNextAction() = 0;
+};
+
+class NormalEnemy : public Entity
+{
+	Q_OBJECT
+public:
+    NormalEnemy(int index, int hp);
     virtual void setNextAction(QPair<Action::Act_t, Context*> _next) final;
     virtual QPair<Action::Act_t, Context*> getNextAction() final;
 
@@ -75,7 +90,7 @@ protected:
     QPair<Action::Act_t, Context*> _nextAction;
 };
 
-class Boss : public Enemy
+class Boss : public NormalEnemy
 {
     Q_OBJECT
 public:

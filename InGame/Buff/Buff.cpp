@@ -104,7 +104,7 @@ void ReadyToAttackBuff::affect(Context *ctx, BuffInfo::BuffType situation)
     }
     this->degrade();
     if (!this->isValid()) {
-        ctx->buffGiven = "+0004";
+        ctx->buffGiven = "0004";
     }
 }
 
